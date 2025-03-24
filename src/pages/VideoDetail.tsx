@@ -20,10 +20,10 @@ interface Comment {
   likes: number;
 }
 
-interface VideoDetail extends Omit<VideoProps, 'thumbnail'> {
+// Modified interface to avoid the type conflict with 'comments'
+interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
   description: string;
   videoUrl: string;
-  likes: number;
   comments: Comment[];
 }
 
