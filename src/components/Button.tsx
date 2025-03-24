@@ -9,6 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   isLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  as?: React.ElementType;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -23,6 +24,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     rightIcon,
     disabled,
     type = 'button',
+    as: Component = 'button',
     ...props 
   }, ref) => {
     const baseStyles = "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50";
@@ -42,9 +44,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
     
     return (
-      <button
+      <Component
         ref={ref}
-        type={type}
+        type={Component === 'button' ? type : undefined}
         disabled={disabled || isLoading}
         className={cn(
           baseStyles,
@@ -76,7 +78,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {!isLoading && leftIcon && <span className="mr-2">{leftIcon}</span>}
         {children}
         {!isLoading && rightIcon && <span className="ml-2">{rightIcon}</span>}
-      </button>
+      </Component>
     );
   }
 );
