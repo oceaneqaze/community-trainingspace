@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -8,7 +7,7 @@ import Button from './Button';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const { isAuthenticated, user, profile, logout, isAdmin } = useAuth();
   const location = useLocation();
 
   const navigation = [
@@ -56,11 +55,11 @@ const Navbar: React.FC = () => {
                     <div className="flex items-center space-x-3">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
-                          {user?.avatar ? (
+                          {profile?.avatar_url ? (
                             <img
                               className="h-8 w-8 rounded-full object-cover"
-                              src={user.avatar}
-                              alt={user.name}
+                              src={profile.avatar_url}
+                              alt={profile.name}
                             />
                           ) : (
                             <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
@@ -68,7 +67,7 @@ const Navbar: React.FC = () => {
                             </div>
                           )}
                         </div>
-                        <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+                        <span className="text-sm font-medium text-gray-700">{profile?.name}</span>
                       </div>
                       <button
                         onClick={logout}
@@ -137,11 +136,11 @@ const Navbar: React.FC = () => {
           {isAuthenticated && (
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center px-4">
-                {user?.avatar ? (
+                {profile?.avatar_url ? (
                   <img
                     className="h-10 w-10 rounded-full object-cover"
-                    src={user.avatar}
-                    alt={user.name}
+                    src={profile.avatar_url}
+                    alt={profile.name}
                   />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
@@ -149,8 +148,8 @@ const Navbar: React.FC = () => {
                   </div>
                 )}
                 <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800">{user?.name}</div>
-                  <div className="text-sm font-medium text-gray-500">{user?.email}</div>
+                  <div className="text-base font-medium text-gray-800">{profile?.name}</div>
+                  <div className="text-sm font-medium text-gray-500">{profile?.email}</div>
                 </div>
               </div>
               <div className="mt-3 space-y-1">

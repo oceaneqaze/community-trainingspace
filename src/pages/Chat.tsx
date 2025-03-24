@@ -59,7 +59,7 @@ const Chat: React.FC = () => {
   const [newMessage, setNewMessage] = useState('');
   const [showOnlineUsers, setShowOnlineUsers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
 
   // Check if user is authenticated
@@ -81,8 +81,8 @@ const Chat: React.FC = () => {
     const newMessageObj: ChatMessage = {
       id: `msg-${Date.now()}`,
       userId: user.id,
-      username: user.displayName || 'Utilisateur',
-      avatar: user.photoURL || 'https://i.pravatar.cc/150?img=8',
+      username: profile?.name || 'Utilisateur',
+      avatar: profile?.avatar_url || 'https://i.pravatar.cc/150?img=8',
       content: newMessage,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };

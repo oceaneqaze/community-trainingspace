@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,6 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
     
     try {
       if (editingVideo) {
-        // Update existing video
         const { error } = await supabase
           .from('videos')
           .update({
@@ -89,7 +87,6 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
           description: "La vidéo a été mise à jour avec succès.",
         });
       } else {
-        // Insert new video
         const { data, error } = await supabase
           .from('videos')
           .insert({
@@ -104,7 +101,6 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
           
         if (error) throw error;
         
-        // Create VideoProps object from the database response
         const newVideo: VideoProps = {
           id: data.id,
           title: data.title,

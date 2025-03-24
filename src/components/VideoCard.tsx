@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Play, Clock, Heart, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,6 +14,7 @@ export type VideoProps = {
   progress?: number;
   likes?: number;
   comments?: number;
+  videoUrl?: string; // Ajout de la propriété videoUrl
 };
 
 interface VideoCardProps {

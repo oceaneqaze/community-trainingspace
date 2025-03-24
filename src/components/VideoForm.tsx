@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +33,6 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       const file = e.target.files[0];
       setThumbnailFile(file);
       
-      // Create a preview URL
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
@@ -76,7 +74,6 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       
     if (error) throw error;
     
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
@@ -96,21 +93,18 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       let thumbnailUrl = thumbnailPreview;
       let videoUrl = video?.videoUrl;
       
-      // Upload thumbnail if there's a new file
       if (thumbnailFile) {
         setUploadProgress(10);
         thumbnailUrl = await uploadFile(thumbnailFile, 'videos', 'thumbnails/');
         setUploadProgress(40);
       }
       
-      // Upload video if there's a new file
       if (videoFile) {
         setUploadProgress(50);
         videoUrl = await uploadFile(videoFile, 'videos', 'content/');
         setUploadProgress(90);
       }
       
-      // Prepare video data
       const videoData: Partial<VideoProps> = {
         title,
         thumbnail: thumbnailUrl,
@@ -125,7 +119,6 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       
       setUploadProgress(100);
       
-      // Call parent's submit handler
       onSubmit(videoData);
     } catch (error: any) {
       console.error('Error uploading files:', error);

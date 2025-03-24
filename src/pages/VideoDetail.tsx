@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
+import { VideoProps } from '@/components/VideoCard';
 
 // Types
 interface Comment {
@@ -67,7 +68,7 @@ const VideoDetail: React.FC = () => {
   const [newComment, setNewComment] = useState('');
   const [liked, setLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -110,8 +111,8 @@ const VideoDetail: React.FC = () => {
       const newCommentObj: Comment = {
         id: `comment-${Date.now()}`,
         userId: user.id,
-        username: user.displayName || 'Utilisateur',
-        avatar: user.photoURL || 'https://i.pravatar.cc/150?img=3',
+        username: profile?.name || 'Utilisateur',
+        avatar: profile?.avatar_url || 'https://i.pravatar.cc/150?img=3',
         content: newComment,
         timestamp: 'À l\'instant',
         likes: 0
