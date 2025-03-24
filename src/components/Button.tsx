@@ -49,22 +49,27 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // If Component is RouterLink and to prop is provided, use RouterLink directly
     if (Component === RouterLink && to) {
-      // Extract only the props that are valid for LinkProps
-      const { onClick, title, id, role, tabIndex, ...restProps } = props;
-      const linkProps: Partial<LinkProps> = { onClick, title, id, role, tabIndex };
+      // Create a filtered set of props suitable for anchor elements
+      const linkProps: LinkProps = {
+        to,
+        className: cn(
+          baseStyles,
+          variants[variant],
+          sizes[size],
+          fullWidth && "w-full",
+          className
+        )
+      };
+      
+      // Only add compatible event handlers and attributes
+      if (props.onClick) linkProps.onClick = props.onClick as React.MouseEventHandler<HTMLAnchorElement>;
+      if (props.title) linkProps.title = props.title;
+      if (props.id) linkProps.id = props.id;
+      if (props.role) linkProps.role = props.role;
+      if (props.tabIndex) linkProps.tabIndex = props.tabIndex;
       
       return (
-        <RouterLink
-          to={to}
-          className={cn(
-            baseStyles,
-            variants[variant],
-            sizes[size],
-            fullWidth && "w-full",
-            className
-          )}
-          {...linkProps}
-        >
+        <RouterLink {...linkProps}>
           {isLoading && (
             <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
               <circle
