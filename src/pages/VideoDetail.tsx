@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
 import { VideoProps } from '@/components/VideoCard';
+import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 
 // Types
 interface Comment {
@@ -153,7 +154,7 @@ const VideoDetail: React.FC = () => {
             <video 
               controls 
               className="w-full aspect-video"
-              poster={`https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=1280&q=80`}
+              poster={DEFAULT_THUMBNAIL}
               src={video.videoUrl}
             >
               Votre navigateur ne supporte pas la lecture de vidéos.

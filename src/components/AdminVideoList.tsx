@@ -6,6 +6,7 @@ import { Edit, Trash2, Plus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import VideoForm from './VideoForm';
 import { supabase } from '@/integrations/supabase/client';
+import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 
 interface AdminVideoListProps {
   videos: VideoProps[];
@@ -91,7 +92,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
           .from('videos')
           .insert({
             title: videoData.title,
-            thumbnail_url: videoData.thumbnail,
+            thumbnail_url: videoData.thumbnail || DEFAULT_THUMBNAIL,
             duration: videoData.duration,
             category: videoData.category,
             video_url: videoData.videoUrl || 'https://example.com/placeholder.mp4' // Placeholder
@@ -104,7 +105,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
         const newVideo: VideoProps = {
           id: data.id,
           title: data.title,
-          thumbnail: data.thumbnail_url || '/placeholder.svg',
+          thumbnail: data.thumbnail_url || DEFAULT_THUMBNAIL,
           duration: data.duration || '00:00',
           category: data.category || 'Sans catégorie',
           date: new Date(data.created_at).toLocaleDateString('fr-FR', {

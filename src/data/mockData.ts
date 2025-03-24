@@ -1,12 +1,15 @@
 
 import { VideoProps } from '@/components/VideoCard';
 
+// URL de l'image par défaut pour les vignettes de vidéos
+export const DEFAULT_THUMBNAIL = '/lovable-uploads/3c1cfa01-899c-4090-b1dd-f597ec6a239b.png';
+
 // Mock data for videos
 export const mockVideos: VideoProps[] = [
   {
     id: '1',
     title: 'Introduction aux fondamentaux',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '12:34',
     category: 'Débutant',
     date: '10 Juin 2023',
@@ -18,7 +21,7 @@ export const mockVideos: VideoProps[] = [
   {
     id: '2',
     title: 'Techniques avancées de résolution',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '24:15',
     category: 'Avancé',
     date: '18 Juillet 2023',
@@ -29,7 +32,7 @@ export const mockVideos: VideoProps[] = [
   {
     id: '3',
     title: 'Méthodologie et approche pratique',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '18:22',
     category: 'Intermédiaire',
     date: '02 Août 2023',
@@ -39,7 +42,7 @@ export const mockVideos: VideoProps[] = [
   {
     id: '4',
     title: 'Exercices pratiques - Session 1',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '31:47',
     category: 'Pratique',
     date: '15 Septembre 2023',
@@ -49,7 +52,7 @@ export const mockVideos: VideoProps[] = [
   {
     id: '5',
     title: 'Analyse de cas concrets',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '22:05',
     category: 'Étude de cas',
     date: '30 Septembre 2023',
@@ -58,7 +61,7 @@ export const mockVideos: VideoProps[] = [
   {
     id: '6',
     title: 'Atelier collaboratif',
-    thumbnail: 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80',
+    thumbnail: DEFAULT_THUMBNAIL,
     duration: '45:12',
     category: 'Atelier',
     date: '10 Octobre 2023',

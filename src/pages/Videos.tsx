@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 
 // Adapter les props aux colonnes de notre table videos
 type DBVideo = {
@@ -50,7 +51,7 @@ const Videos: React.FC = () => {
         const transformedVideos: VideoProps[] = (data as DBVideo[]).map(video => ({
           id: video.id,
           title: video.title,
-          thumbnail: video.thumbnail_url || '/placeholder.svg',
+          thumbnail: video.thumbnail_url || DEFAULT_THUMBNAIL,
           duration: video.duration || '00:00',
           category: video.category || 'Sans catégorie',
           date: new Date(video.created_at).toLocaleDateString('fr-FR', {
