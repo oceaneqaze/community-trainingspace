@@ -88,8 +88,8 @@ const Navbar: React.FC = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  as={Link}
                   to="/login"
+                  as={Link}
                 >
                   Connexion
                 </Button>
@@ -174,8 +174,8 @@ const Navbar: React.FC = () => {
                   variant="primary" 
                   size="sm" 
                   fullWidth 
-                  as={Link}
                   to="/login"
+                  as={Link}
                   onClick={closeMenu}
                 >
                   Connexion
