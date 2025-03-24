@@ -47,7 +47,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Component
         ref={ref}
         type={Component === 'button' ? type : undefined}
-        disabled={disabled || isLoading}
+        disabled={Component === 'button' ? (disabled || isLoading) : undefined}
         className={cn(
           baseStyles,
           variants[variant],

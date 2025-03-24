@@ -86,10 +86,10 @@ const Navbar: React.FC = () => {
             {!isAuthenticated && (
               <div className="flex items-center space-x-4">
                 <Button 
-                  as={Link} 
-                  to="/login" 
                   variant="outline" 
                   size="sm"
+                  as={Link}
+                  to="/login"
                 >
                   Connexion
                 </Button>
@@ -171,11 +171,11 @@ const Navbar: React.FC = () => {
             <div className="pt-4 pb-3 border-t border-gray-200">
               <div className="flex items-center justify-center space-x-4 px-4 py-2">
                 <Button 
-                  as={Link} 
-                  to="/login" 
                   variant="primary" 
                   size="sm" 
                   fullWidth 
+                  as={Link}
+                  to="/login"
                   onClick={closeMenu}
                 >
                   Connexion
