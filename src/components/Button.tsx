@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { cn } from "@/lib/utils";
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, LinkProps } from 'react-router-dom';
 
 // Extend ButtonProps to include to and other potential Link props
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -49,6 +49,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     // If Component is RouterLink and to prop is provided, use RouterLink directly
     if (Component === RouterLink && to) {
+      // Extract only the props that are valid for LinkProps
+      const { onClick, title, id, role, tabIndex, ...restProps } = props;
+      const linkProps: Partial<LinkProps> = { onClick, title, id, role, tabIndex };
+      
       return (
         <RouterLink
           to={to}
@@ -59,7 +63,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             fullWidth && "w-full",
             className
           )}
-          {...props}
+          {...linkProps}
         >
           {isLoading && (
             <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24">
