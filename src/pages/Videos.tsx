@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import VideoCard, { VideoProps } from '@/components/VideoCard';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
 
 // Mock data for videos
 const mockVideos: VideoProps[] = [
@@ -16,6 +17,8 @@ const mockVideos: VideoProps[] = [
     date: '10 Juin 2023',
     viewed: true,
     progress: 100,
+    likes: 24,
+    comments: 5,
   },
   {
     id: '2',
@@ -25,6 +28,8 @@ const mockVideos: VideoProps[] = [
     category: 'Avancé',
     date: '18 Juillet 2023',
     progress: 45,
+    likes: 42,
+    comments: 8,
   },
   {
     id: '3',
@@ -33,6 +38,8 @@ const mockVideos: VideoProps[] = [
     duration: '18:22',
     category: 'Intermédiaire',
     date: '02 Août 2023',
+    likes: 18,
+    comments: 3,
   },
   {
     id: '4',
@@ -41,6 +48,8 @@ const mockVideos: VideoProps[] = [
     duration: '31:47',
     category: 'Pratique',
     date: '15 Septembre 2023',
+    likes: 15,
+    comments: 2,
   },
   {
     id: '5',
@@ -49,6 +58,7 @@ const mockVideos: VideoProps[] = [
     duration: '22:05',
     category: 'Étude de cas',
     date: '30 Septembre 2023',
+    likes: 10,
   },
   {
     id: '6',
@@ -57,6 +67,8 @@ const mockVideos: VideoProps[] = [
     duration: '45:12',
     category: 'Atelier',
     date: '10 Octobre 2023',
+    likes: 7,
+    comments: 1,
   },
 ];
 
@@ -96,13 +108,19 @@ const Videos: React.FC = () => {
 
   // Handle video click
   const handleVideoClick = (videoId: string) => {
-    console.log(`Video ${videoId} clicked`);
-    // In a real app, navigate to video player or detailed view
+    navigate(`/video/${videoId}`);
   };
 
   return (
     <div className="page-container">
-      <h1 className="text-4xl font-bold mb-8 text-center sm:text-left">Bibliothèque de vidéos</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold text-center sm:text-left mb-4 sm:mb-0">Bibliothèque de vidéos</h1>
+        
+        <Button variant="outline" onClick={() => navigate('/chat')} className="self-end sm:self-auto">
+          <MessageCircle className="mr-2 h-4 w-4" />
+          Accéder au Chat
+        </Button>
+      </div>
       
       {/* Search and filters */}
       <div className="mb-8 flex flex-col sm:flex-row gap-4">

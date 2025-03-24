@@ -62,7 +62,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       };
       
       // Only add compatible event handlers and attributes
-      if (props.onClick) linkProps.onClick = props.onClick as React.MouseEventHandler<HTMLAnchorElement>;
+      if (props.onClick) linkProps.onClick = props.onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>;
       if (props.title) linkProps.title = props.title;
       if (props.id) linkProps.id = props.id;
       if (props.role) linkProps.role = props.role;

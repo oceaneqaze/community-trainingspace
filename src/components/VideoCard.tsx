@@ -1,7 +1,8 @@
 
-import React from 'react';
-import { Play, Clock } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Clock, Heart, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 export type VideoProps = {
   id: string;
@@ -12,6 +13,8 @@ export type VideoProps = {
   date: string;
   viewed?: boolean;
   progress?: number;
+  likes?: number;
+  comments?: number;
 };
 
 interface VideoCardProps {
@@ -21,6 +24,21 @@ interface VideoCardProps {
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({ video, className, onClick }) => {
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(video.likes || 0);
+  const navigate = useNavigate();
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLiked(!liked);
+    setLikesCount(prev => liked ? prev - 1 : prev + 1);
+  };
+
+  const handleComments = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/video/${video.id}`);
+  };
+
   return (
     <div 
       className={cn(
@@ -66,6 +84,24 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, className, onClick }) => {
         <h3 className="mt-1 line-clamp-2 text-base font-semibold text-gray-900">{video.title}</h3>
         <div className="mt-2 flex items-center justify-between">
           <span className="text-xs text-gray-500">{video.date}</span>
+          
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={handleLike}
+              className="flex items-center space-x-1 text-gray-600 hover:text-rose-500 transition-colors"
+            >
+              <Heart className={`h-4 w-4 ${liked ? 'fill-rose-500 text-rose-500' : ''}`} />
+              <span className="text-xs">{likesCount}</span>
+            </button>
+            
+            <button 
+              onClick={handleComments}
+              className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4" />
+              <span className="text-xs">{video.comments || 0}</span>
+            </button>
+          </div>
         </div>
         
         {video.progress !== undefined && video.progress > 0 && (

@@ -9,6 +9,8 @@ import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Videos from "./pages/Videos";
+import VideoDetail from "./pages/VideoDetail";
+import Chat from "./pages/Chat";
 import Members from "./pages/Members";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -39,6 +41,16 @@ const AppRoutes = () => (
       <Route path="/videos" element={
         <ProtectedRoute>
           <Videos />
+        </ProtectedRoute>
+      } />
+      <Route path="/video/:id" element={
+        <ProtectedRoute>
+          <VideoDetail />
+        </ProtectedRoute>
+      } />
+      <Route path="/chat" element={
+        <ProtectedRoute>
+          <Chat />
         </ProtectedRoute>
       } />
       <Route path="/members" element={
