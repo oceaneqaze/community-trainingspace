@@ -5,7 +5,20 @@ import { Search, Filter, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { mockVideos } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+
+// Adapter les props aux colonnes de notre table videos
+type DBVideo = {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  video_url: string;
+  duration: string | null;
+  category: string | null;
+  created_at: string;
+};
 
 // Extract unique categories
 const getCategories = (videos: VideoProps[]) => Array.from(new Set(videos.map(video => video.category)));
@@ -16,13 +29,56 @@ const Videos: React.FC = () => {
   const [filteredVideos, setFilteredVideos] = useState<VideoProps[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Load videos from mock data
+  // Load videos from Supabase
   useEffect(() => {
-    setVideos(mockVideos);
-  }, []);
+    const fetchVideos = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('videos')
+          .select('*');
+
+        if (error) {
+          throw error;
+        }
+
+        // Transform database videos to our VideoProps format
+        const transformedVideos: VideoProps[] = (data as DBVideo[]).map(video => ({
+          id: video.id,
+          title: video.title,
+          thumbnail: video.thumbnail_url || '/placeholder.svg',
+          duration: video.duration || '00:00',
+          category: video.category || 'Sans catégorie',
+          date: new Date(video.created_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          likes: 0,
+          comments: 0
+        }));
+
+        setVideos(transformedVideos);
+      } catch (error) {
+        console.error('Error fetching videos:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les vidéos",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchVideos();
+    }
+  }, [isAuthenticated]);
 
   // Update categories when videos change
   useEffect(() => {
@@ -102,7 +158,11 @@ const Videos: React.FC = () => {
       </div>
       
       {/* Videos grid */}
-      {filteredVideos.length > 0 ? (
+      {isLoading ? (
+        <div className="text-center py-10">
+          <h3 className="mt-2 text-lg font-medium text-gray-900">Chargement des vidéos...</h3>
+        </div>
+      ) : filteredVideos.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => (
             <VideoCard

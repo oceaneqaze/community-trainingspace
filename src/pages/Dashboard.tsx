@@ -7,11 +7,22 @@ import { Users, Video, Activity, Clock } from 'lucide-react';
 import AdminVideoList from '@/components/AdminVideoList';
 import { VideoProps } from '@/components/VideoCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
-// Mock data for videos - We'll manage this with state now
-import { mockVideos } from '@/data/mockData';
+// Types for database data
+type DBVideo = {
+  id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  video_url: string;
+  duration: string | null;
+  category: string | null;
+  created_at: string;
+};
 
-// Mock data
+// Mock data for charts
 const videoViewsData = [
   { name: 'Jan', views: 400 },
   { name: 'Fév', views: 300 },
@@ -65,17 +76,82 @@ const Dashboard: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [videos, setVideos] = useState<VideoProps[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userCount, setUserCount] = useState(0);
+  const [viewCount, setViewCount] = useState(0);
 
   useEffect(() => {
-    // Load videos from mock data initially
-    setVideos(mockVideos);
-  }, []);
-
-  useEffect(() => {
+    // Check if user is authenticated and admin
     if (!isAuthenticated || !isAdmin()) {
       navigate('/login');
     }
   }, [isAuthenticated, isAdmin, navigate]);
+
+  // Fetch videos and stats from Supabase
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch videos
+        const { data: videoData, error: videoError } = await supabase
+          .from('videos')
+          .select('*');
+          
+        if (videoError) throw videoError;
+        
+        // Transform to VideoProps format
+        const transformedVideos: VideoProps[] = (videoData as DBVideo[]).map(video => ({
+          id: video.id,
+          title: video.title,
+          thumbnail: video.thumbnail_url || '/placeholder.svg',
+          duration: video.duration || '00:00',
+          category: video.category || 'Sans catégorie',
+          date: new Date(video.created_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          likes: 0,
+          comments: 0,
+          videoUrl: video.video_url
+        }));
+        
+        setVideos(transformedVideos);
+        
+        // Fetch user count
+        const { count: userCount, error: userError } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true });
+          
+        if (userError) throw userError;
+        
+        setUserCount(userCount || 0);
+        
+        // Fetch view count
+        const { count: viewCount, error: viewError } = await supabase
+          .from('video_views')
+          .select('*', { count: 'exact', head: true });
+          
+        if (viewError) throw viewError;
+        
+        setViewCount(viewCount || 0);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les données du tableau de bord",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (isAuthenticated && isAdmin()) {
+      fetchData();
+    }
+  }, [isAuthenticated, isAdmin]);
 
   // Video management handlers
   const handleVideoAdded = (newVideo: Partial<VideoProps>) => {
@@ -94,6 +170,17 @@ const Dashboard: React.FC = () => {
     setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
   };
 
+  if (isLoading) {
+    return (
+      <div className="page-container">
+        <h1 className="text-4xl font-bold mb-8 text-center sm:text-left">Tableau de bord</h1>
+        <div className="text-center py-10">
+          <h3 className="mt-2 text-lg font-medium text-gray-900">Chargement...</h3>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="page-container">
       <h1 className="text-4xl font-bold mb-8 text-center sm:text-left">Tableau de bord</h1>
@@ -109,7 +196,7 @@ const Dashboard: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               title="Membres"
-              value="24"
+              value={userCount.toString()}
               description="Nombre total de membres"
               icon={<Users className="h-6 w-6" />}
               trend="up"
@@ -125,7 +212,7 @@ const Dashboard: React.FC = () => {
             />
             <StatCard
               title="Vues"
-              value="1,256"
+              value={viewCount.toString()}
               description="Vues totales ce mois-ci"
               icon={<Activity className="h-6 w-6" />}
               trend="up"

@@ -6,6 +6,7 @@ import { VideoProps } from './VideoCard';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import VideoForm from './VideoForm';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AdminVideoListProps {
   videos: VideoProps[];
@@ -22,6 +23,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
 }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoProps | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleAddClick = () => {
     setEditingVideo(null);
@@ -33,24 +35,110 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
     setShowForm(true);
   };
 
-  const handleDeleteClick = (videoId: string) => {
+  const handleDeleteClick = async (videoId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette vidéo?')) {
-      onVideoDeleted(videoId);
-      toast({
-        title: "Vidéo supprimée",
-        description: "La vidéo a été supprimée avec succès.",
-      });
+      setIsLoading(true);
+      try {
+        const { error } = await supabase
+          .from('videos')
+          .delete()
+          .eq('id', videoId);
+          
+        if (error) throw error;
+        
+        onVideoDeleted(videoId);
+        toast({
+          title: "Vidéo supprimée",
+          description: "La vidéo a été supprimée avec succès.",
+        });
+      } catch (error) {
+        console.error('Error deleting video:', error);
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de la suppression de la vidéo.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
-  const handleFormSubmit = (video: Partial<VideoProps>) => {
-    if (editingVideo) {
-      onVideoUpdated({ ...editingVideo, ...video });
-    } else {
-      onVideoAdded(video);
+  const handleFormSubmit = async (videoData: Partial<VideoProps>) => {
+    setIsLoading(true);
+    
+    try {
+      if (editingVideo) {
+        // Update existing video
+        const { error } = await supabase
+          .from('videos')
+          .update({
+            title: videoData.title,
+            thumbnail_url: videoData.thumbnail,
+            duration: videoData.duration,
+            category: videoData.category,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingVideo.id);
+          
+        if (error) throw error;
+        
+        onVideoUpdated({ ...editingVideo, ...videoData });
+        toast({
+          title: "Vidéo mise à jour",
+          description: "La vidéo a été mise à jour avec succès.",
+        });
+      } else {
+        // Insert new video
+        const { data, error } = await supabase
+          .from('videos')
+          .insert({
+            title: videoData.title,
+            thumbnail_url: videoData.thumbnail,
+            duration: videoData.duration,
+            category: videoData.category,
+            video_url: videoData.videoUrl || 'https://example.com/placeholder.mp4' // Placeholder
+          })
+          .select('*')
+          .single();
+          
+        if (error) throw error;
+        
+        // Create VideoProps object from the database response
+        const newVideo: VideoProps = {
+          id: data.id,
+          title: data.title,
+          thumbnail: data.thumbnail_url || '/placeholder.svg',
+          duration: data.duration || '00:00',
+          category: data.category || 'Sans catégorie',
+          date: new Date(data.created_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          likes: 0,
+          comments: 0,
+          videoUrl: data.video_url
+        };
+        
+        onVideoAdded(newVideo);
+        toast({
+          title: "Vidéo ajoutée",
+          description: "La vidéo a été ajoutée avec succès.",
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting video:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'enregistrement de la vidéo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setShowForm(false);
+      setEditingVideo(null);
     }
-    setShowForm(false);
-    setEditingVideo(null);
   };
 
   const handleFormCancel = () => {
@@ -65,6 +153,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
         <Button 
           onClick={handleAddClick}
           className="flex items-center"
+          disabled={isLoading}
         >
           <Plus className="h-4 w-4 mr-2" />
           Ajouter une vidéo
@@ -80,6 +169,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
             onSubmit={handleFormSubmit} 
             video={editingVideo || undefined} 
             onCancel={handleFormCancel}
+            isLoading={isLoading}
           />
         </div>
       )}
@@ -117,6 +207,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
                         variant="outline" 
                         size="sm" 
                         onClick={() => handleEditClick(video)}
+                        disabled={isLoading}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -125,6 +216,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
                         size="sm" 
                         onClick={() => handleDeleteClick(video.id)}
                         className="text-red-500 hover:text-red-600"
+                        disabled={isLoading}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

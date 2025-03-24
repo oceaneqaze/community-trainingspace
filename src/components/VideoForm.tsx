@@ -4,24 +4,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Upload, X } from 'lucide-react';
+import { Upload, X, FileVideo } from 'lucide-react';
 import { VideoProps } from './VideoCard';
 import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 interface VideoFormProps {
   onSubmit: (video: Partial<VideoProps>) => void;
   video?: VideoProps;
   onCancel?: () => void;
+  isLoading?: boolean;
 }
 
-const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
+const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoading = false }) => {
   const [title, setTitle] = useState(video?.title || '');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState(video?.category || '');
   const [duration, setDuration] = useState(video?.duration || '');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>(video?.thumbnail || '');
-  const [isLoading, setIsLoading] = useState(false);
+  const [videoFileName, setVideoFileName] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [localLoading, setLocalLoading] = useState(false);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -39,54 +45,96 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
     }
   };
 
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setVideoFile(file);
+      setVideoFileName(file.name);
+    }
+  };
+
   const clearThumbnail = () => {
     setThumbnailFile(null);
     setThumbnailPreview('');
   };
 
+  const clearVideo = () => {
+    setVideoFile(null);
+    setVideoFileName('');
+  };
+
+  const uploadFile = async (file: File, bucket: string, path: string) => {
+    const fileExt = file.name.split('.').pop();
+    const filePath = `${path}${uuidv4()}.${fileExt}`;
+    
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: true,
+      });
+      
+    if (error) throw error;
+    
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+      
+    return publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    if (isLoading || localLoading) return;
+    
+    setLocalLoading(true);
+    setUploadProgress(0);
     
     try {
-      // In a real app with Supabase, you would upload the file and get the URL
-      // For now, we'll just use the preview or existing thumbnail
-      const thumbnail = thumbnailPreview || 'https://images.unsplash.com/photo-1661956600684-97d3a4320e45?ixlib=rb-4.0.3&auto=format&fit=crop&w=640&q=80';
+      let thumbnailUrl = thumbnailPreview;
+      let videoUrl = video?.videoUrl;
       
-      // Generate a unique ID for new videos
-      const id = video?.id || Math.random().toString(36).substring(2, 15);
-      const date = new Date().toLocaleDateString('fr-FR', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      });
+      // Upload thumbnail if there's a new file
+      if (thumbnailFile) {
+        setUploadProgress(10);
+        thumbnailUrl = await uploadFile(thumbnailFile, 'videos', 'thumbnails/');
+        setUploadProgress(40);
+      }
       
-      onSubmit({
-        id,
+      // Upload video if there's a new file
+      if (videoFile) {
+        setUploadProgress(50);
+        videoUrl = await uploadFile(videoFile, 'videos', 'content/');
+        setUploadProgress(90);
+      }
+      
+      // Prepare video data
+      const videoData: Partial<VideoProps> = {
         title,
-        thumbnail,
+        thumbnail: thumbnailUrl,
         duration,
         category,
-        date,
-        likes: video?.likes || 0,
-        comments: video?.comments || 0,
-      });
+        videoUrl,
+      };
       
-      toast({
-        title: video ? "Vidéo mise à jour" : "Vidéo ajoutée",
-        description: video 
-          ? "La vidéo a été mise à jour avec succès." 
-          : "La vidéo a été ajoutée avec succès.",
-      });
-    } catch (error) {
-      console.error('Error submitting video:', error);
+      if (video?.id) {
+        videoData.id = video.id;
+      }
+      
+      setUploadProgress(100);
+      
+      // Call parent's submit handler
+      onSubmit(videoData);
+    } catch (error: any) {
+      console.error('Error uploading files:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue. Veuillez réessayer.",
+        description: error.message || "Une erreur est survenue lors de l'upload des fichiers",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   };
 
@@ -100,6 +148,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Saisissez le titre de la vidéo"
           required
+          disabled={isLoading || localLoading}
         />
       </div>
       
@@ -111,6 +160,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Saisissez une description de la vidéo"
           rows={4}
+          disabled={isLoading || localLoading}
         />
       </div>
       
@@ -123,6 +173,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
             onChange={(e) => setCategory(e.target.value)}
             placeholder="Ex: Débutant, Avancé..."
             required
+            disabled={isLoading || localLoading}
           />
         </div>
         
@@ -136,6 +187,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
             required
             pattern="[0-9]{1,2}:[0-9]{2}"
             title="Format: MM:SS (ex: 12:34)"
+            disabled={isLoading || localLoading}
           />
         </div>
       </div>
@@ -158,6 +210,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
                   accept="image/*"
                   className="sr-only"
                   onChange={handleThumbnailChange}
+                  disabled={isLoading || localLoading}
                 />
               </label>
               <p className="mt-1 text-xs text-gray-500">
@@ -176,6 +229,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
               type="button"
               onClick={clearThumbnail}
               className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md"
+              disabled={isLoading || localLoading}
             >
               <X className="h-5 w-5 text-gray-700" />
             </button>
@@ -183,14 +237,76 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel }) => {
         )}
       </div>
       
+      <div>
+        <Label htmlFor="video">Fichier vidéo</Label>
+        
+        {!videoFileName ? (
+          <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6">
+            <div className="flex flex-col items-center">
+              <FileVideo className="h-8 w-8 text-gray-400" />
+              <label
+                htmlFor="video-upload"
+                className="mt-2 block text-sm font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
+              >
+                Cliquez pour télécharger une vidéo
+                <Input
+                  id="video-upload"
+                  type="file"
+                  accept="video/*"
+                  className="sr-only"
+                  onChange={handleVideoChange}
+                  disabled={isLoading || localLoading}
+                />
+              </label>
+              <p className="mt-1 text-xs text-gray-500">
+                MP4, WEBM, MOV jusqu'à 100MB
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-1 relative bg-gray-100 p-4 rounded-md">
+            <div className="flex items-center">
+              <FileVideo className="h-6 w-6 text-gray-500 mr-2" />
+              <span className="text-sm text-gray-700 truncate">{videoFileName}</span>
+            </div>
+            <button
+              type="button"
+              onClick={clearVideo}
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-sm"
+              disabled={isLoading || localLoading}
+            >
+              <X className="h-4 w-4 text-gray-700" />
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {uploadProgress > 0 && uploadProgress < 100 && (
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className="bg-blue-600 h-2.5 rounded-full" 
+            style={{ width: `${uploadProgress}%` }}
+          ></div>
+          <p className="text-xs text-gray-500 mt-1">Upload: {uploadProgress}%</p>
+        </div>
+      )}
+      
       <div className="flex justify-end space-x-2 pt-4">
         {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isLoading || localLoading}
+          >
             Annuler
           </Button>
         )}
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
+        <Button 
+          type="submit" 
+          disabled={isLoading || localLoading}
+        >
+          {isLoading || localLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
         </Button>
       </div>
     </form>

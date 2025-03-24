@@ -1,41 +1,41 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/components/ui/use-toast';
 
 // Types
-type User = {
+type UserProfile = {
   id: string;
   name: string;
   email: string;
   role: 'admin' | 'member';
-  avatar?: string;
+  avatar_url?: string;
 };
 
 type AuthState = {
   user: User | null;
+  profile: UserProfile | null;
+  session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
 };
 
 type AuthContextType = AuthState & {
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  logout: () => Promise<void>;
   isAdmin: () => boolean;
 };
 
 // Initial state
 const initialState: AuthState = {
   user: null,
+  profile: null,
+  session: null,
   isAuthenticated: false,
   isLoading: true,
-};
-
-// Mock admin user (this would come from your backend in a real application)
-const mockAdmin: User = {
-  id: '1',
-  name: 'Admin User',
-  email: 'admin@example.com',
-  role: 'admin',
-  avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
 };
 
 // Create context
@@ -44,17 +44,63 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Provider component
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(initialState);
+  const navigate = useNavigate();
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+
+      return data as UserProfile;
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
-    // Check for existing session (e.g., from localStorage)
-    const checkAuth = async () => {
-      try {
-        // In a real app, you would verify the token with your backend
-        const savedUser = localStorage.getItem('user');
-        
-        if (savedUser) {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (session) {
+            const profile = await fetchUserProfile(session.user.id);
+            setAuthState({
+              user: session.user,
+              profile,
+              session,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          }
+        } else if (event === 'SIGNED_OUT') {
           setAuthState({
-            user: JSON.parse(savedUser),
+            ...initialState,
+            isLoading: false,
+          });
+        }
+      }
+    );
+
+    // Check for existing session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const profile = await fetchUserProfile(session.user.id);
+          setAuthState({
+            user: session.user,
+            profile,
+            session,
             isAuthenticated: true,
             isLoading: false,
           });
@@ -65,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
       } catch (error) {
-        console.error('Authentication check failed:', error);
+        console.error('Error checking authentication:', error);
         setAuthState({
           ...initialState,
           isLoading: false,
@@ -73,52 +119,131 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    checkAuth();
+    initializeAuth();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    // This is a mock implementation. In a real app, you would call your API
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      const profile = await fetchUserProfile(data.user.id);
       
-      // Demo login - In a real app, validate credentials with your backend
-      if (email === 'admin@example.com' && password === 'password') {
-        // Set user in state
+      if (profile) {
         setAuthState({
-          user: mockAdmin,
+          user: data.user,
+          profile,
+          session: data.session,
           isAuthenticated: true,
           isLoading: false,
         });
         
-        // Save to localStorage (for persistence)
-        localStorage.setItem('user', JSON.stringify(mockAdmin));
-      } else {
-        throw new Error('Invalid credentials');
+        toast({
+          title: "Connexion réussie",
+          description: `Bienvenue, ${profile.name || email}`,
+        });
+        
+        navigate('/videos');
       }
-    } catch (error) {
-      console.error('Login failed:', error);
+    } catch (error: any) {
+      console.error('Login error:', error.message);
+      toast({
+        title: "Échec de la connexion",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      });
       throw error;
     }
   };
 
-  const logout = () => {
-    // Clear user data
-    localStorage.removeItem('user');
-    setAuthState({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-    });
+  const signup = async (email: string, password: string, name: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Inscription réussie",
+        description: "Votre compte a été créé avec succès.",
+      });
+      
+      // If email confirmation is disabled, we can log the user in immediately
+      if (data.session) {
+        const profile = await fetchUserProfile(data.user.id);
+        setAuthState({
+          user: data.user,
+          profile,
+          session: data.session,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        navigate('/videos');
+      } else {
+        toast({
+          title: "Vérification requise",
+          description: "Veuillez vérifier votre email pour confirmer votre compte.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error.message);
+      toast({
+        title: "Échec de l'inscription",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setAuthState({
+        user: null,
+        profile: null,
+        session: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès.",
+      });
+      navigate('/');
+    } catch (error: any) {
+      console.error('Logout error:', error.message);
+      toast({
+        title: "Échec de la déconnexion",
+        description: error.message || "Une erreur est survenue",
+        variant: "destructive",
+      });
+    }
   };
 
   const isAdmin = () => {
-    return authState.user?.role === 'admin';
+    return authState.profile?.role === 'admin';
   };
 
   const value = {
     ...authState,
     login,
+    signup,
     logout,
     isAdmin,
   };
