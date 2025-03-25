@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +12,8 @@ type UserProfile = {
   email: string;
   role: 'admin' | 'member';
   avatar_url?: string;
+  banned?: boolean;
+  limited?: boolean;
 };
 
 type AuthState = {
@@ -26,6 +29,10 @@ type AuthContextType = AuthState & {
   signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: () => boolean;
+  refreshProfile: () => Promise<void>;
+  isBanned: () => boolean;
+  isLimited: () => boolean;
+  updateUserStatus: (userId: string, status: { banned?: boolean, limited?: boolean }) => Promise<void>;
 };
 
 // Initial state
@@ -65,18 +72,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Optimized auth state checking
   useEffect(() => {
-    // Set up auth state listener
+    let mounted = true;
+    
+    // First, try to get session from storage to avoid flickering
+    const savedSession = supabase.auth.getSession();
+    
+    // Set up auth state listener with optimized handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          if (session) {
+        console.log('Auth state changed:', event);
+        
+        if (!mounted) return;
+        
+        if (session) {
+          try {
             const profile = await fetchUserProfile(session.user.id);
+            
+            if (profile?.banned) {
+              // If user is banned, log them out
+              await supabase.auth.signOut();
+              toast({
+                title: "Accès refusé",
+                description: "Votre compte a été suspendu.",
+                variant: "destructive",
+              });
+              setAuthState({
+                ...initialState,
+                isLoading: false,
+              });
+              return;
+            }
+            
             setAuthState({
               user: session.user,
               profile,
               session,
               isAuthenticated: true,
+              isLoading: false,
+            });
+          } catch (error) {
+            console.error('Error handling auth state change:', error);
+            setAuthState({
+              ...initialState,
               isLoading: false,
             });
           }
@@ -89,13 +128,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
+    // Initial auth check
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await savedSession;
+        
+        if (!mounted) return;
         
         if (session) {
           const profile = await fetchUserProfile(session.user.id);
+          
+          if (profile?.banned) {
+            // If user is banned, log them out
+            await supabase.auth.signOut();
+            toast({
+              title: "Accès refusé",
+              description: "Votre compte a été suspendu.",
+              variant: "destructive",
+            });
+            setAuthState({
+              ...initialState,
+              isLoading: false,
+            });
+            return;
+          }
+          
           setAuthState({
             user: session.user,
             profile,
@@ -111,22 +168,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
-        setAuthState({
-          ...initialState,
-          isLoading: false,
-        });
+        if (mounted) {
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+        }
       }
     };
 
     initializeAuth();
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -135,6 +197,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) throw error;
 
       const profile = await fetchUserProfile(data.user.id);
+      
+      if (profile?.banned) {
+        await supabase.auth.signOut();
+        toast({
+          title: "Accès refusé",
+          description: "Votre compte a été suspendu.",
+          variant: "destructive",
+        });
+        setAuthState({
+          ...initialState,
+          isLoading: false,
+        });
+        throw new Error("Votre compte a été suspendu.");
+      }
       
       if (profile) {
         setAuthState({
@@ -147,13 +223,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         toast({
           title: "Connexion réussie",
-          description: `Bienvenue, ${profile.name || email}`,
+          description: `Bienvenue sur DOPE CONTENT, ${profile.name || email}`,
         });
         
         navigate('/videos');
       }
     } catch (error: any) {
       console.error('Login error:', error.message);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
       toast({
         title: "Échec de la connexion",
         description: error.message || "Une erreur est survenue",
@@ -165,6 +242,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signup = async (email: string, password: string, name: string) => {
     try {
+      setAuthState(prev => ({ ...prev, isLoading: true }));
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -194,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         navigate('/videos');
       } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
         toast({
           title: "Vérification requise",
           description: "Veuillez vérifier votre email pour confirmer votre compte.",
@@ -201,6 +281,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error: any) {
       console.error('Signup error:', error.message);
+      setAuthState(prev => ({ ...prev, isLoading: false }));
       toast({
         title: "Échec de l'inscription",
         description: error.message || "Une erreur est survenue",
@@ -235,17 +316,82 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshProfile = async () => {
+    if (!authState.user?.id) return;
+    
+    try {
+      const profile = await fetchUserProfile(authState.user.id);
+      if (profile) {
+        setAuthState(prev => ({
+          ...prev,
+          profile
+        }));
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
+    }
+  };
+
+  const updateUserStatus = async (userId: string, status: { banned?: boolean, limited?: boolean }) => {
+    if (!isAdmin()) {
+      toast({
+        title: "Accès refusé",
+        description: "Vous n'avez pas les droits d'administrateur.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(status)
+        .eq('id', userId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Statut mis à jour",
+        description: "Le statut de l'utilisateur a été mis à jour avec succès.",
+      });
+      
+      // If updating current user, refresh profile
+      if (userId === authState.user?.id) {
+        await refreshProfile();
+      }
+    } catch (error: any) {
+      console.error('Error updating user status:', error.message);
+      toast({
+        title: "Erreur",
+        description: error.message || "Impossible de mettre à jour le statut",
+        variant: "destructive",
+      });
+    }
+  };
+
   const isAdmin = () => {
     return authState.profile?.role === 'admin';
   };
+  
+  const isBanned = () => {
+    return !!authState.profile?.banned;
+  };
+  
+  const isLimited = () => {
+    return !!authState.profile?.limited;
+  };
 
-  const value = {
+  const value = useMemo(() => ({
     ...authState,
     login,
     signup,
     logout,
     isAdmin,
-  };
+    refreshProfile,
+    isBanned,
+    isLimited,
+    updateUserStatus
+  }), [authState]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

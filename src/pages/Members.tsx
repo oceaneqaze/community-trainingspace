@@ -1,12 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import Button from '@/components/Button';
-import { Plus, Search, Edit, Trash2, CheckCircle, XCircle, MoreHorizontal } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Plus, Search, Edit, Trash2, CheckCircle, XCircle, MoreHorizontal, Ban, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-// Mock data for members
+// Member type including banned and limited flags
 type Member = {
   id: string;
   name: string;
@@ -15,73 +17,74 @@ type Member = {
   status: 'active' | 'inactive';
   joinDate: string;
   avatar?: string;
+  banned?: boolean;
+  limited?: boolean;
 };
 
-const mockMembers: Member[] = [
-  {
-    id: '1',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    role: 'admin',
-    status: 'active',
-    joinDate: '10/01/2023',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-  },
-  {
-    id: '2',
-    name: 'Jean Dupont',
-    email: 'jean@example.com',
-    role: 'member',
-    status: 'active',
-    joinDate: '15/01/2023',
-    avatar: 'https://randomuser.me/api/portraits/men/42.jpg',
-  },
-  {
-    id: '3',
-    name: 'Marie Martin',
-    email: 'marie@example.com',
-    role: 'member',
-    status: 'active',
-    joinDate: '22/01/2023',
-    avatar: 'https://randomuser.me/api/portraits/women/28.jpg',
-  },
-  {
-    id: '4',
-    name: 'Pierre Petit',
-    email: 'pierre@example.com',
-    role: 'member',
-    status: 'inactive',
-    joinDate: '05/02/2023',
-    avatar: 'https://randomuser.me/api/portraits/men/56.jpg',
-  },
-  {
-    id: '5',
-    name: 'Sophie Durand',
-    email: 'sophie@example.com',
-    role: 'member',
-    status: 'active',
-    joinDate: '18/02/2023',
-    avatar: 'https://randomuser.me/api/portraits/women/39.jpg',
-  },
-];
+// Link validation regex
+const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
 const Members: React.FC = () => {
-  const [members, setMembers] = useState<Member[]>(mockMembers);
+  const [members, setMembers] = useState<Member[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredMembers, setFilteredMembers] = useState<Member[]>(mockMembers);
   const [showDropdownId, setShowDropdownId] = useState<string | null>(null);
-  const { isAuthenticated, isAdmin } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [showBanDialog, setShowBanDialog] = useState(false);
+  const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const { isAuthenticated, isAdmin, updateUserStatus } = useAuth();
   const navigate = useNavigate();
 
   // Filter members based on search
-  useEffect(() => {
-    const results = members.filter(
+  const filteredMembers = useMemo(() => {
+    return members.filter(
       member =>
         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         member.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredMembers(results);
   }, [members, searchTerm]);
+
+  // Fetch actual members from Supabase
+  const fetchMembers = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*');
+
+      if (error) throw error;
+
+      const formattedMembers: Member[] = (data || []).map((profile: any) => ({
+        id: profile.id,
+        name: profile.name || 'Utilisateur inconnu',
+        email: profile.email || '',
+        role: profile.role || 'member',
+        status: profile.banned ? 'inactive' : 'active',
+        joinDate: new Date(profile.created_at).toLocaleDateString('fr-FR'),
+        avatar: profile.avatar_url,
+        banned: profile.banned,
+        limited: profile.limited
+      }));
+
+      setMembers(formattedMembers);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des membres:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les membres.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial fetch
+  useEffect(() => {
+    if (isAuthenticated && isAdmin()) {
+      fetchMembers();
+    }
+  }, [isAuthenticated, isAdmin]);
 
   // Redirect if not admin
   useEffect(() => {
@@ -95,7 +98,47 @@ const Members: React.FC = () => {
     setShowDropdownId(prevId => prevId === id ? null : id);
   };
 
-  // Mock actions
+  // Handle ban/unban member
+  const handleBanMember = async () => {
+    if (!selectedMember) return;
+    
+    try {
+      await updateUserStatus(selectedMember.id, { banned: !selectedMember.banned });
+      await fetchMembers();
+      setShowBanDialog(false);
+      setSelectedMember(null);
+    } catch (error) {
+      console.error('Error updating member status:', error);
+    }
+  };
+
+  // Handle limit/unlimit member
+  const handleLimitMember = async () => {
+    if (!selectedMember) return;
+    
+    try {
+      await updateUserStatus(selectedMember.id, { limited: !selectedMember.limited });
+      await fetchMembers();
+      setShowLimitDialog(false);
+      setSelectedMember(null);
+    } catch (error) {
+      console.error('Error updating member limit status:', error);
+    }
+  };
+
+  // Handle status change
+  const handleStatusChange = (member: Member) => {
+    setSelectedMember(member);
+    setShowBanDialog(true);
+  };
+
+  // Handle limit toggle
+  const handleLimitToggle = (member: Member) => {
+    setSelectedMember(member);
+    setShowLimitDialog(true);
+  };
+
+  // Mock add member (will need to be implemented)
   const handleAddMember = () => {
     toast({
       title: "Fonctionnalité à venir",
@@ -103,41 +146,22 @@ const Members: React.FC = () => {
     });
   };
 
-  const handleStatusChange = (id: string, newStatus: 'active' | 'inactive') => {
-    setMembers(prevMembers =>
-      prevMembers.map(member =>
-        member.id === id ? { ...member, status: newStatus } : member
-      )
-    );
-    
-    toast({
-      title: "Statut modifié",
-      description: `Le statut a été mis à jour avec succès.`,
-    });
-    
-    setShowDropdownId(null);
-  };
-
-  const handleDelete = (id: string) => {
-    setMembers(prevMembers => prevMembers.filter(member => member.id !== id));
-    
-    toast({
-      title: "Membre supprimé",
-      description: "Le membre a été supprimé avec succès.",
-    });
-    
-    setShowDropdownId(null);
+  // Handle delete (soft delete by banning)
+  const handleDelete = (member: Member) => {
+    setSelectedMember(member);
+    setShowBanDialog(true);
   };
 
   return (
     <div className="page-container">
       <div className="sm:flex sm:items-center sm:justify-between mb-8">
-        <h1 className="text-4xl font-bold text-center sm:text-left">Gestion des membres</h1>
+        <h1 className="text-4xl font-bold text-center sm:text-left tech-text">Gestion des membres</h1>
         <div className="mt-4 sm:mt-0">
           <Button 
             onClick={handleAddMember}
-            leftIcon={<Plus className="h-4 w-4" />}
+            className="tech-button"
           >
+            <Plus className="h-4 w-4 mr-2" />
             Ajouter un membre
           </Button>
         </div>
@@ -147,11 +171,11 @@ const Members: React.FC = () => {
       <div className="mb-6">
         <div className="relative max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-muted-foreground" />
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="block w-full pl-10 pr-3 py-2 border border-input bg-background rounded-md shadow-sm focus:ring-primary focus:border-primary"
             placeholder="Rechercher un membre..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -160,142 +184,209 @@ const Members: React.FC = () => {
       </div>
       
       {/* Members table */}
-      <div className="overflow-x-auto shadow-sm rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-muted">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Membre
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Rôle
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Statut
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Date d'inscription
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredMembers.map((member) => (
-              <tr key={member.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      {member.avatar ? (
-                        <img 
-                          className="h-10 w-10 rounded-full object-cover" 
-                          src={member.avatar} 
-                          alt="" 
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-500 font-medium">
-                            {member.name.split(' ').map(n => n[0]).join('')}
-                          </span>
+          <tbody className="divide-y divide-border">
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                  Chargement des membres...
+                </td>
+              </tr>
+            ) : filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
+                <tr key={member.id} className="hover:bg-muted/50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        {member.avatar ? (
+                          <img 
+                            className="h-10 w-10 rounded-full object-cover border border-border" 
+                            src={member.avatar} 
+                            alt="" 
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                            <span className="text-primary font-medium">
+                              {member.name.split(' ').map(n => n[0]).join('')}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium">
+                          {member.name}
+                          {member.limited && (
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-yellow-800 text-yellow-100">
+                              Limité
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {member.email}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      member.role === 'admin' 
+                        ? 'bg-primary/20 text-primary' 
+                        : 'bg-secondary text-secondary-foreground'
+                    }`}>
+                      {member.role === 'admin' ? 'Administrateur' : 'Membre'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      member.banned 
+                        ? 'bg-destructive/20 text-destructive' 
+                        : 'bg-green-800/30 text-green-500'
+                    }`}>
+                      {member.banned ? 'Banni' : 'Actif'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {member.joinDate}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="relative">
+                      <button
+                        onClick={() => toggleDropdown(member.id)}
+                        className="text-muted-foreground hover:text-foreground"
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </button>
+                      
+                      {showDropdownId === member.id && (
+                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover ring-1 ring-black ring-opacity-5 z-10">
+                          <div className="py-1" role="menu" aria-orientation="vertical">
+                            <button
+                              className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
+                              onClick={() => handleStatusChange(member)}
+                            >
+                              {member.banned ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                  <span>Réactiver</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Ban className="mr-2 h-4 w-4 text-destructive" />
+                                  <span>Bannir</span>
+                                </>
+                              )}
+                            </button>
+                            <button
+                              className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
+                              onClick={() => handleLimitToggle(member)}
+                            >
+                              {member.limited ? (
+                                <>
+                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                  <span>Enlever les limitations</span>
+                                </>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="mr-2 h-4 w-4 text-yellow-500" />
+                                  <span>Limiter</span>
+                                </>
+                              )}
+                            </button>
+                            <button
+                              className="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-muted"
+                              onClick={() => handleDelete(member)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Supprimer</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {member.name}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {member.email}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    member.role === 'admin' 
-                      ? 'bg-purple-100 text-purple-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {member.role === 'admin' ? 'Administrateur' : 'Membre'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    member.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {member.status === 'active' ? 'Actif' : 'Inactif'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {member.joinDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="relative">
-                    <button
-                      onClick={() => toggleDropdown(member.id)}
-                      className="text-gray-400 hover:text-gray-500"
-                    >
-                      <MoreHorizontal className="h-5 w-5" />
-                    </button>
-                    
-                    {showDropdownId === member.id && (
-                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
-                        <div className="py-1" role="menu" aria-orientation="vertical">
-                          <button
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => handleStatusChange(member.id, member.status === 'active' ? 'inactive' : 'active')}
-                          >
-                            {member.status === 'active' ? (
-                              <>
-                                <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                                <span>Désactiver</span>
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                <span>Activer</span>
-                              </>
-                            )}
-                          </button>
-                          <button
-                            className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            onClick={() => {
-                              setShowDropdownId(null);
-                              toast({
-                                title: "Fonctionnalité à venir",
-                                description: "La modification de membres sera disponible prochainement.",
-                              });
-                            }}
-                          >
-                            <Edit className="mr-2 h-4 w-4 text-blue-500" />
-                            <span>Modifier</span>
-                          </button>
-                          <button
-                            className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            onClick={() => handleDelete(member.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Supprimer</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                  Aucun membre trouvé
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
-        
-        {filteredMembers.length === 0 && (
-          <div className="px-6 py-10 text-center">
-            <p className="text-gray-500">Aucun membre trouvé</p>
-          </div>
-        )}
       </div>
+
+      {/* Ban Dialog */}
+      <Dialog open={showBanDialog} onOpenChange={setShowBanDialog}>
+        <DialogContent className="bg-card text-card-foreground">
+          <DialogHeader>
+            <DialogTitle>{selectedMember?.banned ? 'Réactiver le membre' : 'Bannir le membre'}</DialogTitle>
+            <DialogDescription>
+              {selectedMember?.banned 
+                ? `Voulez-vous vraiment réactiver ${selectedMember?.name}? Ils pourront à nouveau accéder à la plateforme.` 
+                : `Voulez-vous vraiment bannir ${selectedMember?.name}? Ils ne pourront plus accéder à la plateforme.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2">
+            <Button variant="outline" onClick={() => setShowBanDialog(false)}>
+              Annuler
+            </Button>
+            <Button 
+              variant={selectedMember?.banned ? "default" : "destructive"}
+              onClick={handleBanMember}
+            >
+              {selectedMember?.banned ? 'Réactiver' : 'Bannir'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Limit Dialog */}
+      <Dialog open={showLimitDialog} onOpenChange={setShowLimitDialog}>
+        <DialogContent className="bg-card text-card-foreground">
+          <DialogHeader>
+            <DialogTitle>{selectedMember?.limited ? 'Enlever les limitations' : 'Limiter le membre'}</DialogTitle>
+            <DialogDescription>
+              {selectedMember?.limited 
+                ? `Voulez-vous vraiment enlever les limitations pour ${selectedMember?.name}? Ils pourront à nouveau poster librement.` 
+                : `Voulez-vous vraiment limiter ${selectedMember?.name}? Ils ne pourront plus poster de liens ou de certains contenus.`}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2">
+            <Button variant="outline" onClick={() => setShowLimitDialog(false)}>
+              Annuler
+            </Button>
+            <Button 
+              variant={selectedMember?.limited ? "default" : "warning"}
+              onClick={handleLimitMember}
+              className={selectedMember?.limited ? "" : "bg-yellow-600 hover:bg-yellow-700"}
+            >
+              {selectedMember?.limited ? 'Enlever les limitations' : 'Limiter'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
