@@ -128,7 +128,7 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
                     Génération...
                   </>
                 ) : (
-                  'Générer un lien d'invitation'
+                  'Générer un lien d\'invitation'
                 )}
               </Button>
             </div>
