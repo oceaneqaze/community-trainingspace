@@ -15,6 +15,8 @@ export type Database = {
           created_at: string | null
           email: string | null
           id: string
+          invitation_code: string | null
+          invitation_used: boolean | null
           name: string | null
           role: string | null
         }
@@ -23,6 +25,8 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id: string
+          invitation_code?: string | null
+          invitation_used?: boolean | null
           name?: string | null
           role?: string | null
         }
@@ -31,6 +35,8 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           id?: string
+          invitation_code?: string | null
+          invitation_used?: boolean | null
           name?: string | null
           role?: string | null
         }
@@ -179,6 +185,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_invitation_code: {
+        Args: {
+          user_id: string
+        }
+        Returns: string
+      }
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean

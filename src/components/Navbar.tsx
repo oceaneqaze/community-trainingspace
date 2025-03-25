@@ -1,230 +1,269 @@
 
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { cn } from '@/lib/utils';
-import { Menu, X, User, LogOut, Shield } from 'lucide-react';
+import { MenuIcon, X, User, LogOut, Video, MessageSquare, Users, LayoutDashboard } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { isAuthenticated, user, profile, logout, isAdmin, isLimited } = useAuth();
+  const { isAuthenticated, logout, profile, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
 
-  const navigation = [
-    { name: 'Accueil', href: '/' },
-    { name: 'Vidéos', href: '/videos' },
-    ...(isAdmin() ? [{ name: 'Membres', href: '/members' }] : []),
-    ...(isAdmin() ? [{ name: 'Dashboard', href: '/dashboard' }] : []),
-  ];
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => setIsOpen(false);
+  const closeMenu = () => {
+    setIsOpen(false);
+  };
 
-  // URL validation middleware
-  const blockExternalLinks = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isLimited()) {
-      const href = (event.currentTarget as HTMLAnchorElement).href;
-      const isExternal = !href.includes(window.location.hostname) && href.includes('://');
-      
-      if (isExternal) {
-        event.preventDefault();
-        alert("Vous n'êtes pas autorisé à accéder aux liens externes.");
-        return false;
-      }
-    }
-    return true;
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase();
   };
 
   return (
-    <nav className="bg-card/80 backdrop-blur-lg border-b border-border sticky top-0 z-50 shadow-sm">
+    <nav className="bg-background border-b border-border shadow-sm sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-xl font-bold tech-text">DOPE CONTENT</span>
+              <span className="text-2xl font-bold">DOPE CONTENT</span>
             </Link>
           </div>
 
-          {/* Desktop menu */}
-          <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
-            {isAuthenticated && (
-              <>
-                <div className="hidden sm:flex sm:space-x-8">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={cn(
-                        'inline-flex items-center px-1 pt-1 text-sm font-medium border-b-2 transition-colors duration-300',
-                        location.pathname === item.href
-                          ? 'border-primary text-primary'
-                          : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                      )}
-                      onClick={blockExternalLinks}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                  <div className="relative ml-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="flex-shrink-0">
-                          {profile?.avatar_url ? (
-                            <div className="h-8 w-8 rounded-full overflow-hidden border border-primary/30">
-                              <img
-                                className="h-8 w-8 rounded-full object-cover"
-                                src={profile.avatar_url}
-                                alt={profile.name}
-                              />
-                            </div>
-                          ) : (
-                            <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                              <User className="h-4 w-4 text-primary" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium">{profile?.name}</span>
-                          {isAdmin() && (
-                            <span className="text-xs text-primary flex items-center">
-                              <Shield className="h-3 w-3 mr-1" /> Admin
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={logout}
-                        className="p-1 rounded-full text-muted-foreground hover:text-foreground focus:outline-none"
-                        title="Déconnexion"
-                      >
-                        <LogOut className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+          {isAuthenticated && (
+            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
+              <Link
+                to="/videos"
+                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                  location.pathname === '/videos'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                Vidéos
+              </Link>
+              
+              <Link
+                to="/chat"
+                className={`px-3 py-2 text-sm font-medium rounded-md ${
+                  location.pathname === '/chat'
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-foreground hover:bg-muted'
+                }`}
+              >
+                Chat
+              </Link>
+              
+              {isAdmin() && (
+                <>
+                  <Link
+                    to="/members"
+                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                      location.pathname === '/members'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    Membres
+                  </Link>
+                  
+                  <Link
+                    to="/dashboard"
+                    className={`px-3 py-2 text-sm font-medium rounded-md ${
+                      location.pathname === '/dashboard'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
-            {!isAuthenticated && (
-              <div className="flex items-center space-x-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  asChild
-                  className="tech-button-outline"
-                >
-                  <Link to="/login">Connexion</Link>
+          <div className="flex items-center">
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar>
+                      {profile?.avatar_url ? (
+                        <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                      ) : (
+                        <AvatarFallback>
+                          {profile?.name ? getInitials(profile.name) : 'U'}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{profile?.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {profile?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/videos')}>
+                    <Video className="mr-2 h-4 w-4" />
+                    <span>Vidéos</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/chat')}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    <span>Chat</span>
+                  </DropdownMenuItem>
+                  {isAdmin() && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate('/members')}>
+                        <Users className="mr-2 h-4 w-4" />
+                        <span>Membres</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Déconnexion</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => navigate('/login')}>
+                  Connexion
+                </Button>
+                <Button onClick={() => navigate('/signup')}>
+                  Inscription
                 </Button>
               </div>
             )}
-          </div>
 
-          {/* Mobile menu button */}
-          <div className="flex items-center sm:hidden">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              {isOpen ? (
-                <X className="block h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="block h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
+            <div className="flex items-center sm:hidden ml-4">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={toggleMenu}
+              >
+                <span className="sr-only">Open main menu</span>
+                {isOpen ? (
+                  <X className="block h-6 w-6" />
+                ) : (
+                  <MenuIcon className="block h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
-      <div className={`sm:hidden ${isOpen ? 'block animate-fade-in' : 'hidden animate-fade-out'}`}>
-        <div className="pt-2 pb-3 space-y-1">
-          {isAuthenticated && navigation.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={cn(
-                'block pl-3 pr-4 py-2 border-l-4 text-base font-medium',
-                location.pathname === item.href
-                  ? 'bg-primary/10 border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:bg-muted hover:border-border hover:text-foreground'
+      <div className={`sm:hidden ${isOpen ? 'block' : 'hidden'}`}>
+        <div className="px-2 pt-2 pb-3 space-y-1">
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/profile"
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Profil
+              </Link>
+              <Link
+                to="/videos"
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Vidéos
+              </Link>
+              <Link
+                to="/chat"
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Chat
+              </Link>
+              
+              {isAdmin() && (
+                <>
+                  <Link
+                    to="/members"
+                    className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                    onClick={closeMenu}
+                  >
+                    Membres
+                  </Link>
+                  <Link
+                    to="/dashboard"
+                    className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                    onClick={closeMenu}
+                  >
+                    Dashboard
+                  </Link>
+                </>
               )}
-              onClick={(e) => {
-                blockExternalLinks(e);
-                closeMenu();
-              }}
-            >
-              {item.name}
-            </Link>
-          ))}
-          
-          {isAuthenticated && (
-            <div className="pt-4 pb-3 border-t border-border">
-              <div className="flex items-center px-4">
-                {profile?.avatar_url ? (
-                  <div className="h-10 w-10 rounded-full overflow-hidden border border-primary/30">
-                    <img
-                      className="h-10 w-10 rounded-full object-cover"
-                      src={profile.avatar_url}
-                      alt={profile.name}
-                    />
-                  </div>
-                ) : (
-                  <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                )}
-                <div className="ml-3">
-                  <div className="text-base font-medium">{profile?.name}</div>
-                  <div className="text-sm font-medium text-muted-foreground">{profile?.email}</div>
-                  {isAdmin() && (
-                    <span className="text-xs text-primary flex items-center mt-1">
-                      <Shield className="h-3 w-3 mr-1" /> Admin
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="mt-3 space-y-1">
-                <button
-                  onClick={() => {
-                    logout();
-                    closeMenu();
-                  }}
-                  className="block w-full text-left px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted"
-                >
-                  Déconnexion
-                </button>
-              </div>
-            </div>
-          )}
-
-          {!isAuthenticated && (
-            <div className="pt-4 pb-3 border-t border-border">
-              <div className="flex items-center justify-center space-x-4 px-4 py-2">
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  className="w-full tech-button"
-                  asChild
-                  onClick={closeMenu}
-                >
-                  <Link to="/login">Connexion</Link>
-                </Button>
-              </div>
-            </div>
+              
+              <button
+                className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-muted"
+                onClick={() => {
+                  handleLogout();
+                  closeMenu();
+                }}
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Connexion
+              </Link>
+              <Link
+                to="/signup"
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-muted"
+                onClick={closeMenu}
+              >
+                Inscription
+              </Link>
+            </>
           )}
         </div>
-      </div>
-      
-      {/* Author info in footer */}
-      <div className="hidden lg:block absolute bottom-0 right-4 text-xs text-muted-foreground">
-        <a href="https://wa.me/22954155702" className="hover:text-primary" target="_blank" rel="noopener noreferrer">
-          DOPE CONTENT par Emma-Alk DOHOU
-        </a>
       </div>
     </nav>
   );

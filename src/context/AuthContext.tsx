@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -14,6 +13,8 @@ type UserProfile = {
   avatar_url?: string;
   banned?: boolean;
   limited?: boolean;
+  invitation_code?: string;
+  invitation_used?: boolean;
 };
 
 type AuthState = {
@@ -72,7 +73,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Optimized auth state checking
   useEffect(() => {
     let mounted = true;
     

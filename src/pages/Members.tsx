@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Search, Edit, Trash2, CheckCircle, XCircle, MoreHorizontal, Ban, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Trash2, CheckCircle, XCircle, MoreHorizontal, Ban, AlertTriangle, Mail } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import InvitationSystem from '@/components/InvitationSystem';
 
 // Member type including banned and limited flags
 type Member = {
@@ -18,6 +19,8 @@ type Member = {
   avatar?: string;
   banned?: boolean;
   limited?: boolean;
+  invitation_code?: string;
+  invitation_used?: boolean;
 };
 
 // Link validation regex
@@ -62,7 +65,9 @@ const Members: React.FC = () => {
         joinDate: new Date(profile.created_at).toLocaleDateString('fr-FR'),
         avatar: profile.avatar_url,
         banned: profile.banned,
-        limited: profile.limited
+        limited: profile.limited,
+        invitation_code: profile.invitation_code,
+        invitation_used: profile.invitation_used
       }));
 
       setMembers(formattedMembers);
@@ -137,6 +142,11 @@ const Members: React.FC = () => {
     setShowLimitDialog(true);
   };
 
+  // Handle invitation refresh
+  const handleInvitationSent = () => {
+    fetchMembers();
+  };
+
   // Mock add member (will need to be implemented)
   const handleAddMember = () => {
     toast({
@@ -199,6 +209,9 @@ const Members: React.FC = () => {
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Date d'inscription
               </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Invitation
+              </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
@@ -207,7 +220,7 @@ const Members: React.FC = () => {
           <tbody className="divide-y divide-border">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                <td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">
                   Chargement des membres...
                 </td>
               </tr>
@@ -267,67 +280,93 @@ const Members: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                     {member.joinDate}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                    {member.invitation_used ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-800/30 text-green-500">
+                        Utilisée
+                      </span>
+                    ) : member.invitation_code ? (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-800/30 text-blue-500">
+                        En attente
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                        Non envoyée
+                      </span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="relative">
-                      <button
-                        onClick={() => toggleDropdown(member.id)}
-                        className="text-muted-foreground hover:text-foreground"
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-                      </button>
+                    <div className="flex items-center justify-end space-x-2">
+                      <InvitationSystem 
+                        member={{
+                          id: member.id,
+                          name: member.name,
+                          email: member.email
+                        }}
+                        onInvitationSent={handleInvitationSent}
+                      />
                       
-                      {showDropdownId === member.id && (
-                        <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover ring-1 ring-black ring-opacity-5 z-10">
-                          <div className="py-1" role="menu" aria-orientation="vertical">
-                            <button
-                              className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
-                              onClick={() => handleStatusChange(member)}
-                            >
-                              {member.banned ? (
-                                <>
-                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                  <span>Réactiver</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Ban className="mr-2 h-4 w-4 text-destructive" />
-                                  <span>Bannir</span>
-                                </>
-                              )}
-                            </button>
-                            <button
-                              className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
-                              onClick={() => handleLimitToggle(member)}
-                            >
-                              {member.limited ? (
-                                <>
-                                  <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                                  <span>Enlever les limitations</span>
-                                </>
-                              ) : (
-                                <>
-                                  <AlertTriangle className="mr-2 h-4 w-4 text-yellow-500" />
-                                  <span>Limiter</span>
-                                </>
-                              )}
-                            </button>
-                            <button
-                              className="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-muted"
-                              onClick={() => handleDelete(member)}
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              <span>Supprimer</span>
-                            </button>
+                      <div className="relative">
+                        <button
+                          onClick={() => toggleDropdown(member.id)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <MoreHorizontal className="h-5 w-5" />
+                        </button>
+                        
+                        {showDropdownId === member.id && (
+                          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-popover ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="py-1" role="menu" aria-orientation="vertical">
+                              <button
+                                className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
+                                onClick={() => handleStatusChange(member)}
+                              >
+                                {member.banned ? (
+                                  <>
+                                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                    <span>Réactiver</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Ban className="mr-2 h-4 w-4 text-destructive" />
+                                    <span>Bannir</span>
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
+                                onClick={() => handleLimitToggle(member)}
+                              >
+                                {member.limited ? (
+                                  <>
+                                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                                    <span>Enlever les limitations</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertTriangle className="mr-2 h-4 w-4 text-yellow-500" />
+                                    <span>Limiter</span>
+                                  </>
+                                )}
+                              </button>
+                              <button
+                                className="flex items-center w-full px-4 py-2 text-sm text-destructive hover:bg-muted"
+                                onClick={() => handleDelete(member)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                <span>Supprimer</span>
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-muted-foreground">
+                <td colSpan={6} className="px-6 py-10 text-center text-muted-foreground">
                   Aucun membre trouvé
                 </td>
               </tr>

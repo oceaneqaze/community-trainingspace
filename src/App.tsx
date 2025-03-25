@@ -14,6 +14,8 @@ import VideoDetail from "./pages/VideoDetail";
 import Chat from "./pages/Chat";
 import Members from "./pages/Members";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Invitation from "./pages/Invitation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +67,12 @@ const AppRoutes = () => (
           <Dashboard />
         </ProtectedRoute>
       } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <Profile />
+        </ProtectedRoute>
+      } />
+      <Route path="/invitation/:code" element={<Invitation />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </>
