@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -378,7 +377,7 @@ const Members: React.FC = () => {
               Annuler
             </Button>
             <Button 
-              variant={selectedMember?.limited ? "default" : "warning"}
+              variant={selectedMember?.limited ? "default" : "destructive"}
               onClick={handleLimitMember}
               className={selectedMember?.limited ? "" : "bg-yellow-600 hover:bg-yellow-700"}
             >
