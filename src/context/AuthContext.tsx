@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -342,12 +343,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     
     try {
+      // Use type assertion to work around the type checking limitation
+      // since we can't modify the generated types file
+      const updateData: any = {};
+      
+      if (status.banned !== undefined) {
+        updateData.banned = status.banned;
+      }
+      
+      if (status.limited !== undefined) {
+        updateData.limited = status.limited;
+      }
+      
       const { error } = await supabase
         .from('profiles')
-        .update({
-          banned: status.banned,
-          limited: status.limited
-        })
+        .update(updateData)
         .eq('id', userId);
         
       if (error) throw error;
