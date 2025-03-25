@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,37 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   const [videoFileName, setVideoFileName] = useState<string>('');
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [localLoading, setLocalLoading] = useState(false);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState<string>('');
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Fonction pour formatter la durée de la vidéo (secondes -> MM:SS)
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  // Écouter les changements de métadonnées de la vidéo pour extraire sa durée
+  useEffect(() => {
+    if (videoRef.current && previewVideoUrl) {
+      const handleMetadataLoaded = () => {
+        if (videoRef.current) {
+          const videoDuration = videoRef.current.duration;
+          const formattedDuration = formatDuration(videoDuration);
+          setDuration(formattedDuration);
+          console.log(`Durée extraite: ${formattedDuration}`);
+        }
+      };
+
+      videoRef.current.addEventListener('loadedmetadata', handleMetadataLoaded);
+      
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('loadedmetadata', handleMetadataLoaded);
+        }
+      };
+    }
+  }, [previewVideoUrl]);
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -48,6 +80,10 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       const file = e.target.files[0];
       setVideoFile(file);
       setVideoFileName(file.name);
+      
+      // Créer une URL temporaire pour la prévisualisation et extraction des métadonnées
+      const videoURL = URL.createObjectURL(file);
+      setPreviewVideoUrl(videoURL);
     }
   };
 
@@ -59,6 +95,8 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   const clearVideo = () => {
     setVideoFile(null);
     setVideoFileName('');
+    setPreviewVideoUrl('');
+    setDuration('');
   };
 
   const uploadFile = async (file: File, bucket: string, path: string) => {
@@ -86,6 +124,24 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
     
     if (isLoading || localLoading) return;
     
+    if (!title.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Le titre est obligatoire",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!videoFile && !video?.videoUrl) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez télécharger une vidéo",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLocalLoading(true);
     setUploadProgress(0);
     
@@ -108,7 +164,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       const videoData: Partial<VideoProps> = {
         title,
         thumbnail: thumbnailUrl,
-        duration,
+        duration, // Utilise la durée extraite automatiquement
         category,
         videoUrl,
       };
@@ -157,33 +213,34 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="category">Catégorie</Label>
-          <Input
-            id="category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Ex: Débutant, Avancé..."
-            required
-            disabled={isLoading || localLoading}
-          />
-        </div>
-        
-        <div>
-          <Label htmlFor="duration">Durée (MM:SS)</Label>
-          <Input
-            id="duration"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="Ex: 12:34"
-            required
-            pattern="[0-9]{1,2}:[0-9]{2}"
-            title="Format: MM:SS (ex: 12:34)"
-            disabled={isLoading || localLoading}
-          />
-        </div>
+      <div>
+        <Label htmlFor="category">Catégorie</Label>
+        <Input
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="Ex: Débutant, Avancé..."
+          required
+          disabled={isLoading || localLoading}
+        />
       </div>
+      
+      {previewVideoUrl && (
+        <div className="mt-2">
+          <Label>Aperçu de la vidéo</Label>
+          <div className="relative mt-1 aspect-video w-full max-w-lg overflow-hidden rounded-lg bg-gray-100">
+            <video 
+              ref={videoRef} 
+              src={previewVideoUrl} 
+              className="h-full w-full" 
+              controls 
+            />
+          </div>
+          <p className="mt-1 text-sm text-gray-500">
+            Durée détectée: {duration || 'Chargement...'}
+          </p>
+        </div>
+      )}
       
       <div>
         <Label htmlFor="thumbnail">Miniature</Label>
@@ -302,6 +359,11 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
           {isLoading || localLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
         </Button>
       </div>
+      
+      {/* Élément vidéo caché pour extraire les métadonnées */}
+      {previewVideoUrl && !videoRef.current && (
+        <video ref={videoRef} src={previewVideoUrl} className="hidden" />
+      )}
     </form>
   );
 };
