@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -76,10 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
     
-    // First, try to get session from storage to avoid flickering
-    const savedSession = supabase.auth.getSession();
-    
-    // Set up auth state listener with optimized handling
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
@@ -112,6 +110,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               isAuthenticated: true,
               isLoading: false,
             });
+
+            // Navigate to videos page after successful login
+            if (event === 'SIGNED_IN') {
+              navigate('/videos');
+            }
           } catch (error) {
             console.error('Error handling auth state change:', error);
             setAuthState({
@@ -131,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Initial auth check
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await savedSession;
+        const { data: { session } } = await supabase.auth.getSession();
         
         if (!mounted) return;
         
@@ -183,7 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate]);
 
   const login = async (email: string, password: string) => {
     try {

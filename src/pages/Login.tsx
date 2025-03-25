@@ -1,30 +1,42 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Redirect to videos page if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/videos');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
     try {
       await login(email, password);
-      // Redirection gérée par la fonction login
-    } catch (error) {
-      // Erreur gérée par la fonction login
+      // If login is successful, the AuthContext will handle the redirection
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || "Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
     }
@@ -40,6 +52,13 @@ const Login: React.FC = () => {
               Accédez à votre espace exclusif
             </p>
           </div>
+          
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>Erreur</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
