@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -77,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     let mounted = true;
     
-    // Set up auth state listener
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
@@ -86,30 +85,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (session) {
           try {
-            const profile = await fetchUserProfile(session.user.id);
-            
-            if (profile?.banned) {
-              // If user is banned, log them out
-              await supabase.auth.signOut();
-              toast({
-                title: "Accès refusé",
-                description: "Votre compte a été suspendu.",
-                variant: "destructive",
-              });
-              setAuthState({
-                ...initialState,
-                isLoading: false,
-              });
-              return;
-            }
-            
-            setAuthState({
+            // Use setTimeout to prevent potential deadlock
+            setAuthState(prev => ({
+              ...prev,
               user: session.user,
-              profile,
               session,
               isAuthenticated: true,
-              isLoading: false,
-            });
+            }));
+            
+            // Fetch profile separately to avoid deadlock
+            setTimeout(async () => {
+              if (!mounted) return;
+              const profile = await fetchUserProfile(session.user.id);
+              
+              if (profile?.banned) {
+                // If user is banned, log them out
+                await supabase.auth.signOut();
+                toast({
+                  title: "Accès refusé",
+                  description: "Votre compte a été suspendu.",
+                  variant: "destructive",
+                });
+                setAuthState({
+                  ...initialState,
+                  isLoading: false,
+                });
+                return;
+              }
+              
+              setAuthState(prev => ({
+                ...prev,
+                profile,
+                isLoading: false,
+              }));
+            }, 0);
 
             // Navigate to videos page after successful login
             if (event === 'SIGNED_IN') {
@@ -122,7 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               isLoading: false,
             });
           }
-        } else if (event === 'SIGNED_OUT') {
+        } else {
           setAuthState({
             ...initialState,
             isLoading: false,
@@ -139,6 +148,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!mounted) return;
         
         if (session) {
+          setAuthState(prev => ({
+            ...prev,
+            user: session.user,
+            session,
+            isAuthenticated: true,
+          }));
+          
           const profile = await fetchUserProfile(session.user.id);
           
           if (profile?.banned) {
@@ -156,13 +172,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
           
-          setAuthState({
-            user: session.user,
+          setAuthState(prev => ({
+            ...prev,
             profile,
-            session,
-            isAuthenticated: true,
             isLoading: false,
-          });
+          }));
         } else {
           setAuthState({
             ...initialState,
@@ -199,38 +213,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      const profile = await fetchUserProfile(data.user.id);
-      
-      if (profile?.banned) {
-        await supabase.auth.signOut();
-        toast({
-          title: "Accès refusé",
-          description: "Votre compte a été suspendu.",
-          variant: "destructive",
-        });
-        setAuthState({
-          ...initialState,
-          isLoading: false,
-        });
-        throw new Error("Votre compte a été suspendu.");
-      }
-      
-      if (profile) {
-        setAuthState({
-          user: data.user,
-          profile,
-          session: data.session,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-        
-        toast({
-          title: "Connexion réussie",
-          description: `Bienvenue sur DOPE CONTENT, ${profile.name || email}`,
-        });
-        
-        navigate('/videos');
-      }
+      // Auth state change will handle session and navigation
+      // We just show a success toast here
+      toast({
+        title: "Connexion réussie",
+        description: `Bienvenue sur DOPE CONTENT, ${email}`,
+      });
     } catch (error: any) {
       console.error('Login error:', error.message);
       setAuthState(prev => ({ ...prev, isLoading: false }));

@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -20,7 +19,14 @@ import Profile from "./pages/Profile";
 import Invitation from "./pages/Invitation";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 // Protected route component
 const ProtectedRoute = ({ children, adminOnly = false }: { children: JSX.Element, adminOnly?: boolean }) => {
@@ -47,11 +53,9 @@ const ProtectedRoute = ({ children, adminOnly = false }: { children: JSX.Element
 const AppRoutes = () => {
   // Check auth configuration on app startup (development only)
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
-      checkAuthConfig().then(result => {
-        console.log('Auth configuration check:', result);
-      });
-    }
+    checkAuthConfig().then(result => {
+      console.log('Auth configuration check:', result);
+    });
   }, []);
 
   return (

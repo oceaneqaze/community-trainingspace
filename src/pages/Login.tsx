@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -17,7 +17,6 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Redirect to videos page if already authenticated
   useEffect(() => {
@@ -33,10 +32,16 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      // If login is successful, the AuthContext will handle the redirection
+      // Note: Redirection is now handled in AuthContext
     } catch (error: any) {
       console.error('Login error:', error);
-      setError(error.message || "Une erreur est survenue lors de la connexion");
+      
+      // Afficher un message d'erreur plus précis selon la cause
+      if (error.message.includes('Invalid login credentials')) {
+        setError("Email ou mot de passe incorrect");
+      } else {
+        setError(error.message || "Une erreur est survenue lors de la connexion");
+      }
     } finally {
       setIsLoading(false);
     }

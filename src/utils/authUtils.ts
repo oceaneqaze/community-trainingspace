@@ -21,6 +21,15 @@ export const checkAuthConfig = async () => {
       hasApiKey: true, // We assume the API key is set since we're using the client
     });
     
+    // Log additional details for better debugging
+    if (data.session) {
+      console.log('Session details:', {
+        userId: data.session.user.id,
+        expires: new Date(data.session.expires_at! * 1000).toISOString(),
+        provider: data.session.user.app_metadata.provider,
+      });
+    }
+    
     return {
       isConfigured: true,
       session: data.session,
@@ -46,4 +55,12 @@ export const getCurrentSession = async () => {
     return null;
   }
   return data.session;
+};
+
+/**
+ * Check if the user is authenticated
+ */
+export const isAuthenticated = async () => {
+  const session = await getCurrentSession();
+  return !!session;
 };
