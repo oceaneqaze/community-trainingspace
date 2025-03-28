@@ -50,7 +50,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               const profile = await fetchUserProfile(session.user.id);
               
               // Handle banned users
-              if (await checkUserBanned(profile, supabase.auth.signOut)) {
+              if (await checkUserBanned(profile, async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Error signing out:', error);
+              })) {
                 setAuthState({
                   ...initialState,
                   isLoading: false,
@@ -103,7 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const profile = await fetchUserProfile(session.user.id);
           
           // Handle banned users
-          if (await checkUserBanned(profile, supabase.auth.signOut)) {
+          if (await checkUserBanned(profile, async () => {
+            const { error } = await supabase.auth.signOut();
+            if (error) console.error('Error signing out:', error);
+          })) {
             setAuthState({
               ...initialState,
               isLoading: false,
@@ -223,7 +229,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error.message);
+        toast({
+          title: "Échec de la déconnexion",
+          description: error.message || "Une erreur est survenue",
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
       setAuthState({
         user: null,
         profile: null,
@@ -231,10 +247,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: false,
         isLoading: false,
       });
+      
       toast({
         title: "Déconnexion réussie",
         description: "Vous avez été déconnecté avec succès.",
       });
+      
       navigate('/');
     } catch (error: any) {
       console.error('Logout error:', error.message);
@@ -243,6 +261,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message || "Une erreur est survenue",
         variant: "destructive",
       });
+      throw error;
     }
   };
 
