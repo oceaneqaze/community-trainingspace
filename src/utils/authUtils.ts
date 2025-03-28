@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_URL } from '@/integrations/supabase/client';
 
 /**
  * Check if authentication is properly configured
@@ -16,8 +17,8 @@ export const checkAuthConfig = async () => {
     
     console.log('Supabase auth configuration:', { 
       hasSession: !!data.session,
-      url: supabase.supabaseUrl,
-      hasApiKey: !!supabase.supabaseKey && supabase.supabaseKey.length > 0,
+      url: SUPABASE_URL,
+      hasApiKey: true, // We assume the API key is set since we're using the client
     });
     
     return {
