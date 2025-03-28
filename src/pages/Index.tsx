@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import Button from '@/components/Button';
+import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
@@ -32,10 +32,10 @@ const Index = () => {
               <div className="mt-10 flex items-center gap-x-6">
                 <Button 
                   onClick={() => navigate(isAuthenticated ? '/videos' : '/login')}
-                  rightIcon={<ArrowRight className="h-4 w-4" />}
-                  size="lg"
+                  className="inline-flex items-center gap-2"
                 >
                   {isAuthenticated ? 'Voir les formations' : 'Se connecter'}
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
