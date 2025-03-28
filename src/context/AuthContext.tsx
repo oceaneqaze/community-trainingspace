@@ -1,40 +1,11 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-
-// Types
-type UserProfile = {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'member';
-  avatar_url?: string;
-  banned?: boolean;
-  limited?: boolean;
-  invitation_code?: string;
-  invitation_used?: boolean;
-};
-
-type AuthState = {
-  user: User | null;
-  profile: UserProfile | null;
-  session: Session | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-};
-
-type AuthContextType = AuthState & {
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => Promise<void>;
-  isAdmin: () => boolean;
-  refreshProfile: () => Promise<void>;
-  isBanned: () => boolean;
-  isLimited: () => boolean;
-  updateUserStatus: (userId: string, status: { banned?: boolean, limited?: boolean }) => Promise<void>;
-};
+import { AuthContextType, AuthState, UserProfile } from '@/types/auth.types';
+import { fetchUserProfile, checkUserBanned, updateUserStatus as updateStatus } from '@/utils/authHelpers';
 
 // Initial state
 const initialState: AuthState = {
@@ -52,26 +23,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [authState, setAuthState] = useState<AuthState>(initialState);
   const navigate = useNavigate();
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (error) {
-        console.error('Error fetching user profile:', error);
-        return null;
-      }
-
-      return data as UserProfile;
-    } catch (error) {
-      console.error('Error in fetchUserProfile:', error);
-      return null;
-    }
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -98,14 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               if (!mounted) return;
               const profile = await fetchUserProfile(session.user.id);
               
-              if (profile?.banned) {
-                // If user is banned, log them out
-                await supabase.auth.signOut();
-                toast({
-                  title: "Accès refusé",
-                  description: "Votre compte a été suspendu.",
-                  variant: "destructive",
-                });
+              // Handle banned users
+              if (await checkUserBanned(profile, supabase.auth.signOut)) {
                 setAuthState({
                   ...initialState,
                   isLoading: false,
@@ -157,14 +102,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           const profile = await fetchUserProfile(session.user.id);
           
-          if (profile?.banned) {
-            // If user is banned, log them out
-            await supabase.auth.signOut();
-            toast({
-              title: "Accès refusé",
-              description: "Votre compte a été suspendu.",
-              variant: "destructive",
-            });
+          // Handle banned users
+          if (await checkUserBanned(profile, supabase.auth.signOut)) {
             setAuthState({
               ...initialState,
               isLoading: false,
@@ -323,52 +262,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const updateUserStatus = async (userId: string, status: { banned?: boolean, limited?: boolean }) => {
-    if (!isAdmin()) {
-      toast({
-        title: "Accès refusé",
-        description: "Vous n'avez pas les droits d'administrateur.",
-        variant: "destructive",
-      });
-      return;
-    }
+  const handleUpdateUserStatus = async (userId: string, status: { banned?: boolean, limited?: boolean }) => {
+    const success = await updateStatus(userId, status, isAdmin());
     
-    try {
-      // Use type assertion to work around the type checking limitation
-      // since we can't modify the generated types file
-      const updateData: any = {};
-      
-      if (status.banned !== undefined) {
-        updateData.banned = status.banned;
-      }
-      
-      if (status.limited !== undefined) {
-        updateData.limited = status.limited;
-      }
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update(updateData)
-        .eq('id', userId);
-        
-      if (error) throw error;
-      
-      toast({
-        title: "Statut mis à jour",
-        description: "Le statut de l'utilisateur a été mis à jour avec succès.",
-      });
-      
-      // If updating current user, refresh profile
-      if (userId === authState.user?.id) {
-        await refreshProfile();
-      }
-    } catch (error: any) {
-      console.error('Error updating user status:', error.message);
-      toast({
-        title: "Erreur",
-        description: error.message || "Impossible de mettre à jour le statut",
-        variant: "destructive",
-      });
+    // If updating current user, refresh profile
+    if (success && userId === authState.user?.id) {
+      await refreshProfile();
     }
   };
 
@@ -393,7 +292,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile,
     isBanned,
     isLimited,
-    updateUserStatus
+    updateUserStatus: handleUpdateUserStatus
   }), [authState]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
