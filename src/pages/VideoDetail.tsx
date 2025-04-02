@@ -11,54 +11,21 @@ import {
   RelatedVideos
 } from '@/components/video';
 import { CommentProps } from '@/components/video/CommentItem';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 
-// Modified interface to avoid the type conflict with 'comments'
+// Modified interface to include all the fields we need
 interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
   description: string;
   videoUrl: string;
   comments: CommentProps[];
 }
 
-// Mock data for the video details
-const getMockVideoData = (id: string): VideoDetail => {
-  return {
-    id,
-    title: 'Techniques avancées de résolution',
-    description: 'Dans cette vidéo, nous explorons des techniques avancées pour résoudre des problèmes complexes. Apprenez comment aborder méthodiquement chaque défi et développer des solutions efficaces.',
-    videoUrl: 'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-    duration: '24:15',
-    category: 'Avancé',
-    date: '18 Juillet 2023',
-    likes: 42,
-    progress: 45,
-    comments: [
-      {
-        id: '1',
-        userId: 'user1',
-        username: 'Sophie Martin',
-        avatar: 'https://i.pravatar.cc/150?img=1',
-        content: 'Excellente vidéo ! J\'ai beaucoup appris sur ces techniques avancées.',
-        timestamp: 'Il y a 2 jours',
-        likes: 5,
-        onLike: () => {}
-      },
-      {
-        id: '2',
-        userId: 'user2',
-        username: 'Thomas Dubois',
-        avatar: 'https://i.pravatar.cc/150?img=2',
-        content: 'Pourriez-vous faire une vidéo sur des cas pratiques spécifiques ?',
-        timestamp: 'Il y a 1 jour',
-        likes: 3,
-        onLike: () => {}
-      }
-    ]
-  };
-};
-
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [video, setVideo] = useState<VideoDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
 
@@ -68,11 +35,65 @@ const VideoDetail: React.FC = () => {
       return;
     }
 
-    if (id) {
-      // In a real app, this would be an API call
-      const videoData = getMockVideoData(id);
-      setVideo(videoData);
-    }
+    if (!id) return;
+
+    const fetchVideoData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch the video data from Supabase
+        const { data: videoData, error: videoError } = await supabase
+          .from('videos')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        if (videoError) throw videoError;
+        if (!videoData) {
+          toast({
+            title: "Erreur",
+            description: "Vidéo non trouvée",
+            variant: "destructive",
+          });
+          navigate('/videos');
+          return;
+        }
+
+        // Fetch comments for this video (if we had a comments table)
+        // For now, we'll use empty comments
+        const comments: CommentProps[] = [];
+
+        // Format the video data for our component
+        const formattedVideo: VideoDetail = {
+          id: videoData.id,
+          title: videoData.title,
+          description: videoData.description || '',
+          videoUrl: videoData.video_url,
+          duration: videoData.duration || '00:00',
+          category: videoData.category || 'Sans catégorie',
+          date: new Date(videoData.created_at).toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+          }),
+          likes: 0,
+          progress: 0,
+          comments: comments
+        };
+
+        setVideo(formattedVideo);
+      } catch (error) {
+        console.error('Error fetching video:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger la vidéo",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchVideoData();
   }, [id, isAuthenticated, navigate]);
 
   const handleCommentLike = (commentId: string) => {
@@ -111,7 +132,8 @@ const VideoDetail: React.FC = () => {
     navigate(-1);
   };
 
-  if (!video) return <div className="page-container">Chargement...</div>;
+  if (isLoading) return <div className="page-container">Chargement...</div>;
+  if (!video) return <div className="page-container">Vidéo non trouvée</div>;
 
   return (
     <div className="page-container">

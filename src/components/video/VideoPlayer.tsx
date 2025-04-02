@@ -15,6 +15,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
         className="w-full aspect-video"
         poster={poster}
         src={videoUrl}
+        preload="metadata"
+        controlsList="nodownload"
       >
         Votre navigateur ne supporte pas la lecture de vidéos.
       </video>
