@@ -1,31 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MessageCircle, Heart, Send, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Avatar } from '@/components/ui/avatar';
 import { VideoProps } from '@/components/VideoCard';
-import { DEFAULT_THUMBNAIL } from '@/data/mockData';
-
-// Types
-interface Comment {
-  id: string;
-  userId: string;
-  username: string;
-  avatar: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-}
+import { 
+  VideoPlayer,
+  VideoInfo,
+  CommentSection,
+  RelatedVideos
+} from '@/components/video';
+import { CommentProps } from '@/components/video/CommentItem';
 
 // Modified interface to avoid the type conflict with 'comments'
 interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
   description: string;
   videoUrl: string;
-  comments: Comment[];
+  comments: CommentProps[];
 }
 
 // Mock data for the video details
@@ -48,7 +39,8 @@ const getMockVideoData = (id: string): VideoDetail => {
         avatar: 'https://i.pravatar.cc/150?img=1',
         content: 'Excellente vidéo ! J\'ai beaucoup appris sur ces techniques avancées.',
         timestamp: 'Il y a 2 jours',
-        likes: 5
+        likes: 5,
+        onLike: () => {}
       },
       {
         id: '2',
@@ -57,7 +49,8 @@ const getMockVideoData = (id: string): VideoDetail => {
         avatar: 'https://i.pravatar.cc/150?img=2',
         content: 'Pourriez-vous faire une vidéo sur des cas pratiques spécifiques ?',
         timestamp: 'Il y a 1 jour',
-        likes: 3
+        likes: 3,
+        onLike: () => {}
       }
     ]
   };
@@ -66,12 +59,8 @@ const getMockVideoData = (id: string): VideoDetail => {
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [video, setVideo] = useState<VideoDetail | null>(null);
-  const [newComment, setNewComment] = useState('');
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(0);
   const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -83,14 +72,8 @@ const VideoDetail: React.FC = () => {
       // In a real app, this would be an API call
       const videoData = getMockVideoData(id);
       setVideo(videoData);
-      setLikesCount(videoData.likes);
     }
   }, [id, isAuthenticated, navigate]);
-
-  const handleLike = () => {
-    setLiked(!liked);
-    setLikesCount(prev => liked ? prev - 1 : prev + 1);
-  };
 
   const handleCommentLike = (commentId: string) => {
     if (video) {
@@ -104,30 +87,22 @@ const VideoDetail: React.FC = () => {
     }
   };
 
-  const handleSubmitComment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-
+  const handleAddComment = (content: string) => {
     if (video && user) {
-      const newCommentObj: Comment = {
+      const newCommentObj: CommentProps = {
         id: `comment-${Date.now()}`,
         userId: user.id,
         username: profile?.name || 'Utilisateur',
         avatar: profile?.avatar_url || 'https://i.pravatar.cc/150?img=3',
-        content: newComment,
+        content: content,
         timestamp: 'À l\'instant',
-        likes: 0
+        likes: 0,
+        onLike: () => {}
       };
 
       setVideo({
         ...video,
         comments: [newCommentObj, ...video.comments]
-      });
-      setNewComment('');
-      
-      toast({
-        title: "Commentaire ajouté",
-        description: "Votre commentaire a été publié avec succès.",
       });
     }
   };
@@ -150,90 +125,25 @@ const VideoDetail: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <div className="rounded-lg overflow-hidden bg-black">
-            <video 
-              controls 
-              className="w-full aspect-video"
-              poster={DEFAULT_THUMBNAIL}
-              src={video.videoUrl}
-            >
-              Votre navigateur ne supporte pas la lecture de vidéos.
-            </video>
-          </div>
+          <VideoPlayer videoUrl={video.videoUrl} />
+          
+          <VideoInfo 
+            title={video.title}
+            description={video.description}
+            category={video.category}
+            date={video.date}
+            initialLikes={video.likes}
+          />
 
-          <div className="mt-4">
-            <h1 className="text-2xl font-bold">{video.title}</h1>
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-sm text-gray-500">{video.category} • {video.date}</span>
-              <div className="flex items-center space-x-2">
-                <button 
-                  onClick={handleLike}
-                  className="flex items-center space-x-1 px-3 py-1 rounded-full border hover:bg-gray-50"
-                >
-                  <Heart className={`h-5 w-5 ${liked ? 'fill-rose-500 text-rose-500' : 'text-gray-600'}`} />
-                  <span>{likesCount}</span>
-                </button>
-              </div>
-            </div>
-
-            <p className="mt-4 text-gray-700">{video.description}</p>
-          </div>
-
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold flex items-center">
-              <MessageCircle className="h-5 w-5 mr-2" />
-              Commentaires ({video.comments.length})
-            </h2>
-
-            <form onSubmit={handleSubmitComment} className="mt-4 flex gap-2">
-              <Input
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Ajouter un commentaire..."
-                className="flex-grow"
-              />
-              <Button type="submit" size="sm">
-                <Send className="h-4 w-4 mr-1" />
-                Envoyer
-              </Button>
-            </form>
-
-            <div className="mt-6 space-y-4">
-              {video.comments.map((comment) => (
-                <div key={comment.id} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-start">
-                    <Avatar className="h-8 w-8 mr-3">
-                      <img src={comment.avatar} alt={comment.username} />
-                    </Avatar>
-                    <div className="flex-grow">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium">{comment.username}</h4>
-                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
-                      </div>
-                      <p className="mt-1 text-gray-700">{comment.content}</p>
-                      <div className="mt-2 flex items-center">
-                        <button 
-                          onClick={() => handleCommentLike(comment.id)}
-                          className="flex items-center text-gray-500 text-sm hover:text-rose-500"
-                        >
-                          <Heart className="h-3 w-3 mr-1" />
-                          {comment.likes} J'aime
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <CommentSection 
+            comments={video.comments}
+            onAddComment={handleAddComment}
+            onLikeComment={handleCommentLike}
+          />
         </div>
 
         <div className="lg:col-span-1">
-          <h3 className="text-lg font-semibold mb-4">Vidéos similaires</h3>
-          <div className="space-y-4">
-            {/* Liste de vidéos recommandées */}
-            <p className="text-gray-500 text-sm">Les recommandations personnalisées seront bientôt disponibles.</p>
-          </div>
+          <RelatedVideos />
         </div>
       </div>
     </div>
