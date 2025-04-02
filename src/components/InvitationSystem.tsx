@@ -23,10 +23,12 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
   const [isCopied, setIsCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [customMessage, setCustomMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const generateInvitationLink = async () => {
     try {
       setIsGenerating(true);
+      setError(null);
       
       // Call the Supabase function to generate a new invitation code
       const { data, error } = await supabase
@@ -45,8 +47,16 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
         title: "Lien d'invitation généré",
         description: "Le lien d'invitation a été généré avec succès.",
       });
+      
+      // Debug information in console
+      console.log("Invitation code generated:", {
+        userId: member.id,
+        code: data,
+        fullLink: inviteLink
+      });
     } catch (error: any) {
       console.error('Error generating invitation link:', error);
+      setError(error.message || "Impossible de générer le lien d'invitation");
       toast({
         title: "Erreur",
         description: error.message || "Impossible de générer le lien d'invitation",
@@ -117,6 +127,11 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
                 onChange={(e) => setCustomMessage(e.target.value)}
                 className="min-h-[100px]"
               />
+              {error && (
+                <div className="text-destructive text-sm p-2 bg-destructive/10 rounded border border-destructive/20">
+                  {error}
+                </div>
+              )}
               <Button 
                 onClick={generateInvitationLink} 
                 className="w-full"
