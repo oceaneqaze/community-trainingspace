@@ -12,7 +12,7 @@ const Index = () => {
       <main>
         {/* Hero section */}
         <div className="relative isolate overflow-hidden pt-14">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,#f5f5f5_0,#fff_100%)]" />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(45%_45%_at_50%_50%,#f5f5f5_0,#fff_100%)] bg-pink-400" />
           
           <div className="mx-auto max-w-7xl px-6 py-32 sm:py-40 lg:px-8 bg-fuchsia-200">
             <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
