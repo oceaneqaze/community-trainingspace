@@ -53,7 +53,8 @@ const Chat = () => {
         setMessages(data || []);
         
         // Collect all unique user IDs
-        const userIds = [...new Set(data.map((message: ChatMessage) => message.user_id))];
+        // Fixed: Explicitly type as string[] and add type guard to ensure all items are strings
+        const userIds = [...new Set(data.map((message: ChatMessage) => message.user_id))] as string[];
         await fetchUserProfiles(userIds);
       } catch (error: any) {
         console.error('Error fetching messages:', error);
