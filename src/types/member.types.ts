@@ -11,4 +11,6 @@ export type Member = {
   limited?: boolean;
   invitation_code?: string;
   invitation_used?: boolean;
+  lastLogin?: string;
+  activityScore?: number;
 };
