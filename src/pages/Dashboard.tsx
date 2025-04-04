@@ -2,13 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Users, Video, Activity, Clock } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { Users, Video, Activity, Clock, TrendingUp, TrendingDown } from 'lucide-react';
 import AdminVideoList from '@/components/AdminVideoList';
 import { VideoProps } from '@/components/VideoCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 // Types for database data
 type DBVideo = {
@@ -49,27 +50,37 @@ type StatCardProps = {
 };
 
 const StatCard: React.FC<StatCardProps> = ({ title, value, description, icon, trend, trendValue }) => (
-  <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-    <div className="flex items-center">
-      <div className="p-3 rounded-md bg-blue-50 text-blue-600">
-        {icon}
-      </div>
-      <div className="ml-5">
-        <p className="text-sm font-medium text-gray-500">{title}</p>
-        <div className="flex items-baseline">
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {trend && trendValue && (
-            <span className={`ml-2 text-sm font-medium ${
-              trend === 'up' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {trend === 'up' ? '↑' : '↓'} {trendValue}
-            </span>
-          )}
+  <Card className="transition-all duration-300 hover:shadow-md">
+    <CardContent className="p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-3xl font-bold tracking-tight">{value}</h3>
+            {trend && trendValue && (
+              <div className={`flex items-center text-sm font-medium ${
+                trend === 'up' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {trend === 'up' 
+                  ? <TrendingUp className="mr-1 h-4 w-4" /> 
+                  : <TrendingDown className="mr-1 h-4 w-4" />
+                }
+                {trendValue}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className={`p-3 rounded-lg ${
+          trend === 'up' ? 'bg-green-100 text-green-700' : 
+          trend === 'down' ? 'bg-red-100 text-red-700' : 
+          'bg-blue-100 text-blue-700'
+        }`}>
+          {icon}
         </div>
       </div>
-    </div>
-    <p className="mt-2 text-sm text-gray-500">{description}</p>
-  </div>
+      <p className="mt-4 text-sm text-muted-foreground">{description}</p>
+    </CardContent>
+  </Card>
 );
 
 const Dashboard: React.FC = () => {
@@ -173,9 +184,14 @@ const Dashboard: React.FC = () => {
   if (isLoading) {
     return (
       <div className="page-container">
-        <h1 className="text-4xl font-bold mb-8 text-center sm:text-left">Tableau de bord</h1>
-        <div className="text-center py-10">
-          <h3 className="mt-2 text-lg font-medium text-gray-900">Chargement...</h3>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl font-bold">Tableau de bord</h1>
+        </div>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+            <p className="text-xl font-medium">Chargement des données...</p>
+          </div>
         </div>
       </div>
     );
@@ -183,17 +199,23 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="page-container">
-      <h1 className="text-4xl font-bold mb-8 text-center sm:text-left">Tableau de bord</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-4xl font-bold">Tableau de bord</h1>
+      </div>
       
       <Tabs defaultValue="overview" className="mb-8">
-        <TabsList className="mb-6">
-          <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
-          <TabsTrigger value="videos">Gestion des vidéos</TabsTrigger>
+        <TabsList className="mb-6 w-full sm:w-auto p-1 bg-muted/80 backdrop-blur-sm">
+          <TabsTrigger value="overview" className="px-6 py-2.5">
+            Vue d'ensemble
+          </TabsTrigger>
+          <TabsTrigger value="videos" className="px-6 py-2.5">
+            Gestion des vidéos
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview">
+        <TabsContent value="overview" className="animate-fade-in">
           {/* Stats overview */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
             <StatCard
               title="Membres"
               value={userCount.toString()}
@@ -231,80 +253,114 @@ const Dashboard: React.FC = () => {
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Video views chart */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Vues mensuelles</h2>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={videoViewsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} 
-                    />
-                    <Bar 
-                      dataKey="views" 
-                      fill="#3b82f6" 
-                      radius={[4, 4, 0, 0]} 
-                      barSize={40} 
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-0">
+                <CardTitle>Vues mensuelles</CardTitle>
+                <CardDescription>Visualisation des vues pour les 6 derniers mois</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={videoViewsData}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0,0,0,0.8)',
+                          borderRadius: '8px', 
+                          border: 'none', 
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
+                        }} 
+                      />
+                      <Bar 
+                        dataKey="views" 
+                        fill="url(#colorGradient)" 
+                        radius={[4, 4, 0, 0]} 
+                        barSize={40}
+                      />
+                      <defs>
+                        <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={1} />
+                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+                        </linearGradient>
+                      </defs>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
             
             {/* Member activity chart */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Activité des membres</h2>
-              <div className="h-80 flex flex-col items-center justify-center">
-                <ResponsiveContainer width="100%" height="80%">
-                  <PieChart>
-                    <Pie
-                      data={memberActivityData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
-                    >
-                      {memberActivityData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={ACTIVITY_COLORS[index % ACTIVITY_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} 
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex justify-center space-x-8 mt-4">
-                  {memberActivityData.map((entry, index) => (
-                    <div key={index} className="flex items-center">
-                      <div 
-                        className="w-3 h-3 rounded-full mr-2"
-                        style={{ backgroundColor: ACTIVITY_COLORS[index % ACTIVITY_COLORS.length] }}
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle>Activité des membres</CardTitle>
+                <CardDescription>Membres actifs vs inactifs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80 flex flex-col items-center justify-center">
+                  <ResponsiveContainer width="100%" height="80%">
+                    <PieChart>
+                      <Pie
+                        data={memberActivityData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {memberActivityData.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={ACTIVITY_COLORS[index % ACTIVITY_COLORS.length]} 
+                            stroke="rgba(0,0,0,0.1)"
+                            strokeWidth={1}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0,0,0,0.8)',
+                          borderRadius: '8px', 
+                          border: 'none', 
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' 
+                        }} 
                       />
-                      <span className="text-sm text-gray-600">{entry.name}</span>
-                    </div>
-                  ))}
+                      <Legend 
+                        verticalAlign="bottom"
+                        height={36}
+                        iconType="circle"
+                        iconSize={10}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
         
-        <TabsContent value="videos">
-          <AdminVideoList 
-            videos={videos}
-            onVideoAdded={handleVideoAdded}
-            onVideoUpdated={handleVideoUpdated}
-            onVideoDeleted={handleVideoDeleted}
-          />
+        <TabsContent value="videos" className="animate-fade-in">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gestion des vidéos</CardTitle>
+              <CardDescription>Ajouter, modifier ou supprimer des vidéos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AdminVideoList 
+                videos={videos}
+                onVideoAdded={handleVideoAdded}
+                onVideoUpdated={handleVideoUpdated}
+                onVideoDeleted={handleVideoDeleted}
+              />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
