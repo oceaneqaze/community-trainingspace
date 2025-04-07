@@ -19,6 +19,7 @@ const DesktopNav = ({ isAuthenticated, isAdmin }: DesktopNavProps) => {
         <>
           <NavLink to="/members">Membres</NavLink>
           <NavLink to="/dashboard">Dashboard</NavLink>
+          <NavLink to="/library-manager">Bibliothèque</NavLink>
         </>
       )}
     </div>

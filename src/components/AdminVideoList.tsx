@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { VideoProps } from './VideoCard';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus, Tag } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import VideoForm from './VideoForm';
 import { supabase } from '@/integrations/supabase/client';
 import { DEFAULT_THUMBNAIL } from '@/data/mockData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AdminVideoListProps {
   videos: VideoProps[];
@@ -24,6 +26,31 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
   const [showForm, setShowForm] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoProps | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  
+  // Charger les catégories existantes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('videos')
+          .select('category')
+          .not('category', 'is', null);
+          
+        if (error) throw error;
+        
+        // Extraire les catégories uniques
+        const uniqueCategories = Array.from(new Set(
+          data.map(item => item.category).filter(Boolean) as string[]
+        ));
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error('Erreur lors du chargement des catégories:', error);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
 
   const handleAddClick = () => {
     setEditingVideo(null);
@@ -123,6 +150,11 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
           title: "Vidéo ajoutée",
           description: "La vidéo a été ajoutée avec succès.",
         });
+        
+        // Ajouter la nouvelle catégorie à la liste si elle n'existe pas déjà
+        if (data.category && !categories.includes(data.category)) {
+          setCategories([...categories, data.category]);
+        }
       }
     } catch (error) {
       console.error('Error submitting video:', error);
@@ -141,6 +173,45 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingVideo(null);
+  };
+  
+  // Mettre à jour la catégorie d'une vidéo
+  const handleCategoryChange = async (videoId: string, newCategory: string) => {
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase
+        .from('videos')
+        .update({ category: newCategory })
+        .eq('id', videoId);
+        
+      if (error) throw error;
+      
+      // Mettre à jour la vidéo dans l'état local
+      const updatedVideos = videos.map(video => 
+        video.id === videoId ? { ...video, category: newCategory } : video
+      );
+      
+      // Mise à jour via onVideoUpdated pour informer le composant parent
+      const updatedVideo = updatedVideos.find(v => v.id === videoId);
+      if (updatedVideo) {
+        onVideoUpdated(updatedVideo);
+      }
+      
+      toast({
+        title: "Catégorie mise à jour",
+        description: "La catégorie de la vidéo a été mise à jour avec succès."
+      });
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour de la catégorie:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour la catégorie",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -195,7 +266,27 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
                     />
                   </TableCell>
                   <TableCell className="font-medium">{video.title}</TableCell>
-                  <TableCell>{video.category}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center space-x-2">
+                      <Select 
+                        value={video.category || 'Sans catégorie'} 
+                        onValueChange={(value) => handleCategoryChange(video.id, value)}
+                        disabled={isLoading}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((category, index) => (
+                            <SelectItem key={index} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="Sans catégorie">Sans catégorie</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </TableCell>
                   <TableCell>{video.duration}</TableCell>
                   <TableCell>{video.date}</TableCell>
                   <TableCell className="text-right">

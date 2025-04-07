@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,6 +19,7 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Invitation from "./pages/Invitation";
 import NotFound from "./pages/NotFound";
+import LibraryManager from "./pages/LibraryManager";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +95,11 @@ const AppRoutes = () => {
         <Route path="/profile" element={
           <ProtectedRoute>
             <Profile />
+          </ProtectedRoute>
+        } />
+        <Route path="/library-manager" element={
+          <ProtectedRoute adminOnly>
+            <LibraryManager />
           </ProtectedRoute>
         } />
         <Route path="/invitation/:code" element={<Invitation />} />
