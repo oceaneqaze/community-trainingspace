@@ -45,7 +45,7 @@ const Videos: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeView, setActiveView] = useState<'grid' | 'list'>('grid');
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const Videos: React.FC = () => {
                 Accéder au Chat
               </Button>
               
-              {isAdmin() && (
+              {isAdmin && isAdmin() && (
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/library-manager')} 
