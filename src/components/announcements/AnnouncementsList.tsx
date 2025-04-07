@@ -21,7 +21,8 @@ const AnnouncementsList = ({ onAnnouncementsRead, compact = false, limit = 5 }: 
     const fetchAnnouncements = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
+        // Use any pour contourner les limitations de typages
+        const { data, error } = await (supabase as any)
           .from('announcements')
           .select('*')
           .eq('is_active', true)
@@ -32,7 +33,7 @@ const AnnouncementsList = ({ onAnnouncementsRead, compact = false, limit = 5 }: 
           throw error;
         }
 
-        setAnnouncements(data || []);
+        setAnnouncements(data as Announcement[] || []);
         
         // Mark announcements as read
         if (onAnnouncementsRead && data && data.length > 0) {

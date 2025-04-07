@@ -6,7 +6,8 @@ import {
   Ban, 
   CheckCircle, 
   AlertTriangle, 
-  Trash2 
+  Trash2,
+  UserCheck 
 } from 'lucide-react';
 import { TableRow, TableCell } from '@/components/ui/table';
 import InvitationSystem from '@/components/InvitationSystem';
@@ -19,6 +20,7 @@ type MemberTableRowProps = {
   onLimitToggle: (member: Member) => void;
   onDelete: (member: Member) => void;
   onInvitationSent: () => void;
+  onAdminToggle: (member: Member) => void;
 };
 
 const MemberTableRow: React.FC<MemberTableRowProps> = ({
@@ -28,7 +30,8 @@ const MemberTableRow: React.FC<MemberTableRowProps> = ({
   onStatusChange,
   onLimitToggle,
   onDelete,
-  onInvitationSent
+  onInvitationSent,
+  onAdminToggle
 }) => {
   return (
     <TableRow className="hover:bg-muted/50">
@@ -151,6 +154,22 @@ const MemberTableRow: React.FC<MemberTableRowProps> = ({
                       <>
                         <AlertTriangle className="mr-2 h-4 w-4 text-yellow-500" />
                         <span>Limiter</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted"
+                    onClick={() => onAdminToggle(member)}
+                  >
+                    {member.role === 'admin' ? (
+                      <>
+                        <UserCheck className="mr-2 h-4 w-4 text-primary" />
+                        <span>Retirer rôle admin</span>
+                      </>
+                    ) : (
+                      <>
+                        <UserCheck className="mr-2 h-4 w-4 text-primary" />
+                        <span>Promouvoir admin</span>
                       </>
                     )}
                   </button>

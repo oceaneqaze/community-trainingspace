@@ -19,6 +19,7 @@ const Members: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showBanDialog, setShowBanDialog] = useState(false);
   const [showLimitDialog, setShowLimitDialog] = useState(false);
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [activeFilters, setActiveFilters] = useState({
     roles: ['admin', 'member'],
@@ -144,6 +145,34 @@ const Members: React.FC = () => {
     }
   };
 
+  // Handle admin toggle
+  const handleAdminToggle = async () => {
+    if (!selectedMember) return;
+    
+    const newRole = selectedMember.role === 'admin' ? 'member' : 'admin';
+    
+    try {
+      await updateUserStatus(selectedMember.id, { role: newRole });
+      await fetchMembers();
+      setShowAdminDialog(false);
+      setSelectedMember(null);
+      
+      toast({
+        title: newRole === 'admin' ? "Administrateur ajouté" : "Administrateur rétrogradé",
+        description: newRole === 'admin'
+          ? `${selectedMember.name} a été promu administrateur.`
+          : `${selectedMember.name} n'est plus administrateur.`,
+      });
+    } catch (error) {
+      console.error('Error updating member role:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la mise à jour du rôle.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Handle status change
   const handleStatusChange = (member: Member) => {
     setSelectedMember(member);
@@ -154,6 +183,12 @@ const Members: React.FC = () => {
   const handleLimitToggle = (member: Member) => {
     setSelectedMember(member);
     setShowLimitDialog(true);
+  };
+  
+  // Handle admin toggle
+  const handleAdminToggleClick = (member: Member) => {
+    setSelectedMember(member);
+    setShowAdminDialog(true);
   };
 
   // Handle invitation refresh
@@ -266,6 +301,7 @@ const Members: React.FC = () => {
             isLoading={isLoading}
             onStatusChange={handleStatusChange}
             onLimitToggle={handleLimitToggle}
+            onAdminToggle={handleAdminToggleClick}
             onDelete={handleDelete}
             onInvitationSent={handleInvitationSent}
             onFilterChange={handleFilterChange}
@@ -293,6 +329,15 @@ const Members: React.FC = () => {
         onConfirm={handleLimitMember}
         member={selectedMember}
         action="limit"
+      />
+      
+      {/* Admin Toggle Dialog */}
+      <MemberActionDialog 
+        isOpen={showAdminDialog}
+        onClose={() => setShowAdminDialog(false)}
+        onConfirm={handleAdminToggle}
+        member={selectedMember}
+        action="admin"
       />
     </div>
   );

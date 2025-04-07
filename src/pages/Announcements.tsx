@@ -94,13 +94,13 @@ const Announcements = () => {
   const fetchAnnouncements = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setAnnouncements(data || []);
+      setAnnouncements(data as Announcement[] || []);
     } catch (error) {
       console.error('Error fetching announcements:', error);
       toast({
@@ -117,7 +117,7 @@ const Announcements = () => {
     try {
       if (currentAnnouncement) {
         // Update
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('announcements')
           .update({
             title: values.title,
@@ -135,7 +135,7 @@ const Announcements = () => {
         });
       } else {
         // Create
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('announcements')
           .insert({
             title: values.title,
@@ -169,7 +169,7 @@ const Announcements = () => {
     if (!currentAnnouncement) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('announcements')
         .delete()
         .eq('id', currentAnnouncement.id);
