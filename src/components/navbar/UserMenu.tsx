@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Video, MessageSquare, Users, LayoutDashboard, LogOut } from 'lucide-react';
+import { User, Video, MessageSquare, Users, LayoutDashboard, LogOut, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -40,7 +40,7 @@ const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar>
+          <Avatar className="h-8 w-8">
             {profile?.avatar_url ? (
               <AvatarImage src={profile.avatar_url} alt={profile.name} />
             ) : (
@@ -62,8 +62,8 @@ const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate('/profile')}>
-          <User className="mr-2 h-4 w-4" />
-          <span>Profil</span>
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Mon profil</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate('/videos')}>
           <Video className="mr-2 h-4 w-4" />
