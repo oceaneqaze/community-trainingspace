@@ -3,7 +3,7 @@ import { updateUserStatus as updateStatus } from '../helpers';
 
 export const updateUserStatus = async (
   userId: string, 
-  status: { banned?: boolean, limited?: boolean }, 
+  status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' }, 
   isAdmin: boolean,
   onSuccess: () => Promise<void>
 ) => {

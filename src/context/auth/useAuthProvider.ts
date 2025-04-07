@@ -68,7 +68,10 @@ export const useAuthProvider = () => {
     }
   };
 
-  const handleUpdateUserStatus = async (userId: string, status: { banned?: boolean, limited?: boolean }) => {
+  const handleUpdateUserStatus = async (
+    userId: string, 
+    status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' }
+  ) => {
     await updateUserStatusOp(
       userId, 
       status, 

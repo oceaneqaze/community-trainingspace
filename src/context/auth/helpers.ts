@@ -39,10 +39,10 @@ export const checkUserBanned = async (profile: UserProfile | null, signOut: () =
   return false;
 };
 
-// Update a user's status (banned or limited)
+// Update a user's status (banned, limited, or role)
 export const updateUserStatus = async (
   userId: string, 
-  status: { banned?: boolean, limited?: boolean },
+  status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' },
   isAdmin: boolean
 ) => {
   if (!isAdmin) {
@@ -64,6 +64,10 @@ export const updateUserStatus = async (
     
     if (status.limited !== undefined) {
       updateData.limited = status.limited;
+    }
+    
+    if (status.role !== undefined) {
+      updateData.role = status.role;
     }
     
     const { error } = await supabase

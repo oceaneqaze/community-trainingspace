@@ -16,7 +16,7 @@ type MemberActionDialogProps = {
   onClose: () => void;
   onConfirm: () => void;
   member: Member | null;
-  action: 'ban' | 'limit';
+  action: 'ban' | 'limit' | 'admin';
 };
 
 const MemberActionDialog: React.FC<MemberActionDialogProps> = ({
@@ -30,10 +30,12 @@ const MemberActionDialog: React.FC<MemberActionDialogProps> = ({
   
   const isBan = action === 'ban';
   const isLimit = action === 'limit';
+  const isAdminAction = action === 'admin';
   
   const getTitle = () => {
     if (isBan) return member.banned ? 'Réactiver le membre' : 'Bannir le membre';
     if (isLimit) return member.limited ? 'Enlever les limitations' : 'Limiter le membre';
+    if (isAdminAction) return member.role === 'admin' ? 'Révoquer les droits d\'administrateur' : 'Promouvoir en administrateur';
     return '';
   };
   
@@ -50,18 +52,26 @@ const MemberActionDialog: React.FC<MemberActionDialogProps> = ({
         : `Voulez-vous vraiment limiter ${member.name}? Ils ne pourront plus poster de liens ou de certains contenus.`;
     }
     
+    if (isAdminAction) {
+      return member.role === 'admin' 
+        ? `Voulez-vous vraiment révoquer les droits d'administrateur de ${member.name}?` 
+        : `Voulez-vous vraiment promouvoir ${member.name} en administrateur? Ils auront accès à toutes les fonctionnalités d'administration.`;
+    }
+    
     return '';
   };
   
   const getButtonText = () => {
     if (isBan) return member.banned ? 'Réactiver' : 'Bannir';
     if (isLimit) return member.limited ? 'Enlever les limitations' : 'Limiter';
+    if (isAdminAction) return member.role === 'admin' ? 'Révoquer' : 'Promouvoir';
     return '';
   };
   
   const getButtonVariant = () => {
     if (isBan) return member.banned ? "default" : "destructive";
     if (isLimit) return member.limited ? "default" : "warning";
+    if (isAdminAction) return member.role === 'admin' ? "destructive" : "default";
     return "default";
   };
   

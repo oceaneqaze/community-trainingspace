@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           avatar_url: string | null
@@ -39,31 +69,37 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned: boolean | null
           created_at: string | null
           email: string | null
           id: string
           invitation_code: string | null
           invitation_used: boolean | null
+          limited: boolean | null
           name: string | null
           role: string | null
         }
         Insert: {
           avatar_url?: string | null
+          banned?: boolean | null
           created_at?: string | null
           email?: string | null
           id: string
           invitation_code?: string | null
           invitation_used?: boolean | null
+          limited?: boolean | null
           name?: string | null
           role?: string | null
         }
         Update: {
           avatar_url?: string | null
+          banned?: boolean | null
           created_at?: string | null
           email?: string | null
           id?: string
           invitation_code?: string | null
           invitation_used?: boolean | null
+          limited?: boolean | null
           name?: string | null
           role?: string | null
         }

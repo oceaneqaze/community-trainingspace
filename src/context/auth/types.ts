@@ -30,5 +30,5 @@ export type AuthContextType = AuthState & {
   refreshProfile: () => Promise<void>;
   isBanned: () => boolean;
   isLimited: () => boolean;
-  updateUserStatus: (userId: string, status: { banned?: boolean, limited?: boolean }) => Promise<void>;
+  updateUserStatus: (userId: string, status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' }) => Promise<void>;
 };

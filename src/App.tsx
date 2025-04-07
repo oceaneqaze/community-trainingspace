@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import Invitation from "./pages/Invitation";
 import NotFound from "./pages/NotFound";
 import LibraryManager from "./pages/LibraryManager";
+import Announcements from "./pages/Announcements";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,11 @@ const AppRoutes = () => {
         <Route path="/library-manager" element={
           <ProtectedRoute adminOnly>
             <LibraryManager />
+          </ProtectedRoute>
+        } />
+        <Route path="/announcements" element={
+          <ProtectedRoute adminOnly>
+            <Announcements />
           </ProtectedRoute>
         } />
         <Route path="/invitation/:code" element={<Invitation />} />

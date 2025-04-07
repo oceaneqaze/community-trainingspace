@@ -17,6 +17,7 @@ type MemberTableProps = {
   isLoading: boolean;
   onStatusChange: (member: Member) => void;
   onLimitToggle: (member: Member) => void;
+  onAdminToggle: (member: Member) => void;
   onDelete: (member: Member) => void;
   onInvitationSent: () => void;
   filteredMembers: Member[];
@@ -27,6 +28,7 @@ const MemberTable: React.FC<MemberTableProps> = ({
   isLoading,
   onStatusChange,
   onLimitToggle,
+  onAdminToggle,
   onDelete,
   onInvitationSent,
   filteredMembers,
@@ -141,6 +143,7 @@ const MemberTable: React.FC<MemberTableProps> = ({
                 toggleDropdown={toggleDropdown}
                 onStatusChange={onStatusChange}
                 onLimitToggle={onLimitToggle}
+                onAdminToggle={onAdminToggle}
                 onDelete={onDelete}
                 onInvitationSent={onInvitationSent}
               />
