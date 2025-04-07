@@ -247,7 +247,7 @@ const Profile = () => {
                 <p className="text-sm text-muted-foreground">Membre depuis</p>
                 <p className="font-medium flex items-center gap-1.5">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  {formatDate(profile?.created_at)}
+                  {formatDate(profile?.created_at || user?.created_at)}
                 </p>
               </div>
 

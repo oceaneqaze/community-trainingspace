@@ -11,6 +11,7 @@ export type UserProfile = {
   limited?: boolean;
   invitation_code?: string;
   invitation_used?: boolean;
+  created_at?: string; // Add this field
 };
 
 export type AuthState = {
