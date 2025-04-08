@@ -14,10 +14,12 @@ export const useResources = () => {
   const fetchResourcesByVideo = async (videoId: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('video_resources')
+      // Use 'as any' to bypass TypeScript type checking since the video_resources table 
+      // exists in the database but not in the TypeScript types
+      const { data, error } = await (supabase
+        .from('video_resources' as any)
         .select('*')
-        .eq('video_id', videoId);
+        .eq('video_id', videoId) as any);
 
       if (error) throw error;
       setResources(data as Resource[]);
@@ -62,11 +64,11 @@ export const useResources = () => {
         description: description || null
       };
       
-      const { data, error } = await supabase
-        .from('video_resources')
+      const { data, error } = await (supabase
+        .from('video_resources' as any)
         .insert(resourceData)
         .select()
-        .single();
+        .single() as any);
         
       if (error) throw error;
       
@@ -94,33 +96,35 @@ export const useResources = () => {
       setIsLoading(true);
       
       // Récupération de l'URL du fichier avant la suppression
-      const { data: resourceData, error: fetchError } = await supabase
-        .from('video_resources')
+      const { data: resourceData, error: fetchError } = await (supabase
+        .from('video_resources' as any)
         .select('file_url')
         .eq('id', resourceId)
-        .single();
+        .single() as any);
         
       if (fetchError) throw fetchError;
       
       // Suppression de l'enregistrement dans la base de données
-      const { error } = await supabase
-        .from('video_resources')
+      const { error } = await (supabase
+        .from('video_resources' as any)
         .delete()
-        .eq('id', resourceId);
+        .eq('id', resourceId) as any);
         
       if (error) throw error;
       
       // Suppression du fichier dans le stockage
       // Extraction du chemin du fichier depuis l'URL complète
-      const fileUrl = resourceData.file_url;
-      const filePath = fileUrl.split('/').slice(-2).join('/');
-      
-      const { error: storageError } = await supabase.storage
-        .from('resources')
-        .remove([filePath]);
+      const fileUrl = resourceData?.file_url;
+      if (fileUrl) {
+        const filePath = fileUrl.split('/').slice(-2).join('/');
         
-      if (storageError) {
-        console.warn('Le fichier n\'a pas pu être supprimé du stockage:', storageError);
+        const { error: storageError } = await supabase.storage
+          .from('resources')
+          .remove([filePath]);
+          
+        if (storageError) {
+          console.warn('Le fichier n\'a pas pu être supprimé du stockage:', storageError);
+        }
       }
       
       toast({
