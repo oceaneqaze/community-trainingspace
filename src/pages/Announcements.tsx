@@ -4,49 +4,19 @@ import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Announcement } from '@/types/announcement.types';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
-import { formatDistanceToNow } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { format } from 'date-fns';
-import { Pencil, Trash2, Plus, AlertCircle } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { Plus } from 'lucide-react';
+import AnnouncementDialog from '@/components/announcements/AnnouncementDialog';
+import AnnouncementDeleteDialog from '@/components/announcements/AnnouncementDeleteDialog';
+import EmptyAnnouncementState from '@/components/announcements/EmptyAnnouncementState';
+import AnnouncementCard from '@/components/announcements/AnnouncementCard';
 
-const announcementSchema = z.object({
-  title: z.string().min(3, { message: 'Le titre doit contenir au moins 3 caractères' }),
-  content: z.string().min(10, { message: 'Le contenu doit contenir au moins 10 caractères' }),
-  is_active: z.boolean().default(true),
-});
-
-type AnnouncementFormValues = z.infer<typeof announcementSchema>;
+type AnnouncementFormValues = {
+  title: string;
+  content: string;
+  is_active: boolean;
+};
 
 const Announcements = () => {
   const { isAuthenticated, isAdmin, user } = useAuth();
@@ -57,15 +27,6 @@ const Announcements = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentAnnouncement, setCurrentAnnouncement] = useState<Announcement | null>(null);
 
-  const form = useForm<AnnouncementFormValues>({
-    resolver: zodResolver(announcementSchema),
-    defaultValues: {
-      title: '',
-      content: '',
-      is_active: true,
-    },
-  });
-
   useEffect(() => {
     if (!isAuthenticated || !isAdmin()) {
       navigate('/videos');
@@ -75,26 +36,10 @@ const Announcements = () => {
     fetchAnnouncements();
   }, [isAuthenticated, isAdmin, navigate]);
 
-  useEffect(() => {
-    if (currentAnnouncement) {
-      form.reset({
-        title: currentAnnouncement.title,
-        content: currentAnnouncement.content,
-        is_active: currentAnnouncement.is_active,
-      });
-    } else {
-      form.reset({
-        title: '',
-        content: '',
-        is_active: true,
-      });
-    }
-  }, [currentAnnouncement, form]);
-
   const fetchAnnouncements = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('announcements')
         .select('*')
         .order('created_at', { ascending: false });
@@ -117,7 +62,7 @@ const Announcements = () => {
     try {
       if (currentAnnouncement) {
         // Update
-        const { error } = await (supabase as any)
+        const { error } = await supabase
           .from('announcements')
           .update({
             title: values.title,
@@ -135,7 +80,7 @@ const Announcements = () => {
         });
       } else {
         // Create
-        const { error } = await (supabase as any)
+        const { error } = await supabase
           .from('announcements')
           .insert({
             title: values.title,
@@ -169,7 +114,7 @@ const Announcements = () => {
     if (!currentAnnouncement) return;
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('announcements')
         .delete()
         .eq('id', currentAnnouncement.id);
@@ -225,150 +170,33 @@ const Announcements = () => {
           <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
         </div>
       ) : announcements.length === 0 ? (
-        <Card className="text-center p-12">
-          <div className="flex flex-col items-center gap-4">
-            <AlertCircle className="h-12 w-12 text-muted-foreground" />
-            <h3 className="text-xl font-semibold">Aucune annonce</h3>
-            <p className="text-muted-foreground">
-              Créez votre première annonce en cliquant sur le bouton "Nouvelle annonce"
-            </p>
-          </div>
-        </Card>
+        <EmptyAnnouncementState />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {announcements.map((announcement) => (
-            <Card key={announcement.id} className={`overflow-hidden ${!announcement.is_active ? 'border-muted bg-muted/30' : ''}`}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {announcement.title}
-                      {!announcement.is_active && (
-                        <span className="text-xs bg-muted-foreground/20 text-muted-foreground px-2 py-0.5 rounded-full">Inactive</span>
-                      )}
-                    </CardTitle>
-                    <CardDescription>
-                      {formatDistanceToNow(new Date(announcement.created_at), { addSuffix: true, locale: fr })}
-                    </CardDescription>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => openEditDialog(announcement)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(announcement)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap">{announcement.content}</p>
-              </CardContent>
-              <CardFooter className="text-sm text-muted-foreground">
-                <div>
-                  Dernière mise à jour: {format(new Date(announcement.updated_at), 'dd/MM/yyyy HH:mm')}
-                </div>
-              </CardFooter>
-            </Card>
+            <AnnouncementCard 
+              key={announcement.id}
+              announcement={announcement}
+              onEdit={openEditDialog}
+              onDelete={openDeleteDialog}
+            />
           ))}
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>{currentAnnouncement ? 'Modifier l\'annonce' : 'Créer une annonce'}</DialogTitle>
-            <DialogDescription>
-              {currentAnnouncement 
-                ? 'Modifiez les informations de l\'annonce ci-dessous'
-                : 'Remplissez le formulaire pour créer une nouvelle annonce'}
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleCreateOrUpdate)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titre</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Titre de l'annonce" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contenu</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Contenu de l'annonce" 
-                        className="min-h-[150px]" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-primary"
-                        checked={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Active</FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Cette annonce sera visible par tous les utilisateurs si active
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Annuler
-                </Button>
-                <Button type="submit">Enregistrer</Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette annonce ? Cette action est irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Annuler
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Supprimer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Dialogs */}
+      <AnnouncementDialog 
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onSave={handleCreateOrUpdate}
+        announcement={currentAnnouncement}
+      />
+      
+      <AnnouncementDeleteDialog 
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onDelete={handleDelete}
+      />
     </div>
   );
 };
