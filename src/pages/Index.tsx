@@ -1,16 +1,14 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Users, BarChart3 } from 'lucide-react';
-
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const {
+    isAuthenticated
+  } = useAuth();
   const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+  return <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       {/* Hero section */}
       <section className="relative overflow-hidden pt-16 md:pt-20 lg:pt-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -30,35 +28,21 @@ const Index = () => {
               </p>
               
               <div className="flex items-center gap-4 flex-wrap">
-                <Button 
-                  onClick={() => navigate(isAuthenticated ? '/videos' : '/login')} 
-                  className="shadow-md hover:shadow-lg transition-all"
-                  size="lg"
-                >
+                <Button onClick={() => navigate(isAuthenticated ? '/videos' : '/login')} className="shadow-md hover:shadow-lg transition-all" size="lg">
                   {isAuthenticated ? 'Voir les formations' : 'Se connecter'}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
                 
-                {!isAuthenticated && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate('/signup')}
-                    size="lg"
-                  >
+                {!isAuthenticated && <Button variant="outline" onClick={() => navigate('/signup')} size="lg">
                     Inscription
-                  </Button>
-                )}
+                  </Button>}
               </div>
             </div>
             
             <div className="relative lg:block hidden">
               <div className="tech-border rounded-2xl p-4 shadow-xl bg-card/50 backdrop-blur-sm">
                 <div className="aspect-[4/3] rounded-lg overflow-hidden">
-                  <img 
-                    src="/placeholder.svg" 
-                    alt="Learning platform" 
-                    className="w-full h-full object-cover"
-                  />
+                  <img alt="Learning platform" className="w-full h-full object-cover" src="/lovable-uploads/eb0edc65-1186-41c7-b6f7-68352bf284ff.png" />
                 </div>
               </div>
               
@@ -131,8 +115,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
