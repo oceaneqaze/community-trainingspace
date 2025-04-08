@@ -52,7 +52,14 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md animate-fade-in">
         <div className="glass-panel py-8 px-6 rounded-lg sm:px-10">
           <div className="mb-8 text-center">
-            <h2 className="text-3xl font-bold tech-text">DOPE CONTENT</h2>
+            <div className="flex justify-center items-center gap-2 mb-2">
+              <img 
+                src="/lovable-uploads/bb7e7daa-74a3-4cd4-8457-13ba5ae39dce.png" 
+                alt="DOPE CONTENT Logo" 
+                className="h-10 w-auto" 
+              />
+              <h2 className="text-3xl font-bold tech-text">DOPE CONTENT</h2>
+            </div>
             <p className="mt-2 text-sm text-muted-foreground">
               Accédez à votre espace exclusif
             </p>

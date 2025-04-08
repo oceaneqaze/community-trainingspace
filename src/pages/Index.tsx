@@ -1,14 +1,18 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CheckCircle, Users, BarChart3 } from 'lucide-react';
+
 const Index = () => {
   const {
     isAuthenticated
   } = useAuth();
   const navigate = useNavigate();
-  return <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       {/* Hero section */}
       <section className="relative overflow-hidden pt-16 md:pt-20 lg:pt-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -18,9 +22,16 @@ const Index = () => {
                 Plateforme privée
               </div>
               
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-                Plateforme <span className="text-primary">Communautaire</span> de Formation
-              </h1>
+              <div className="flex items-center gap-4 mb-4">
+                <img 
+                  src="/lovable-uploads/bb7e7daa-74a3-4cd4-8457-13ba5ae39dce.png"
+                  alt="DOPE CONTENT" 
+                  className="h-12 w-auto"
+                />
+                <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                  DOPE <span className="text-primary">CONTENT</span>
+                </h1>
+              </div>
               
               <p className="text-lg text-muted-foreground leading-relaxed">
                 Accédez à des contenus exclusifs et de haute qualité pour développer vos compétences 
@@ -115,6 +126,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
