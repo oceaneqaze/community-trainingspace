@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +8,8 @@ import { toast } from '@/components/ui/use-toast';
 import ThumbnailUploader from './ThumbnailUploader';
 import VideoUploader from './VideoUploader';
 import { useFileUpload } from '@/hooks/useFileUpload';
+import VideoResourcesManager from './resources/VideoResourcesManager';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface VideoFormProps {
   onSubmit: (video: Partial<VideoProps>) => void;
@@ -26,19 +27,40 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>(video?.thumbnail || '');
   const { uploadFile, status: uploadStatus } = useFileUpload();
+  const [activeTab, setActiveTab] = useState<string>("details");
+
+  useEffect(() => {
+    if (video?.id) {
+      async function loadFullVideoData() {
+        try {
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data, error } = await supabase
+            .from('videos')
+            .select('description')
+            .eq('id', video.id)
+            .single();
+
+          if (data && !error) {
+            setDescription(data.description || '');
+          }
+        } catch (err) {
+          console.error('Error loading video description:', err);
+        }
+      }
+
+      loadFullVideoData();
+    }
+  }, [video?.id]);
   
-  // Handle thumbnail change from ThumbnailUploader component
   const handleThumbnailChange = (file: File | null, previewUrl: string) => {
     setThumbnailFile(file);
     setThumbnailPreview(previewUrl);
   };
   
-  // Handle video change from VideoUploader component
   const handleVideoChange = (file: File | null) => {
     setVideoFile(file);
   };
   
-  // Handle duration extraction from VideoUploader component
   const handleDurationExtracted = (extractedDuration: string) => {
     setDuration(extractedDuration);
     console.log(`Durée extraite: ${extractedDuration}`);
@@ -103,90 +125,192 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="title">Titre de la vidéo</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Saisissez le titre de la vidéo"
-          required
-          disabled={isLoading || uploadStatus.isLoading}
-        />
-      </div>
-      
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Saisissez une description de la vidéo"
-          rows={4}
-          disabled={isLoading || uploadStatus.isLoading}
-        />
-      </div>
-      
-      <div>
-        <Label htmlFor="category">Catégorie</Label>
-        <Input
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="Ex: Débutant, Avancé..."
-          required
-          disabled={isLoading || uploadStatus.isLoading}
-        />
-      </div>
-      
-      {duration && (
-        <p className="text-sm text-gray-500">
-          Durée détectée: {duration}
-        </p>
-      )}
-      
-      <VideoUploader
-        disabled={isLoading || uploadStatus.isLoading}
-        onVideoChange={handleVideoChange}
-        onDurationExtracted={handleDurationExtracted}
-      />
-      
-      <ThumbnailUploader
-        initialPreview={thumbnailPreview}
-        disabled={isLoading || uploadStatus.isLoading}
-        onThumbnailChange={handleThumbnailChange}
-      />
-      
-      {uploadStatus.progress > 0 && uploadStatus.progress < 100 && (
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <div 
-            className="bg-blue-600 h-2.5 rounded-full" 
-            style={{ width: `${uploadStatus.progress}%` }}
-          ></div>
-          <p className="text-xs text-gray-500 mt-1">Upload: {uploadStatus.progress}%</p>
-        </div>
-      )}
-      
-      <div className="flex justify-end space-x-2 pt-4">
-        {onCancel && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onCancel}
+    <div>
+      {video?.id ? (
+        <Tabs defaultValue="details" value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details">Détails de la vidéo</TabsTrigger>
+            <TabsTrigger value="resources">Documents PDF</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="title">Titre de la vidéo</Label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Saisissez le titre de la vidéo"
+                  required
+                  disabled={isLoading || uploadStatus.isLoading}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Saisissez une description de la vidéo"
+                  rows={4}
+                  disabled={isLoading || uploadStatus.isLoading}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="category">Catégorie</Label>
+                <Input
+                  id="category"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Ex: Débutant, Avancé..."
+                  required
+                  disabled={isLoading || uploadStatus.isLoading}
+                />
+              </div>
+              
+              {duration && (
+                <p className="text-sm text-gray-500">
+                  Durée détectée: {duration}
+                </p>
+              )}
+              
+              <VideoUploader
+                disabled={isLoading || uploadStatus.isLoading}
+                onVideoChange={handleVideoChange}
+                onDurationExtracted={handleDurationExtracted}
+              />
+              
+              <ThumbnailUploader
+                initialPreview={thumbnailPreview}
+                disabled={isLoading || uploadStatus.isLoading}
+                onThumbnailChange={handleThumbnailChange}
+              />
+              
+              {uploadStatus.progress > 0 && uploadStatus.progress < 100 && (
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div 
+                    className="bg-blue-600 h-2.5 rounded-full" 
+                    style={{ width: `${uploadStatus.progress}%` }}
+                  ></div>
+                  <p className="text-xs text-gray-500 mt-1">Upload: {uploadStatus.progress}%</p>
+                </div>
+              )}
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                {onCancel && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={onCancel}
+                    disabled={isLoading || uploadStatus.isLoading}
+                  >
+                    Annuler
+                  </Button>
+                )}
+                <Button 
+                  type="submit" 
+                  disabled={isLoading || uploadStatus.isLoading}
+                >
+                  {isLoading || uploadStatus.isLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+          
+          <TabsContent value="resources">
+            {video?.id && <VideoResourcesManager videoId={video.id} />}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="title">Titre de la vidéo</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Saisissez le titre de la vidéo"
+              required
+              disabled={isLoading || uploadStatus.isLoading}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Saisissez une description de la vidéo"
+              rows={4}
+              disabled={isLoading || uploadStatus.isLoading}
+            />
+          </div>
+          
+          <div>
+            <Label htmlFor="category">Catégorie</Label>
+            <Input
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              placeholder="Ex: Débutant, Avancé..."
+              required
+              disabled={isLoading || uploadStatus.isLoading}
+            />
+          </div>
+          
+          {duration && (
+            <p className="text-sm text-gray-500">
+              Durée détectée: {duration}
+            </p>
+          )}
+          
+          <VideoUploader
             disabled={isLoading || uploadStatus.isLoading}
-          >
-            Annuler
-          </Button>
-        )}
-        <Button 
-          type="submit" 
-          disabled={isLoading || uploadStatus.isLoading}
-        >
-          {isLoading || uploadStatus.isLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
-        </Button>
-      </div>
-    </form>
+            onVideoChange={handleVideoChange}
+            onDurationExtracted={handleDurationExtracted}
+          />
+          
+          <ThumbnailUploader
+            initialPreview={thumbnailPreview}
+            disabled={isLoading || uploadStatus.isLoading}
+            onThumbnailChange={handleThumbnailChange}
+          />
+          
+          {uploadStatus.progress > 0 && uploadStatus.progress < 100 && (
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="bg-blue-600 h-2.5 rounded-full" 
+                style={{ width: `${uploadStatus.progress}%` }}
+              ></div>
+              <p className="text-xs text-gray-500 mt-1">Upload: {uploadStatus.progress}%</p>
+            </div>
+          )}
+          
+          <div className="flex justify-end space-x-2 pt-4">
+            {onCancel && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onCancel}
+                disabled={isLoading || uploadStatus.isLoading}
+              >
+                Annuler
+              </Button>
+            )}
+            <Button 
+              type="submit" 
+              disabled={isLoading || uploadStatus.isLoading}
+            >
+              {isLoading || uploadStatus.isLoading ? 'Chargement...' : (video ? 'Mettre à jour' : 'Ajouter la vidéo')}
+            </Button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 };
 

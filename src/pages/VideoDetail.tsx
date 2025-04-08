@@ -155,6 +155,7 @@ const VideoDetail: React.FC = () => {
             category={video.category}
             date={video.date}
             initialLikes={video.likes}
+            videoId={video.id}
           />
 
           <CommentSection 

@@ -1,6 +1,9 @@
 
 import React, { useState } from 'react';
-import { Heart } from 'lucide-react';
+import { Download, ThumbsUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import ResourcesDialog from '@/components/resources/ResourcesDialog';
 
 interface VideoInfoProps {
   title: string;
@@ -8,6 +11,7 @@ interface VideoInfoProps {
   category: string;
   date: string;
   initialLikes: number;
+  videoId?: string;
 }
 
 const VideoInfo: React.FC<VideoInfoProps> = ({ 
@@ -15,33 +19,67 @@ const VideoInfo: React.FC<VideoInfoProps> = ({
   description, 
   category, 
   date, 
-  initialLikes 
+  initialLikes,
+  videoId = '' 
 }) => {
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(initialLikes);
-
+  const [likes, setLikes] = useState(initialLikes);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [showResources, setShowResources] = useState(false);
+  
   const handleLike = () => {
-    setLiked(!liked);
-    setLikesCount(prev => liked ? prev - 1 : prev + 1);
+    if (!hasLiked) {
+      setLikes(likes + 1);
+      setHasLiked(true);
+      // Ici, on pourrait appeler une API pour enregistrer le like
+    }
   };
 
   return (
-    <div className="mt-4">
+    <div className="mt-4 space-y-4">
       <h1 className="text-2xl font-bold">{title}</h1>
-      <div className="flex items-center justify-between mt-2">
-        <span className="text-sm text-gray-500">{category} • {date}</span>
-        <div className="flex items-center space-x-2">
-          <button 
-            onClick={handleLike}
-            className="flex items-center space-x-1 px-3 py-1 rounded-full border hover:bg-gray-50"
-          >
-            <Heart className={`h-5 w-5 ${liked ? 'fill-rose-500 text-rose-500' : 'text-gray-600'}`} />
-            <span>{likesCount}</span>
-          </button>
+      
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+        <Badge variant="secondary">{category}</Badge>
+        <span>Ajoutée le {date}</span>
+        <div className="flex items-center gap-1">
+          <ThumbsUp className="h-4 w-4" />
+          <span>{likes}</span>
         </div>
       </div>
-
-      <p className="mt-4 text-gray-700">{description}</p>
+      
+      <p className="text-gray-700 whitespace-pre-wrap">{description}</p>
+      
+      <div className="flex flex-wrap gap-2">
+        <Button 
+          variant={hasLiked ? "secondary" : "outline"} 
+          size="sm"
+          onClick={handleLike}
+          disabled={hasLiked}
+        >
+          <ThumbsUp className="mr-2 h-4 w-4" />
+          {hasLiked ? 'Aimé' : 'J\'aime'}
+        </Button>
+        
+        {videoId && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowResources(true)}
+          >
+            <Download className="mr-2 h-4 w-4" />
+            Documents PDF
+          </Button>
+        )}
+      </div>
+      
+      {videoId && showResources && (
+        <ResourcesDialog 
+          isOpen={showResources}
+          videoId={videoId}
+          videoTitle={title}
+          onClose={() => setShowResources(false)}
+        />
+      )}
     </div>
   );
 };
