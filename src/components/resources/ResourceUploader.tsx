@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FilePdf, Upload, X } from 'lucide-react';
+import { FileText, Upload, X } from 'lucide-react';
 
 interface ResourceUploaderProps {
   onFileSelect: (file: File, title: string, description: string) => Promise<void>;
@@ -102,7 +102,7 @@ const ResourceUploader: React.FC<ResourceUploaderProps> = ({ onFileSelect, isLoa
         </div>
       ) : (
         <div className="flex items-center p-4 bg-muted rounded-lg">
-          <FilePdf className="h-8 w-8 text-primary mr-3" />
+          <FileText className="h-8 w-8 text-primary mr-3" />
           <div className="flex-1">
             <p className="font-medium truncate">{file.name}</p>
             <p className="text-xs text-muted-foreground">

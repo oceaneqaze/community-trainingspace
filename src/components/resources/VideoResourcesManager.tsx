@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { FilePdf, Download, Plus, Trash2 } from 'lucide-react';
+import { FileText, Download, Plus, Trash2 } from 'lucide-react';
 import { useResources } from '@/hooks/useResources';
 import ResourceUploader from './ResourceUploader';
 import { Resource } from '@/types/resource.types';
@@ -90,7 +90,7 @@ const VideoResourcesManager: React.FC<VideoResourcesManagerProps> = ({ videoId }
                   key={resource.id} 
                   className="flex items-center p-3 border rounded-md bg-background"
                 >
-                  <FilePdf className="h-5 w-5 text-blue-500 mr-3" />
+                  <FileText className="h-5 w-5 text-blue-500 mr-3" />
                   <div className="flex-1">
                     <p className="font-medium text-sm">{resource.title}</p>
                     <p className="text-xs text-muted-foreground">{formatFileSize(resource.file_size)}</p>

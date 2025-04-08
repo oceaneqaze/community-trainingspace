@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Resource } from '@/types/resource.types';
-import { FilePdf, Download, Trash2 } from 'lucide-react';
+import { FileText, Download, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
@@ -42,7 +42,7 @@ const ResourcesList: React.FC<ResourcesListProps> = ({ resources, isLoading, onD
         <Card key={resource.id} className="overflow-hidden">
           <CardContent className="p-4">
             <div className="flex items-center">
-              <FilePdf className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
+              <FileText className="h-8 w-8 text-primary mr-3 flex-shrink-0" />
               
               <div className="flex-1 min-w-0">
                 <h4 className="text-base font-medium truncate">{resource.title}</h4>
