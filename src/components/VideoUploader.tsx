@@ -23,11 +23,11 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Increased file size limit to 500MB (from 100MB)
-      const maxSizeInBytes = 500 * 1024 * 1024; 
+      // Increased file size limit to 1000MB (1GB)
+      const maxSizeInBytes = 1000 * 1024 * 1024; 
       
       if (file.size > maxSizeInBytes) {
-        alert("Le fichier est trop volumineux. La taille maximum est de 500MB.");
+        alert("Le fichier est trop volumineux. La taille maximum est de 1GB.");
         return;
       }
       
@@ -92,7 +92,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
               />
             </label>
             <p className="mt-1 text-xs text-gray-500">
-              MP4, WEBM, MOV jusqu'à 500MB
+              MP4, WEBM, MOV jusqu'à 1GB
             </p>
           </div>
         </div>
