@@ -6,12 +6,10 @@ import { VideoProps } from '@/components/video/VideoCard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DEFAULT_THUMBNAIL } from '@/data/mockData';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import CategoryManager from '@/components/admin/CategoryManager';
-import VideoCategorizer from '@/components/admin/VideoCategorizer';
-import { ArrowDown, ArrowUp, CheckCircle } from 'lucide-react';
+import VideosTabContent from '@/components/admin/VideosTabContent';
 
 type DBVideo = {
   id: string;
@@ -28,10 +26,6 @@ const LibraryManager: React.FC = () => {
   const [videos, setVideos] = useState<VideoProps[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof VideoProps | 'date',
-    direction: 'asc' | 'desc'
-  }>({ key: 'title', direction: 'asc' });
   
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -99,35 +93,6 @@ const LibraryManager: React.FC = () => {
     }
   }, [isAuthenticated, isAdmin]);
 
-  // Gérer le tri des vidéos
-  const requestSort = (key: keyof VideoProps | 'date') => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  const sortedVideos = React.useMemo(() => {
-    const sortableVideos = [...videos];
-    sortableVideos.sort((a, b) => {
-      if (sortConfig.key === 'date') {
-        const dateA = new Date(a.date.split(' ').reverse().join(' '));
-        const dateB = new Date(b.date.split(' ').reverse().join(' '));
-        return sortConfig.direction === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
-      }
-      
-      if (a[sortConfig.key as keyof VideoProps] < b[sortConfig.key as keyof VideoProps]) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (a[sortConfig.key as keyof VideoProps] > b[sortConfig.key as keyof VideoProps]) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-    return sortableVideos;
-  }, [videos, sortConfig]);
-
   // Gérer le changement de catégorie d'une vidéo
   const handleCategoryChange = (videoId: string, newCategory: string) => {
     setVideos(videos.map(video => 
@@ -156,68 +121,12 @@ const LibraryManager: React.FC = () => {
             </TabsList>
             
             <TabsContent value="videos">
-              {isLoading ? (
-                <div className="flex justify-center py-20">
-                  <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full"></div>
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-lg border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[100px]">Miniature</TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('title')}>
-                          <div className="flex items-center">
-                            Titre
-                            {sortConfig.key === 'title' && (
-                              sortConfig.direction === 'asc' ? 
-                                <ArrowUp className="ml-1 h-4 w-4" /> : 
-                                <ArrowDown className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('category')}>
-                          <div className="flex items-center">
-                            Catégorie actuelle
-                            {sortConfig.key === 'category' && (
-                              sortConfig.direction === 'asc' ? 
-                                <ArrowUp className="ml-1 h-4 w-4" /> : 
-                                <ArrowDown className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                        <TableHead className="w-[200px]">Nouvelle catégorie</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {sortedVideos.map((video) => (
-                        <TableRow key={video.id}>
-                          <TableCell>
-                            <img 
-                              src={video.thumbnail} 
-                              alt={video.title} 
-                              className="h-14 w-20 object-cover rounded"
-                            />
-                          </TableCell>
-                          <TableCell>{video.title}</TableCell>
-                          <TableCell>
-                            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-                              {video.category}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <VideoCategorizer 
-                              video={video}
-                              categories={categories}
-                              onCategoryChange={handleCategoryChange}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
+              <VideosTabContent 
+                videos={videos}
+                isLoading={isLoading}
+                categories={categories}
+                onCategoryChange={handleCategoryChange}
+              />
             </TabsContent>
             
             <TabsContent value="categories">
