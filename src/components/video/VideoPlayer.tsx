@@ -17,6 +17,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
         src={videoUrl}
         preload="metadata"
         controlsList="nodownload"
+        playsInline
       >
         Votre navigateur ne supporte pas la lecture de vidéos.
       </video>
