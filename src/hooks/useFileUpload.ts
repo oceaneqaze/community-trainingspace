@@ -29,19 +29,28 @@ export const useFileUpload = () => {
       const fileExt = file.name.split('.').pop();
       const filePath = `${path}${uuidv4()}.${fileExt}`;
       
-      // For large files, we need to update the progress more accurately
-      const onUploadProgress = (progress: number) => {
-        setStatus(prev => ({ ...prev, progress: Math.round(progress * 100) }));
+      // For large files, we need to track progress manually
+      let uploadProgress = 0;
+      const updateProgress = () => {
+        uploadProgress += 10;
+        if (uploadProgress <= 90) {
+          setStatus(prev => ({ ...prev, progress: uploadProgress }));
+        }
       };
+      
+      // Start progress updates
+      const progressInterval = setInterval(updateProgress, 500);
       
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: true,
-          onUploadProgress,
+          upsert: true
         });
         
+      // Clear the interval once upload is complete
+      clearInterval(progressInterval);
+      
       if (error) throw error;
       
       const { data: { publicUrl } } = supabase.storage
