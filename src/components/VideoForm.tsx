@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   const [duration, setDuration] = useState(video?.duration || '');
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [externalVideoUrl, setExternalVideoUrl] = useState<string>('');
   const [thumbnailPreview, setThumbnailPreview] = useState<string>(video?.thumbnail || '');
   const { uploadFile, status: uploadStatus } = useFileUpload();
   const [activeTab, setActiveTab] = useState<string>("details");
@@ -36,12 +38,16 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
           const { supabase } = await import('@/integrations/supabase/client');
           const { data, error } = await supabase
             .from('videos')
-            .select('description')
+            .select('description, video_url')
             .eq('id', video.id)
             .single();
 
           if (data && !error) {
             setDescription(data.description || '');
+            // Check if it's an external URL (doesn't start with a Supabase storage URL)
+            if (data.video_url && !data.video_url.includes('storage.googleapis.com')) {
+              setExternalVideoUrl(data.video_url);
+            }
           }
         } catch (err) {
           console.error('Error loading video description:', err);
@@ -59,6 +65,18 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   
   const handleVideoChange = (file: File | null) => {
     setVideoFile(file);
+    // Clear external URL if a file is selected
+    if (file) {
+      setExternalVideoUrl('');
+    }
+  };
+  
+  const handleExternalUrlChange = (url: string) => {
+    setExternalVideoUrl(url);
+    // Clear video file if an external URL is provided
+    if (url) {
+      setVideoFile(null);
+    }
   };
   
   const handleDurationExtracted = (extractedDuration: string) => {
@@ -80,10 +98,10 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       return;
     }
     
-    if (!videoFile && !video?.videoUrl) {
+    if (!videoFile && !externalVideoUrl && !video?.videoUrl) {
       toast({
         title: "Erreur",
-        description: "Veuillez télécharger une vidéo",
+        description: "Veuillez télécharger une vidéo ou fournir un lien",
         variant: "destructive",
       });
       return;
@@ -99,12 +117,14 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       
       if (videoFile) {
         videoUrl = await uploadFile(videoFile, 'videos', 'content/');
+      } else if (externalVideoUrl) {
+        videoUrl = externalVideoUrl;
       }
       
       const videoData: Partial<VideoProps> = {
         title,
         thumbnail: thumbnailUrl,
-        duration, // Uses duration automatically extracted
+        duration,
         category,
         videoUrl,
       };
