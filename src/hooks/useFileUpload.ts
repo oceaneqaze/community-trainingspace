@@ -11,6 +11,7 @@ type UploadStatus = {
 
 /**
  * Hook for handling file uploads to Supabase storage
+ * Supports larger file sizes and provides progress updates
  */
 export const useFileUpload = () => {
   const [status, setStatus] = useState<UploadStatus>({
@@ -22,22 +23,26 @@ export const useFileUpload = () => {
   const uploadFile = async (file: File, bucket: string, path: string) => {
     if (!file) return null;
     
-    setStatus({ isLoading: true, progress: 10, error: null });
+    setStatus({ isLoading: true, progress: 0, error: null });
     
     try {
       const fileExt = file.name.split('.').pop();
       const filePath = `${path}${uuidv4()}.${fileExt}`;
+      
+      // For large files, we need to update the progress more accurately
+      const onUploadProgress = (progress: number) => {
+        setStatus(prev => ({ ...prev, progress: Math.round(progress * 100) }));
+      };
       
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true,
+          onUploadProgress,
         });
         
       if (error) throw error;
-      
-      setStatus(prev => ({ ...prev, progress: 90 }));
       
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
