@@ -12,22 +12,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
   const isScreenRecUrl = videoUrl?.includes('screenrec.com/share');
   
   if (isScreenRecUrl) {
-    // Parse the screenrec share URL to get the video ID
+    // Extract the video ID from the share URL
     const videoId = videoUrl.split('/').pop();
     if (!videoId) return null;
     
-    // Construct the embedding URL for screenrec
-    const embedUrl = `https://screenrec.com/embed/${videoId}`;
-    
+    // Use the proper iframe embed URL format for screenrec
     return (
       <div className="rounded-lg overflow-hidden bg-black">
         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
           <iframe
-            src={embedUrl}
+            src={`https://screenrec.com/embed/${videoId}`}
             className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            title="Video externe"
+            title="Screenrec Video"
           ></iframe>
         </div>
       </div>
@@ -44,9 +43,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
           <iframe
             src={videoUrl}
             className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            title="Video externe"
+            title="External Video"
           ></iframe>
         </div>
       </div>
