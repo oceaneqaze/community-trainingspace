@@ -1,28 +1,33 @@
-
 import { useState, useRef, useEffect } from 'react';
 
 interface UseVideoUploaderProps {
   onVideoChange: (file: File | null) => void;
   onDurationExtracted: (duration: string) => void;
   onExternalUrlChange?: (url: string) => void;
+  screenRecVideoId?: string; // ID de la vidéo ScreenRec
+  screenRecPosterUrl?: string; // URL de prévisualisation (GIF)
 }
 
 export const useVideoUploader = ({ 
   onVideoChange, 
   onDurationExtracted,
-  onExternalUrlChange
+  onExternalUrlChange,
+  screenRecVideoId,
+  screenRecPosterUrl
 }: UseVideoUploaderProps) => {
   const [videoFileName, setVideoFileName] = useState<string>('');
   const [previewVideoUrl, setPreviewVideoUrl] = useState<string>('');
   const [externalUrl, setExternalUrl] = useState<string>('');
+  const [previewImage, setPreviewImage] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>("upload");
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Gestion des fichiers vidéo locaux
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Increased file size limit to 1000MB (1GB)
+      // Limite de taille de fichier à 1GB
       const maxSizeInBytes = 1000 * 1024 * 1024; 
       
       if (file.size > maxSizeInBytes) {
@@ -33,18 +38,32 @@ export const useVideoUploader = ({
       onVideoChange(file);
       setVideoFileName(file.name);
       
-      // Create a temporary URL for preview and metadata extraction
+      // Créer une URL temporaire pour la prévisualisation
       const videoURL = URL.createObjectURL(file);
       setPreviewVideoUrl(videoURL);
     }
   };
 
+  // Gestion de l'URL externe
   const handleExternalUrlSubmit = () => {
     if (externalUrl && onExternalUrlChange) {
       onExternalUrlChange(externalUrl);
-      // For preview purposes
-      setPreviewVideoUrl(externalUrl);
+      setPreviewVideoUrl(externalUrl); // Prévisualisation
       setVideoFileName('Vidéo externe');
+    }
+  };
+
+  // Gestion des vidéos ScreenRec
+  const handleScreenRecVideoSubmit = () => {
+    if (screenRecVideoId && screenRecPosterUrl) {
+      const videoUrl = `https://upww.screenrec.com/videos/f_${screenRecVideoId}.mp4/index.m3u8`;
+      
+      setPreviewVideoUrl(videoUrl); // URL de prévisualisation
+      setVideoFileName('Vidéo ScreenRec');
+      setPreviewImage(screenRecPosterUrl); // Prévisualisation GIF
+
+      // Appeler le callback si défini
+      if (onExternalUrlChange) onExternalUrlChange(videoUrl);
     }
   };
 
@@ -54,9 +73,10 @@ export const useVideoUploader = ({
     setVideoFileName('');
     setPreviewVideoUrl('');
     setExternalUrl('');
+    setPreviewImage('');
   };
 
-  // Extract video duration when metadata is loaded
+  // Extraire la durée de la vidéo
   useEffect(() => {
     if (videoRef.current && previewVideoUrl) {
       const handleMetadataLoaded = () => {
@@ -79,16 +99,25 @@ export const useVideoUploader = ({
     }
   }, [previewVideoUrl, onDurationExtracted]);
 
+  // Mise à jour de la prévisualisation du GIF
+  useEffect(() => {
+    if (screenRecPosterUrl) {
+      setPreviewImage(screenRecPosterUrl);
+    }
+  }, [screenRecPosterUrl]);
+
   return {
     videoFileName,
     previewVideoUrl,
     externalUrl,
     setExternalUrl,
+    previewImage,
     activeTab,
     setActiveTab,
     videoRef,
     handleVideoChange,
     handleExternalUrlSubmit,
+    handleScreenRecVideoSubmit,
     clearVideo
   };
 };
