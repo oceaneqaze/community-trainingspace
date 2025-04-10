@@ -14,38 +14,55 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
   // Handle WebVideoCore initialization for ScreenRec videos
   useEffect(() => {
     if (isScreenRecUrl && iframeRef.current) {
-      // Wait for iframe to load
       const iframe = iframeRef.current;
-      iframe.onload = () => {
-        // Extract video ID and convert to m3u8 URL format
-        const videoId = videoUrl.split('/').pop();
-        if (!videoId) return;
+      const videoId = videoUrl.split('/').pop();
+      
+      if (!videoId) return;
+      
+      // Set up message event listener
+      const handleMessage = (event: MessageEvent) => {
+        if (event.source !== iframe.contentWindow) return;
         
+        const key = 'data' in event ? 'data' : 'message';
+        const details = event[key];
+        
+        if (details?.message === 'init') {
+          sendMessageToPlayer();
+        }
+      };
+      
+      // Function to send initialization data to player
+      const sendMessageToPlayer = () => {
         // The m3u8 URL pattern for ScreenRec
         const m3u8Url = `https://upww.screenrec.com/videos/${videoId}.mp4/index.m3u8`;
         
-        // Initialize the WebVideoCore player with the extracted URL
-        sendMessageToPlayer(iframe, 'init', {
-          customUrl: m3u8Url,
-          customPoster: poster,
-          colorBase: '#8B5CF6',
-          colorText: '#ffffff',
-          colorHover: '#9b87f5',
-          threeColorsMode: true,
-          playButton: true,
-          playButtonStyle: 'pulsing'
-        });
+        iframe.contentWindow?.postMessage({
+          message: 'init',
+          data: {
+            customUrl: m3u8Url,
+            customPoster: poster,
+            colorBase: '#8B5CF6',
+            colorText: '#ffffff',
+            colorHover: '#9b87f5',
+            threeColorsMode: true,
+            playButton: true,
+            playButtonStyle: 'pulsing'
+          }
+        }, '*');
+      };
+      
+      // Add event listener
+      window.addEventListener('message', handleMessage, false);
+      
+      // Initialize the player
+      sendMessageToPlayer();
+      
+      // Clean up event listener on unmount
+      return () => {
+        window.removeEventListener('message', handleMessage, false);
       };
     }
   }, [videoUrl, isScreenRecUrl, poster]);
-
-  // Helper function to send messages to the WebVideoCore player iframe
-  const sendMessageToPlayer = (iframe: HTMLIFrameElement, message: string, data: any) => {
-    iframe.contentWindow?.postMessage({
-      message: message,
-      data: data
-    }, '*');
-  };
   
   // Render WebVideoCore player for ScreenRec videos
   if (isScreenRecUrl) {
@@ -58,6 +75,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
             className="absolute top-0 left-0 w-full h-full"
             frameBorder="0"
             allowFullScreen
+            allowTransparency
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             title="ScreenRec Video"
           ></iframe>
