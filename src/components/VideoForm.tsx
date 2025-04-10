@@ -1,27 +1,11 @@
-
-import React from 'react';
-import { VideoProps } from './VideoCard';
+import React, { useState } from 'react';
 import ThumbnailUploader from './ThumbnailUploader';
-import VideoUploader from './VideoUploader';
 import { useVideoFormData } from './video-form/useVideoFormData';
 import BasicVideoDetails from './video-form/BasicVideoDetails';
-import UploadProgress from './video-form/UploadProgress';
 import FormButtons from './video-form/FormButtons';
-import VideoFormTabs from './video-form/VideoFormTabs';
+import UploadProgress from './video-form/UploadProgress';
 
-interface VideoFormProps {
-  onSubmit: (video: Partial<VideoProps>) => void;
-  video?: VideoProps;
-  onCancel?: () => void;
-  isLoading?: boolean;
-}
-
-const VideoForm: React.FC<VideoFormProps> = ({ 
-  onSubmit, 
-  video, 
-  onCancel, 
-  isLoading = false 
-}) => {
+const VideoForm: React.FC = () => {
   const {
     title,
     setTitle,
@@ -29,69 +13,85 @@ const VideoForm: React.FC<VideoFormProps> = ({
     setDescription,
     category,
     setCategory,
-    duration,
-    thumbnailPreview,
-    activeTab,
-    setActiveTab,
     uploadStatus,
-    handleThumbnailChange,
-    handleVideoChange,
-    handleExternalUrlChange,
-    handleDurationExtracted,
-    handleSubmit
-  } = useVideoFormData(video);
+    handleSubmit,
+  } = useVideoFormData();
 
-  const VideoFormContent = (
-    <form onSubmit={(e) => handleSubmit(e, onSubmit)} className="space-y-4">
-      <BasicVideoDetails 
+  const [screenRecVideoId, setScreenRecVideoId] = useState('');
+  const [screenRecPosterUrl, setScreenRecPosterUrl] = useState('');
+  const [previewVideoUrl, setPreviewVideoUrl] = useState('');
+  const [previewImage, setPreviewImage] = useState('');
+
+  const handleScreenRecVideoSubmit = () => {
+    if (screenRecVideoId && screenRecPosterUrl) {
+      const videoUrl = `https://upww.screenrec.com/videos/f_${screenRecVideoId}.mp4/index.m3u8`;
+      setPreviewVideoUrl(videoUrl);
+      setPreviewImage(screenRecPosterUrl);
+    }
+  };
+
+  return (
+    <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
+      <BasicVideoDetails
         title={title}
         description={description}
         category={category}
-        duration={duration}
-        isLoading={isLoading || uploadStatus.isLoading}
         setTitle={setTitle}
         setDescription={setDescription}
         setCategory={setCategory}
       />
-      
-      <VideoUploader
-        disabled={isLoading || uploadStatus.isLoading}
-        onVideoChange={handleVideoChange}
-        onDurationExtracted={handleDurationExtracted}
-        onExternalUrlChange={handleExternalUrlChange}
-      />
-      
-      <ThumbnailUploader
-        initialPreview={thumbnailPreview}
-        disabled={isLoading || uploadStatus.isLoading}
-        onThumbnailChange={handleThumbnailChange}
-      />
-      
-      <UploadProgress progress={uploadStatus.progress} />
-      
-      <FormButtons 
-        isLoading={isLoading} 
-        uploadLoading={uploadStatus.isLoading}
-        onCancel={onCancel}
-        isEdit={!!video}
-      />
-    </form>
-  );
 
-  return (
-    <div>
-      {video?.id ? (
-        <VideoFormTabs 
-          videoId={video.id} 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab}
-        >
-          {VideoFormContent}
-        </VideoFormTabs>
-      ) : (
-        VideoFormContent
+      {/* ScreenRec Video Inputs */}
+      <div>
+        <label htmlFor="screenRecVideoId">ID de la vidéo ScreenRec</label>
+        <input
+          type="text"
+          id="screenRecVideoId"
+          value={screenRecVideoId}
+          onChange={(e) => setScreenRecVideoId(e.target.value)}
+          className="form-input"
+        />
+      </div>
+      <div>
+        <label htmlFor="screenRecPosterUrl">URL du GIF d'aperçu</label>
+        <input
+          type="text"
+          id="screenRecPosterUrl"
+          value={screenRecPosterUrl}
+          onChange={(e) => setScreenRecPosterUrl(e.target.value)}
+          className="form-input"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={handleScreenRecVideoSubmit}
+        className="btn-primary"
+      >
+        Charger la vidéo ScreenRec
+      </button>
+
+      {/* Preview Section */}
+      {previewImage && (
+        <div>
+          <h3>Aperçu</h3>
+          <img
+            src={previewImage}
+            alt="Prévisualisation"
+            style={{ width: '100%', maxHeight: '250px', objectFit: 'cover' }}
+          />
+        </div>
       )}
-    </div>
+      {previewVideoUrl && (
+        <div>
+          <h3>Vidéo chargée</h3>
+          <video src={previewVideoUrl} controls width="100%" />
+        </div>
+      )}
+
+      {/* Upload Progress and Buttons */}
+      <UploadProgress progress={uploadStatus.progress} />
+      <FormButtons isLoading={uploadStatus.isLoading} />
+    </form>
   );
 };
 
