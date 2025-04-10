@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,7 +47,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 mb-2">
               <TabsTrigger value="upload">Upload de fichier</TabsTrigger>
-              <TabsTrigger value="external">Lien externe</TabsTrigger>
+              <TabsTrigger value="external">Lien externe (ScreenRec)</TabsTrigger> {/* Mise à jour ici */}
             </TabsList>
             
             <TabsContent value="upload">
