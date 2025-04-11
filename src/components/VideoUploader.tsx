@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,13 +12,17 @@ interface VideoUploaderProps {
   onVideoChange: (file: File | null) => void;
   onDurationExtracted: (duration: string) => void;
   onExternalUrlChange?: (url: string) => void;
+  screenRecVideoId?: string;
+  screenRecPosterUrl?: string;
 }
 
 const VideoUploader: React.FC<VideoUploaderProps> = ({ 
   disabled = false, 
   onVideoChange, 
   onDurationExtracted,
-  onExternalUrlChange
+  onExternalUrlChange,
+  screenRecVideoId,
+  screenRecPosterUrl
 }) => {
   const {
     videoFileName,
@@ -29,14 +34,24 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     videoRef,
     handleVideoChange,
     handleExternalUrlSubmit,
+    handleScreenRecVideoSubmit,
     clearVideo
   } = useVideoUploader({
     onVideoChange,
     onDurationExtracted,
-    onExternalUrlChange
+    onExternalUrlChange,
+    screenRecVideoId,
+    screenRecPosterUrl
   });
 
   const isExternalUrl = !!externalUrl;
+
+  // Vérifier si des paramètres ScreenRec ont été fournis et les traiter
+  React.useEffect(() => {
+    if (screenRecVideoId && screenRecPosterUrl && !previewVideoUrl) {
+      handleScreenRecVideoSubmit();
+    }
+  }, [screenRecVideoId, screenRecPosterUrl]);
 
   return (
     <div>
@@ -47,7 +62,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 mb-2">
               <TabsTrigger value="upload">Upload de fichier</TabsTrigger>
-              <TabsTrigger value="external">Lien externe (ScreenRec)</TabsTrigger> {/* Mise à jour ici */}
+              <TabsTrigger value="external">Lien externe (ScreenRec)</TabsTrigger>
             </TabsList>
             
             <TabsContent value="upload">

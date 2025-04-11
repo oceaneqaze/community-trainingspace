@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Link } from 'lucide-react';
@@ -17,6 +18,7 @@ const ExternalUrlSection: React.FC<ExternalUrlSectionProps> = ({
 }) => {
   const [videoId, setVideoId] = useState<string>(''); // L'ID de la vidéo ScreenRec
   const [previewImage, setPreviewImage] = useState<string>(''); // L'URL de prévisualisation (GIF)
+  const [isScreenRecUrl, setIsScreenRecUrl] = useState(false);
 
   // Fonction pour extraire l'ID de la vidéo à partir de l'URL de ScreenRec
   const extractVideoId = (url: string) => {
@@ -28,26 +30,38 @@ const ExternalUrlSection: React.FC<ExternalUrlSectionProps> = ({
   // Met à jour l'ID vidéo et l'URL de prévisualisation lorsqu'une URL valide est saisie
   useEffect(() => {
     if (externalUrl) {
-      const id = extractVideoId(externalUrl);
-      setVideoId(id);
+      // Détecter si c'est une URL ScreenRec
+      if (externalUrl.includes('screenrec.com/share')) {
+        const id = extractVideoId(externalUrl);
+        setVideoId(id);
+        setIsScreenRecUrl(true);
 
-      if (id) {
-        // Générez l'URL de prévisualisation pour ScreenRec à partir de l'ID
-        const previewUrl = `https://upww.screenrec.com/share/${id}.gif`;
-        setPreviewImage(previewUrl); // Mettez à jour l'URL de prévisualisation
+        if (id) {
+          // Générez l'URL de prévisualisation pour ScreenRec à partir de l'ID
+          const previewUrl = `https://upww.screenrec.com/images/f_${id}.gif`;
+          setPreviewImage(previewUrl); // Mettez à jour l'URL de prévisualisation
+        }
+      } else {
+        setIsScreenRecUrl(false);
+        setPreviewImage('');
       }
     }
   }, [externalUrl]);
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleExternalUrlSubmit();
+  };
+
   return (
     <div className="space-y-2">
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
+      <form onSubmit={handleFormSubmit} className="border-2 border-dashed border-gray-300 rounded-lg p-6">
         <div className="flex flex-col items-center">
           <Link className="h-8 w-8 text-gray-400" />
           <p className="mt-2 text-sm font-medium">
-            Ajouter un lien vidéo externe
+            {isScreenRecUrl ? 'Ajouter une vidéo ScreenRec' : 'Ajouter un lien vidéo externe'}
           </p>
-          <div className="w-full mt-2 flex gap-2">
+          <div className="w-full mt-2 flex flex-col gap-2">
             <Input
               type="url"
               placeholder="https://screenrec.com/share/..."
@@ -55,17 +69,23 @@ const ExternalUrlSection: React.FC<ExternalUrlSectionProps> = ({
               onChange={(e) => setExternalUrl(e.target.value)}
               disabled={disabled}
             />
+            
+            {isScreenRecUrl && videoId && (
+              <div className="text-xs text-green-600">
+                ID ScreenRec détecté: {videoId}
+              </div>
+            )}
+            
             <button
-              type="button"
-              onClick={handleExternalUrlSubmit}
-              className="px-3 py-1 bg-primary text-white rounded-md text-sm"
+              type="submit"
+              className="px-3 py-2 bg-primary text-white rounded-md text-sm w-full"
               disabled={disabled || !externalUrl}
             >
-              Ajouter
+              {isScreenRecUrl ? 'Prévisualiser la vidéo ScreenRec' : 'Ajouter'}
             </button>
           </div>
         </div>
-      </div>
+      </form>
 
       {/* Affichage de l'aperçu si un ID valide est trouvé */}
       {previewImage && (
