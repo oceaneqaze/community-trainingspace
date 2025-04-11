@@ -22,6 +22,14 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
     e.preventDefault();
     await onSubmit({ title, thumbnail, duration, category, videoUrl });
   };
+  {
+  activeTab === 'screenrec' && screenRecVideoId && screenRecPosterUrl && (
+    <ScreenRecPlayer 
+      videoUrl={`https://upww.screenrec.com/videos/f_${screenRecVideoId}.mp4/index.m3u8`}
+      posterUrl={screenRecPosterUrl}
+    />
+  )
+}
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
