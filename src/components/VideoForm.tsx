@@ -23,6 +23,7 @@ const VideoForm: React.FC = () => {
     handleVideoChange,
     handleDurationExtracted,
     handleExternalUrlChange,
+    handleThumbnailChange,
   } = useVideoFormData();
 
   // Gestionnaire pour les vidéos ScreenRec
@@ -65,7 +66,7 @@ const VideoForm: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-      <ThumbnailUploader />
+      <ThumbnailUploader onThumbnailChange={handleThumbnailChange} />
 
       <UploadProgress progress={uploadStatus.progress} />
       <FormButtons 
