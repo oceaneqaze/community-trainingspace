@@ -2,8 +2,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Navbar from './components/navbar';
 import { AuthProvider } from './context/AuthContext';
+import VerticalNavbar from './components/sidebar/VerticalNavbar';
 
 // Pages
 import Index from './pages/Index';
@@ -31,33 +31,35 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                {/* Public routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/welcome" element={<Index />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                
-                {/* User routes */}
-                <Route path="/videos" element={<Videos />} />
-                <Route path="/videos/:id" element={<VideoDetail />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/invitation/:code" element={<Invitation />} />
-                
-                {/* Admin routes */}
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/members" element={<Members />} />
-                <Route path="/library-manager" element={<LibraryManager />} />
-                <Route path="/announcements" element={<Announcements />} />
-                <Route path="/invitations" element={<InvitationManager />} />
-                
-                {/* Fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+          <div className="flex min-h-screen">
+            <VerticalNavbar />
+            <main className="flex-1 overflow-auto">
+              <div className="container mx-auto p-4">
+                <Routes>
+                  {/* Public routes */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/welcome" element={<Index />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  
+                  {/* User routes */}
+                  <Route path="/videos" element={<Videos />} />
+                  <Route path="/videos/:id" element={<VideoDetail />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/chat" element={<Chat />} />
+                  <Route path="/invitation/:code" element={<Invitation />} />
+                  
+                  {/* Admin routes */}
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/members" element={<Members />} />
+                  <Route path="/library-manager" element={<LibraryManager />} />
+                  <Route path="/announcements" element={<Announcements />} />
+                  <Route path="/invitations" element={<InvitationManager />} />
+                  
+                  {/* Fallback */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
             </main>
           </div>
           <Toaster />

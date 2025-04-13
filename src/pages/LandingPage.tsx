@@ -8,12 +8,12 @@ const LandingPage = () => {
   const navigate = useNavigate();
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+    <div className="min-h-full bg-gradient-to-b from-background to-background/80">
       {/* Hero section */}
       <section className="relative overflow-hidden pt-16 md:pt-20 lg:pt-28">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl mb-6">
+            <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl mb-6">
               DOPE <span className="text-primary">CONTENT</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed mb-8">
@@ -44,7 +44,7 @@ const LandingPage = () => {
       
       {/* Features section */}
       <section className="py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 lg:px-8">
           <div className="mx-auto max-w-2xl lg:text-center">
             <h2 className="text-base font-semibold leading-7 text-primary">Plateforme privée</h2>
             <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
@@ -96,7 +96,7 @@ const LandingPage = () => {
       
       {/* Contact section */}
       <section className="py-16 bg-card/30 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <div className="max-w-5xl mx-auto px-4 lg:px-8 text-center">
           <h2 className="text-2xl font-bold mb-4">Vous souhaitez rejoindre la communauté?</h2>
           <p className="text-muted-foreground mb-8">
             Contactez-nous pour demander une invitation ou en savoir plus sur nos formations
