@@ -18,6 +18,7 @@ body {
 main {
   flex: 1;
   overflow-y: auto;
+  width: 100%;
 }
 
 .container {
@@ -40,4 +41,25 @@ main {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding: 0.75rem;
+  }
+  
+  .page-container {
+    padding: 0.5rem !important;
+  }
+}
+
+.mobile-safe-area {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Fix for iOS bottom safe area */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import VerticalNavbar from './components/sidebar/VerticalNavbar';
+import { useIsMobile } from './hooks/use-mobile';
 
 // Pages
 import Index from './pages/Index';
@@ -26,42 +27,88 @@ import '@/App.css';
 // Create a QueryClient instance for React Query
 const queryClient = new QueryClient();
 
+// Layout component to handle responsive layout
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const isMobile = useIsMobile();
+  
+  return (
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <VerticalNavbar />
+      <main className={`flex-1 overflow-auto ${isMobile ? 'pt-[60px]' : ''}`}>
+        <div className="container mx-auto p-4 md:p-4">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+};
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <div className="flex min-h-screen">
-            <VerticalNavbar />
-            <main className="flex-1 overflow-auto">
-              <div className="container mx-auto p-4">
-                <Routes>
-                  {/* Public routes */}
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/welcome" element={<Index />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  
-                  {/* User routes */}
-                  <Route path="/videos" element={<Videos />} />
-                  <Route path="/videos/:id" element={<VideoDetail />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/chat" element={<Chat />} />
-                  <Route path="/invitation/:code" element={<Invitation />} />
-                  
-                  {/* Admin routes */}
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/members" element={<Members />} />
-                  <Route path="/library-manager" element={<LibraryManager />} />
-                  <Route path="/announcements" element={<Announcements />} />
-                  <Route path="/invitations" element={<InvitationManager />} />
-                  
-                  {/* Fallback */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-            </main>
-          </div>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/welcome" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            
+            {/* Protected routes with layout */}
+            <Route path="/videos" element={
+              <AppLayout>
+                <Videos />
+              </AppLayout>
+            } />
+            <Route path="/videos/:id" element={
+              <AppLayout>
+                <VideoDetail />
+              </AppLayout>
+            } />
+            <Route path="/profile" element={
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            } />
+            <Route path="/chat" element={
+              <AppLayout>
+                <Chat />
+              </AppLayout>
+            } />
+            <Route path="/invitation/:code" element={<Invitation />} />
+            <Route path="/invitation" element={<Invitation />} />
+            
+            {/* Admin routes */}
+            <Route path="/dashboard" element={
+              <AppLayout>
+                <Dashboard />
+              </AppLayout>
+            } />
+            <Route path="/members" element={
+              <AppLayout>
+                <Members />
+              </AppLayout>
+            } />
+            <Route path="/library-manager" element={
+              <AppLayout>
+                <LibraryManager />
+              </AppLayout>
+            } />
+            <Route path="/announcements" element={
+              <AppLayout>
+                <Announcements />
+              </AppLayout>
+            } />
+            <Route path="/invitations" element={
+              <AppLayout>
+                <InvitationManager />
+              </AppLayout>
+            } />
+            
+            {/* Fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
           <Toaster />
         </AuthProvider>
       </Router>
