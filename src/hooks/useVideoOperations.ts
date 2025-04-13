@@ -2,8 +2,7 @@
 import { useState } from 'react';
 import { VideoProps } from '@/components/video/VideoCard';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
-import { Check, AlertCircle, Calendar } from 'lucide-react';
+import { showSuccessToast, showErrorToast } from '@/utils/toastHelpers';
 
 export const useVideoOperations = (
   onVideoAdded: (video: Partial<VideoProps>) => void,
@@ -67,20 +66,11 @@ export const useVideoOperations = (
       };
 
       onVideoAdded(newVideo);
-      toast({
-        title: "Vidéo ajoutée",
-        description: "La vidéo a été ajoutée avec succès",
-        icon: <Check className="h-4 w-4 text-green-500" />
-      });
+      showSuccessToast("Vidéo ajoutée", "La vidéo a été ajoutée avec succès");
       setIsAddDialogOpen(false);
     } catch (error: any) {
       console.error('Error adding video:', error);
-      toast({
-        title: "Erreur",
-        description: `Impossible d'ajouter la vidéo: ${error.message}`,
-        variant: "destructive",
-        icon: <AlertCircle className="h-4 w-4" />
-      });
+      showErrorToast("Erreur", `Impossible d'ajouter la vidéo: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -129,20 +119,11 @@ export const useVideoOperations = (
       };
 
       onVideoUpdated(updatedVideo);
-      toast({
-        title: "Vidéo mise à jour",
-        description: "La vidéo a été mise à jour avec succès",
-        icon: <Check className="h-4 w-4 text-green-500" />
-      });
+      showSuccessToast("Vidéo mise à jour", "La vidéo a été mise à jour avec succès");
       setIsEditDialogOpen(false);
     } catch (error: any) {
       console.error('Error updating video:', error);
-      toast({
-        title: "Erreur",
-        description: `Impossible de mettre à jour la vidéo: ${error.message}`,
-        variant: "destructive",
-        icon: <AlertCircle className="h-4 w-4" />
-      });
+      showErrorToast("Erreur", `Impossible de mettre à jour la vidéo: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -162,20 +143,11 @@ export const useVideoOperations = (
       if (error) throw error;
 
       onVideoDeleted(selectedVideo.id);
-      toast({
-        title: "Vidéo supprimée",
-        description: "La vidéo a été supprimée avec succès",
-        icon: <Check className="h-4 w-4 text-green-500" />
-      });
+      showSuccessToast("Vidéo supprimée", "La vidéo a été supprimée avec succès");
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
       console.error('Error deleting video:', error);
-      toast({
-        title: "Erreur",
-        description: `Impossible de supprimer la vidéo: ${error.message}`,
-        variant: "destructive",
-        icon: <AlertCircle className="h-4 w-4" />
-      });
+      showErrorToast("Erreur", `Impossible de supprimer la vidéo: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
