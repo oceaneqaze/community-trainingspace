@@ -2,8 +2,10 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import Navbar from './components/Navbar';
+import Navbar from './components/navbar';
 import { AuthProvider } from './context/AuthContext';
+
+// Pages
 import Index from './pages/Index';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -20,7 +22,7 @@ import Invitation from './pages/Invitation';
 import InvitationManager from './pages/InvitationManager';
 import '@/App.css';
 
-// Créer une instance de QueryClient pour React Query
+// Create a QueryClient instance for React Query
 const queryClient = new QueryClient();
 
 function App() {
@@ -32,19 +34,26 @@ function App() {
             <Navbar />
             <main className="flex-grow">
               <Routes>
+                {/* Public routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                
+                {/* User routes */}
                 <Route path="/videos" element={<Videos />} />
                 <Route path="/videos/:id" element={<VideoDetail />} />
-                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/members" element={<Members />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/invitation/:code" element={<Invitation />} />
+                
+                {/* Admin routes */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/members" element={<Members />} />
                 <Route path="/library-manager" element={<LibraryManager />} />
                 <Route path="/announcements" element={<Announcements />} />
-                <Route path="/invitation/:code" element={<Invitation />} />
                 <Route path="/invitations" element={<InvitationManager />} />
+                
+                {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

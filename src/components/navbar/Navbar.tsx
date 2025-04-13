@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MenuIcon, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -15,7 +14,6 @@ import AuthButtons from './AuthButtons';
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, logout, profile, isAdmin } = useAuth();
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
 
   const toggleMenu = () => {

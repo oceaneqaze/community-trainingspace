@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavLink from './NavLink';
+import NavigationItems from './NavigationItems';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -28,18 +29,7 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
         {isAuthenticated ? (
           <>
             <NavLink to="/profile" onClick={onClose} mobile>Profil</NavLink>
-            <NavLink to="/videos" onClick={onClose} mobile>Vidéos</NavLink>
-            <NavLink to="/chat" onClick={onClose} mobile>Chat</NavLink>
-            
-            {isAdmin() && (
-              <>
-                <NavLink to="/members" onClick={onClose} mobile>Membres</NavLink>
-                <NavLink to="/dashboard" onClick={onClose} mobile>Dashboard</NavLink>
-                <NavLink to="/invitations" onClick={onClose} mobile>Invitations</NavLink>
-                <NavLink to="/library-manager" onClick={onClose} mobile>Bibliothèque</NavLink>
-                <NavLink to="/announcements" onClick={onClose} mobile>Annonces</NavLink>
-              </>
-            )}
+            <NavigationItems isAdmin={isAdmin()} mobile={true} onItemClick={onClose} />
             
             <button
               className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-muted"
@@ -60,4 +50,3 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
 };
 
 export default MobileMenu;
-

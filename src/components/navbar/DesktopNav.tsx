@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Bell, Users, MessageCircle } from 'lucide-react';
-import NavLink from './NavLink';
+import { Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AnnouncementsList from '../announcements/AnnouncementsList';
+import NavigationItems from './NavigationItems';
 
 interface DesktopNavProps {
   isAuthenticated: boolean;
@@ -18,8 +18,7 @@ const DesktopNav = ({ isAuthenticated, isAdmin }: DesktopNavProps) => {
 
   return (
     <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-      <NavLink to="/videos">Vidéos</NavLink>
-      <NavLink to="/chat">Chat</NavLink>
+      <NavigationItems isAdmin={isAdmin()} />
       
       <Popover>
         <PopoverTrigger asChild>
@@ -36,22 +35,8 @@ const DesktopNav = ({ isAuthenticated, isAdmin }: DesktopNavProps) => {
           <AnnouncementsList onAnnouncementsRead={() => setHasUnreadAnnouncements(false)} />
         </PopoverContent>
       </Popover>
-      
-      {isAdmin() && (
-        <>
-          <NavLink to="/members">Membres</NavLink>
-          <NavLink to="/invitations">
-            <Users className="mr-1 h-4 w-4" />
-            Invitations
-          </NavLink>
-          <NavLink to="/dashboard">Dashboard</NavLink>
-          <NavLink to="/library-manager">Bibliothèque</NavLink>
-          <NavLink to="/announcements">Annonces</NavLink>
-        </>
-      )}
     </div>
   );
 };
 
 export default DesktopNav;
-

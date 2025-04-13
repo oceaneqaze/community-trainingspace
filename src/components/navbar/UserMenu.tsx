@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Video, MessageSquare, Users, LayoutDashboard, LogOut, Settings } from 'lucide-react';
+import { Settings, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { UserProfile } from '@/context/auth/types';
+import { getNavigationItems } from './NavigationItems';
 
 interface UserMenuProps {
   profile: UserProfile | null;
@@ -22,6 +23,7 @@ interface UserMenuProps {
 
 const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
   const navigate = useNavigate();
+  const navigationItems = getNavigationItems();
   
   const getInitials = (name: string) => {
     return name
@@ -65,26 +67,23 @@ const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
           <Settings className="mr-2 h-4 w-4" />
           <span>Mon profil</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/videos')}>
-          <Video className="mr-2 h-4 w-4" />
-          <span>Vidéos</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/chat')}>
-          <MessageSquare className="mr-2 h-4 w-4" />
-          <span>Chat</span>
-        </DropdownMenuItem>
-        {isAdmin() && (
-          <>
-            <DropdownMenuItem onClick={() => navigate('/members')}>
-              <Users className="mr-2 h-4 w-4" />
-              <span>Membres</span>
+        
+        {/* Map through navigation items */}
+        {navigationItems.map(item => {
+          // Skip admin-only items if user is not admin
+          if (item.adminOnly && !isAdmin()) return null;
+          
+          return (
+            <DropdownMenuItem 
+              key={item.path} 
+              onClick={() => navigate(item.path)}
+            >
+              {item.icon && React.cloneElement(item.icon as React.ReactElement, { className: "mr-2 h-4 w-4" })}
+              <span>{item.label}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Dashboard</span>
-            </DropdownMenuItem>
-          </>
-        )}
+          );
+        })}
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
