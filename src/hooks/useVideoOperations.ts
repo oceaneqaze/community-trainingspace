@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { VideoProps } from '@/components/video/VideoCard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { Check, AlertCircle, Calendar } from 'lucide-react';
 
 export const useVideoOperations = (
   onVideoAdded: (video: Partial<VideoProps>) => void,
@@ -69,6 +70,7 @@ export const useVideoOperations = (
       toast({
         title: "Vidéo ajoutée",
         description: "La vidéo a été ajoutée avec succès",
+        icon: <Check className="h-4 w-4 text-green-500" />
       });
       setIsAddDialogOpen(false);
     } catch (error: any) {
@@ -77,6 +79,7 @@ export const useVideoOperations = (
         title: "Erreur",
         description: `Impossible d'ajouter la vidéo: ${error.message}`,
         variant: "destructive",
+        icon: <AlertCircle className="h-4 w-4" />
       });
     } finally {
       setIsLoading(false);
@@ -129,6 +132,7 @@ export const useVideoOperations = (
       toast({
         title: "Vidéo mise à jour",
         description: "La vidéo a été mise à jour avec succès",
+        icon: <Check className="h-4 w-4 text-green-500" />
       });
       setIsEditDialogOpen(false);
     } catch (error: any) {
@@ -137,6 +141,7 @@ export const useVideoOperations = (
         title: "Erreur",
         description: `Impossible de mettre à jour la vidéo: ${error.message}`,
         variant: "destructive",
+        icon: <AlertCircle className="h-4 w-4" />
       });
     } finally {
       setIsLoading(false);
@@ -160,6 +165,7 @@ export const useVideoOperations = (
       toast({
         title: "Vidéo supprimée",
         description: "La vidéo a été supprimée avec succès",
+        icon: <Check className="h-4 w-4 text-green-500" />
       });
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
@@ -168,6 +174,7 @@ export const useVideoOperations = (
         title: "Erreur",
         description: `Impossible de supprimer la vidéo: ${error.message}`,
         variant: "destructive",
+        icon: <AlertCircle className="h-4 w-4" />
       });
     } finally {
       setIsLoading(false);

@@ -5,6 +5,7 @@ import VideoList from './admin/VideoList';
 import VideoDialogs from './admin/VideoDialogs';
 import VideoHeader from './admin/VideoHeader';
 import { useVideoOperations } from '@/hooks/useVideoOperations';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface AdminVideoListProps {
   videos: VideoProps[];
@@ -36,34 +37,38 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
   } = useVideoOperations(onVideoAdded, onVideoUpdated, onVideoDeleted);
 
   return (
-    <div className="space-y-8">
-      <VideoHeader 
-        videoCount={videos.length} 
-        onAddClick={() => setIsAddDialogOpen(true)} 
-      />
+    <Card className="border border-border/40 shadow-lg bg-card/60 backdrop-blur-sm animate-fade-in">
+      <CardContent className="p-6">
+        <VideoHeader 
+          videoCount={videos.length} 
+          onAddClick={() => setIsAddDialogOpen(true)} 
+        />
 
-      {/* Video List Component */}
-      <VideoList 
-        videos={videos}
-        onEditVideo={handleEditButtonClick}
-        onDeleteVideo={handleDeleteButtonClick}
-      />
+        {/* Video List Component */}
+        <div className="transition-all duration-500 ease-in-out">
+          <VideoList 
+            videos={videos}
+            onEditVideo={handleEditButtonClick}
+            onDeleteVideo={handleDeleteButtonClick}
+          />
+        </div>
 
-      {/* Dialogs Components */}
-      <VideoDialogs
-        isAddDialogOpen={isAddDialogOpen}
-        setIsAddDialogOpen={setIsAddDialogOpen}
-        isEditDialogOpen={isEditDialogOpen}
-        setIsEditDialogOpen={setIsEditDialogOpen}
-        isDeleteDialogOpen={isDeleteDialogOpen}
-        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
-        selectedVideo={selectedVideo}
-        isLoading={isLoading}
-        handleAddVideo={handleAddVideo}
-        handleEditVideo={handleEditVideo}
-        handleDeleteVideo={handleDeleteVideo}
-      />
-    </div>
+        {/* Dialogs Components */}
+        <VideoDialogs
+          isAddDialogOpen={isAddDialogOpen}
+          setIsAddDialogOpen={setIsAddDialogOpen}
+          isEditDialogOpen={isEditDialogOpen}
+          setIsEditDialogOpen={setIsEditDialogOpen}
+          isDeleteDialogOpen={isDeleteDialogOpen}
+          setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          selectedVideo={selectedVideo}
+          isLoading={isLoading}
+          handleAddVideo={handleAddVideo}
+          handleEditVideo={handleEditVideo}
+          handleDeleteVideo={handleDeleteVideo}
+        />
+      </CardContent>
+    </Card>
   );
 };
 
