@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Check, AlertCircle } from 'lucide-react';
-import { toast, ToastProps } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 export const showSuccessToast = (title: string, description: string) => {
   toast({
