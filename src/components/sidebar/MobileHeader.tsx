@@ -13,7 +13,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ toggleMobileMenu }) => {
     <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-30">
       <Link to="/" className="flex items-center gap-2">
         <img
-          src="/lovable-uploads/bb7e7daa-74a3-4cd4-8457-13ba5ae39dce.png"
+          src="/lovable-uploads/0cc014bc-d4f7-4cba-9002-f23dfd3daf89.png"
           alt="DOPE CONTENT Logo"
           className="h-8 w-auto"
         />
@@ -27,3 +27,4 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ toggleMobileMenu }) => {
 };
 
 export default MobileHeader;
+
