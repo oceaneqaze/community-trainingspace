@@ -9,6 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { fr } from 'date-fns/locale';
 
 export interface VideoFormProps {
   onSubmit: (videoData: Partial<VideoProps>) => Promise<void>;
@@ -34,7 +35,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
     
     // Formater la date au format français pour affichage
     const formattedDate = publishDate 
-      ? format(publishDate, 'dd MMMM yyyy', { locale: require('date-fns/locale/fr') })
+      ? format(publishDate, 'dd MMMM yyyy', { locale: fr })
       : '';
       
     await onSubmit({ 
@@ -108,7 +109,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
               id="publishDate"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {publishDate ? format(publishDate, 'dd MMMM yyyy', { locale: require('date-fns/locale/fr') }) : <span>Choisir une date</span>}
+              {publishDate ? format(publishDate, 'dd MMMM yyyy', { locale: fr }) : <span>Choisir une date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
