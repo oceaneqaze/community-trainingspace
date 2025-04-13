@@ -31,6 +31,20 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
   const handleAddVideo = async (videoData: Partial<VideoProps>) => {
     setIsLoading(true);
     try {
+      // Déterminer la date à utiliser pour created_at
+      const now = new Date();
+      let createdAt = now;
+      
+      // Si une date personnalisée a été spécifiée, l'utiliser pour created_at
+      if (videoData.date) {
+        // Pour Supabase, nous avons besoin d'une date au format ISO
+        try {
+          createdAt = new Date(videoData.date);
+        } catch (error) {
+          console.error("Erreur lors du parsing de la date:", error);
+        }
+      }
+
       // Convert the form data to Supabase format
       const { data, error } = await supabase
         .from('videos')
@@ -39,7 +53,8 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
           thumbnail_url: videoData.thumbnail,
           duration: videoData.duration,
           category: videoData.category,
-          video_url: videoData.videoUrl
+          video_url: videoData.videoUrl,
+          created_at: createdAt.toISOString() // Utiliser la date spécifiée ou la date actuelle
         })
         .select();
 
@@ -53,7 +68,7 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
         duration: videoData.duration || '',
         category: videoData.category || '',
         videoUrl: videoData.videoUrl || '',
-        date: new Date().toLocaleDateString('fr-FR', {
+        date: videoData.date || new Date().toLocaleDateString('fr-FR', {
           day: 'numeric',
           month: 'long',
           year: 'numeric'
@@ -86,16 +101,32 @@ const AdminVideoList: React.FC<AdminVideoListProps> = ({
     
     setIsLoading(true);
     try {
+      // Préparer les données à mettre à jour
+      const updateData: any = {
+        title: videoData.title,
+        thumbnail_url: videoData.thumbnail,
+        duration: videoData.duration,
+        category: videoData.category,
+        video_url: videoData.videoUrl
+      };
+      
+      // Si une date personnalisée a été spécifiée, mettre à jour created_at
+      if (videoData.date) {
+        try {
+          // Convertir la date formatée en objet Date puis en ISO string pour Supabase
+          const newDate = new Date(videoData.date);
+          if (!isNaN(newDate.getTime())) {
+            updateData.created_at = newDate.toISOString();
+          }
+        } catch (error) {
+          console.error("Erreur lors du parsing de la date:", error);
+        }
+      }
+
       // Convert the form data to Supabase format
       const { error } = await supabase
         .from('videos')
-        .update({
-          title: videoData.title,
-          thumbnail_url: videoData.thumbnail,
-          duration: videoData.duration,
-          category: videoData.category,
-          video_url: videoData.videoUrl
-        })
+        .update(updateData)
         .eq('id', selectedVideo.id);
 
       if (error) throw error;
