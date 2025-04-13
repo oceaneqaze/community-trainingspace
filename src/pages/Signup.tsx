@@ -7,16 +7,37 @@ import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
 
 const Signup: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [invitationCode, setInvitationCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
+
+  const validateInvitationCode = async (code: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, invitation_used')
+        .eq('invitation_code', code)
+        .single();
+
+      if (error || !data) {
+        return false;
+      }
+      
+      return !data.invitation_used;
+    } catch (error) {
+      console.error('Error validating invitation code:', error);
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +54,27 @@ const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Validate invitation code
+      const isValidCode = await validateInvitationCode(invitationCode);
+      if (!isValidCode) {
+        toast({
+          title: "Erreur",
+          description: "Le code d'invitation est invalide ou a déjà été utilisé.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Proceed with signup if code is valid
       await signup(email, password, name);
+      
+      // Mark the invitation as used
+      await supabase
+        .from('profiles')
+        .update({ invitation_used: true })
+        .eq('invitation_code', invitationCode);
+        
     } catch (error) {
       console.error('Signup error:', error);
     } finally {
@@ -53,6 +94,24 @@ const Signup: React.FC = () => {
           </div>
           
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <Label htmlFor="invitationCode" className="text-foreground">
+                Code d'invitation
+              </Label>
+              <div className="mt-1">
+                <Input
+                  id="invitationCode"
+                  name="invitationCode"
+                  type="text"
+                  required
+                  value={invitationCode}
+                  onChange={(e) => setInvitationCode(e.target.value)}
+                  className="bg-background/50"
+                  placeholder="Entrez votre code d'invitation"
+                />
+              </div>
+            </div>
+
             <div>
               <Label htmlFor="name" className="text-foreground">
                 Nom
