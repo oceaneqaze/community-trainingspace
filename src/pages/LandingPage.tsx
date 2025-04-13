@@ -33,7 +33,7 @@ const LandingPage = () => {
           <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-card/50 backdrop-blur-sm shadow-xl mx-auto max-w-4xl">
             <div className="aspect-video w-full">
               <img 
-                src="/lovable-uploads/bb7e7daa-74a3-4cd4-8457-13ba5ae39dce.png" 
+                src="/lovable-uploads/0cc014bc-d4f7-4cba-9002-f23dfd3daf89.png" 
                 alt="DOPE CONTENT Preview" 
                 className="w-full h-full object-cover"
               />
