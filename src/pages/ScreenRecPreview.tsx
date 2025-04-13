@@ -1,31 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ScreenRecUploader from '@/components/video-uploader/ScreenRecUploader';
 import { toast } from "@/components/ui/use-toast";
 
 const ScreenRecPreview: React.FC = () => {
-  const [videoAdded, setVideoAdded] = useState(false);
-
+  // Fonction appelée quand une vidéo est soumise avec succès
   const handleVideoSubmit = (videoData: { videoUrl: string; thumbnailUrl: string; videoId: string }) => {
-    // Dans une application réelle, nous voudrions sauvegarder ces informations
-    // Pour l'instant, nous affichons juste un message de succès
     toast({
-      title: "Vidéo prête à être utilisée",
-      description: "Vous pouvez maintenant utiliser cette vidéo dans votre application",
+      title: "Vidéo ajoutée avec succès",
+      description: "La vidéo ScreenRec a été ajoutée à votre bibliothèque",
     });
-    
-    setVideoAdded(true);
-    
-    // Instruction pour copier le code d'intégration (pour information seulement)
-    const integrationCode = `
-// Utiliser le lecteur vidéo avec:
-<VideoPlayer 
-  videoUrl="${videoData.videoUrl}"
-  poster="${videoData.thumbnailUrl}"
-/>`;
-    
-    console.info("Code d'intégration:", integrationCode);
   };
 
   return (
@@ -43,17 +28,6 @@ const ScreenRecPreview: React.FC = () => {
             </p>
             
             <ScreenRecUploader onVideoSubmit={handleVideoSubmit} />
-            
-            {videoAdded && (
-              <div className="mt-6 text-center p-4 bg-primary/10 rounded-md">
-                <p className="text-sm">
-                  Vidéo ajoutée avec succès! Vous pouvez maintenant l'utiliser dans votre application.
-                </p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Consultez la console pour le code d'intégration (si nécessaire).
-                </p>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
