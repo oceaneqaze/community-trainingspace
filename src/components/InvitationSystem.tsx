@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Mail, Copy, Check, Loader2 } from 'lucide-react';
+import { Mail, Copy, Check, Loader2, Link as LinkIcon } from 'lucide-react';
 
 type InvitationSystemProps = {
   member: {
@@ -30,15 +30,24 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
       setIsGenerating(true);
       setError(null);
       
+      console.log("Generating invitation for user:", member.id);
+      
       // Call the Supabase function to generate a new invitation code
       const { data, error } = await supabase
         .rpc('generate_invitation_code', { user_id: member.id });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error from RPC:", error);
+        throw error;
+      }
+      
+      console.log("Invitation code generated:", data);
       
       // Create the full invitation link
       const baseUrl = window.location.origin;
       const inviteLink = `${baseUrl}/invitation/${data}`;
+      
+      console.log("Full invitation link:", inviteLink);
       
       setInvitationLink(inviteLink);
       onInvitationSent();
@@ -46,13 +55,6 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
       toast({
         title: "Lien d'invitation généré",
         description: "Le lien d'invitation a été généré avec succès.",
-      });
-      
-      // Debug information in console
-      console.log("Invitation code generated:", {
-        userId: member.id,
-        code: data,
-        fullLink: inviteLink
       });
     } catch (error: any) {
       console.error('Error generating invitation link:', error);
@@ -128,7 +130,7 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
                 className="min-h-[100px]"
               />
               {error && (
-                <div className="text-destructive text-sm p-2 bg-destructive/10 rounded border border-destructive/20">
+                <div className="text-destructive text-sm p-3 bg-destructive/10 rounded-md border border-destructive/20">
                   {error}
                 </div>
               )}
@@ -143,29 +145,36 @@ const InvitationSystem: React.FC<InvitationSystemProps> = ({ member, onInvitatio
                     Génération...
                   </>
                 ) : (
-                  'Générer un lien d\'invitation'
+                  <>
+                    <LinkIcon className="mr-2 h-4 w-4" />
+                    Générer un lien d'invitation
+                  </>
                 )}
               </Button>
             </div>
           ) : (
             <div className="space-y-4 py-4">
-              <div className="flex items-center space-x-2">
-                <Input
-                  value={invitationLink}
-                  readOnly
-                  className="flex-1"
-                />
-                <Button 
-                  size="icon" 
-                  variant="outline" 
-                  onClick={copyToClipboard}
-                >
-                  {isCopied ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
+              <div className="bg-secondary/30 p-3 rounded-md">
+                <p className="text-sm mb-2 font-medium">Lien d'invitation généré:</p>
+                <div className="flex items-center space-x-2">
+                  <Input
+                    value={invitationLink}
+                    readOnly
+                    className="flex-1"
+                  />
+                  <Button 
+                    size="icon" 
+                    variant="outline" 
+                    onClick={copyToClipboard}
+                    title={isCopied ? "Copié !" : "Copier le lien"}
+                  >
+                    {isCopied ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
               
               {member.email && (
