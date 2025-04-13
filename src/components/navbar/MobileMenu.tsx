@@ -35,6 +35,9 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
               <>
                 <NavLink to="/members" onClick={onClose} mobile>Membres</NavLink>
                 <NavLink to="/dashboard" onClick={onClose} mobile>Dashboard</NavLink>
+                <NavLink to="/invitations" onClick={onClose} mobile>Invitations</NavLink>
+                <NavLink to="/library-manager" onClick={onClose} mobile>Bibliothèque</NavLink>
+                <NavLink to="/announcements" onClick={onClose} mobile>Annonces</NavLink>
               </>
             )}
             
@@ -57,3 +60,4 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
 };
 
 export default MobileMenu;
+

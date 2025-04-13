@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Bell, Users } from 'lucide-react';
+import { Bell, Users, MessageCircle } from 'lucide-react';
 import NavLink from './NavLink';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -54,3 +54,4 @@ const DesktopNav = ({ isAuthenticated, isAdmin }: DesktopNavProps) => {
 };
 
 export default DesktopNav;
+
