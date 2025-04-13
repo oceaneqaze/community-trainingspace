@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { getNavigationItems } from '@/components/navbar/NavigationItems';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -81,85 +81,89 @@ const VerticalNavbar = () => {
       <div className="flex-grow overflow-auto p-2">
         {isAuthenticated ? (
           <nav className="space-y-1">
-            {navigationItems.map((item) => {
-              // Skip admin-only items if user is not admin
-              if (item.adminOnly && !isAdmin()) return null;
-              
-              const isActive = location.pathname === item.path;
-              
-              return (
-                <Tooltip key={item.path} delayDuration={300}>
-                  <TooltipTrigger asChild>
-                    <Link
-                      to={item.path}
-                      className={cn(
-                        "flex items-center px-3 py-2 rounded-md w-full transition-colors",
-                        isActive
-                          ? "bg-primary/10 text-primary"
-                          : "text-foreground hover:bg-muted",
-                        !expanded && "justify-center"
-                      )}
-                    >
-                      <div className={cn("flex items-center", expanded ? "w-full" : "justify-center")}>
-                        {item.icon || <Video className="h-5 w-5" />}
-                        {expanded && <span className="ml-3 text-sm">{item.label}</span>}
-                      </div>
-                    </Link>
-                  </TooltipTrigger>
-                  {!expanded && (
-                    <TooltipContent side="right">
-                      {item.label}
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              );
-            })}
+            <TooltipProvider>
+              {navigationItems.map((item) => {
+                // Skip admin-only items if user is not admin
+                if (item.adminOnly && !isAdmin()) return null;
+                
+                const isActive = location.pathname === item.path;
+                
+                return (
+                  <Tooltip key={item.path} delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={item.path}
+                        className={cn(
+                          "flex items-center px-3 py-2 rounded-md w-full transition-colors",
+                          isActive
+                            ? "bg-primary/10 text-primary"
+                            : "text-foreground hover:bg-muted",
+                          !expanded && "justify-center"
+                        )}
+                      >
+                        <div className={cn("flex items-center", expanded ? "w-full" : "justify-center")}>
+                          {item.icon || <Video className="h-5 w-5" />}
+                          {expanded && <span className="ml-3 text-sm">{item.label}</span>}
+                        </div>
+                      </Link>
+                    </TooltipTrigger>
+                    {!expanded && (
+                      <TooltipContent side="right">
+                        {item.label}
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                );
+              })}
+            </TooltipProvider>
           </nav>
         ) : (
           <div className="space-y-1 py-2">
-            {expanded ? (
-              <>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start" 
-                  onClick={() => navigate('/login')}
-                >
-                  <span>Connexion</span>
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  onClick={() => navigate('/invitation')}
-                >
-                  <span>S'inscrire</span>
-                </Button>
-              </>
-            ) : (
-              <>
-                <Tooltip delayDuration={300}>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
-                      onClick={() => navigate('/login')}
-                    >
-                      C
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Connexion</TooltipContent>
-                </Tooltip>
-                <Tooltip delayDuration={300}>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      className="w-full"
-                      onClick={() => navigate('/invitation')} 
-                    >
-                      S
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">S'inscrire</TooltipContent>
-                </Tooltip>
-              </>
-            )}
+            <TooltipProvider>
+              {expanded ? (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start" 
+                    onClick={() => navigate('/login')}
+                  >
+                    <span>Connexion</span>
+                  </Button>
+                  <Button 
+                    className="w-full justify-start" 
+                    onClick={() => navigate('/invitation')}
+                  >
+                    <span>S'inscrire</span>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        onClick={() => navigate('/login')}
+                      >
+                        C
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Connexion</TooltipContent>
+                  </Tooltip>
+                  <Tooltip delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        className="w-full"
+                        onClick={() => navigate('/invitation')} 
+                      >
+                        S
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">S'inscrire</TooltipContent>
+                  </Tooltip>
+                </>
+              )}
+            </TooltipProvider>
           </div>
         )}
       </div>
@@ -170,55 +174,57 @@ const VerticalNavbar = () => {
           "border-t border-border p-3",
           expanded ? "flex items-center" : "flex flex-col items-center"
         )}>
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className={cn(
-                  "flex items-center",
-                  expanded ? "w-full justify-start" : "w-full justify-center p-2"
-                )}
-                onClick={() => navigate('/profile')}
-              >
-                <Avatar className="h-8 w-8">
-                  {profile?.avatar_url ? (
-                    <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                  ) : (
-                    <AvatarFallback>
-                      {profile?.name ? getInitials(profile.name) : 'U'}
-                    </AvatarFallback>
+          <TooltipProvider>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className={cn(
+                    "flex items-center",
+                    expanded ? "w-full justify-start" : "w-full justify-center p-2"
                   )}
-                </Avatar>
-                {expanded && <span className="ml-2 text-sm truncate">{profile?.name}</span>}
-              </Button>
-            </TooltipTrigger>
-            {!expanded && (
-              <TooltipContent side="right">
-                {profile?.name || 'Profil'}
-              </TooltipContent>
-            )}
-          </Tooltip>
+                  onClick={() => navigate('/profile')}
+                >
+                  <Avatar className="h-8 w-8">
+                    {profile?.avatar_url ? (
+                      <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                    ) : (
+                      <AvatarFallback>
+                        {profile?.name ? getInitials(profile.name) : 'U'}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  {expanded && <span className="ml-2 text-sm truncate">{profile?.name}</span>}
+                </Button>
+              </TooltipTrigger>
+              {!expanded && (
+                <TooltipContent side="right">
+                  {profile?.name || 'Profil'}
+                </TooltipContent>
+              )}
+            </Tooltip>
 
-          <Tooltip delayDuration={300}>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size={expanded ? "default" : "icon"}
-                className={cn("text-red-500 hover:text-red-600 hover:bg-red-50 mt-1", 
-                  expanded ? "ml-auto" : "w-full"
-                )}
-                onClick={handleLogout}
-              >
-                <LogOut className="h-5 w-5" />
-                {expanded && <span className="ml-2">Déconnexion</span>}
-              </Button>
-            </TooltipTrigger>
-            {!expanded && (
-              <TooltipContent side="right">
-                Déconnexion
-              </TooltipContent>
-            )}
-          </Tooltip>
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size={expanded ? "default" : "icon"}
+                  className={cn("text-red-500 hover:text-red-600 hover:bg-red-50 mt-1", 
+                    expanded ? "ml-auto" : "w-full"
+                  )}
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-5 w-5" />
+                  {expanded && <span className="ml-2">Déconnexion</span>}
+                </Button>
+              </TooltipTrigger>
+              {!expanded && (
+                <TooltipContent side="right">
+                  Déconnexion
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
 
