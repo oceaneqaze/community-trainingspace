@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
 import VerticalNavbar from './components/sidebar/VerticalNavbar';
 import { useIsMobile } from './hooks/use-mobile';
+import ChatBubble from './components/chat/ChatBubble';
 
 // Pages
 import Index from './pages/Index';
@@ -39,6 +40,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           {children}
         </div>
       </main>
+      <ChatBubble />
     </div>
   );
 };
