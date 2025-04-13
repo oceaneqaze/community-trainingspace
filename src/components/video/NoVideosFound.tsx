@@ -1,15 +1,29 @@
 
 import React from 'react';
-import { BookOpen } from 'lucide-react';
+import { FileVideo } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-const NoVideosFound: React.FC = () => {
+interface NoVideosFoundProps {
+  onRefresh?: () => void;
+}
+
+const NoVideosFound: React.FC<NoVideosFoundProps> = ({ onRefresh }) => {
   return (
-    <div className="text-center py-10 bg-secondary/20 rounded-lg">
-      <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-      <h3 className="mt-2 text-lg font-medium text-foreground">Aucune vidéo trouvée</h3>
-      <p className="mt-1 text-sm text-muted-foreground max-w-md mx-auto">
-        Essayez d'ajuster vos critères de recherche ou sélectionnez une autre catégorie.
+    <div className="flex flex-col items-center justify-center py-16 text-center bg-secondary/10 rounded-lg border border-dashed border-secondary">
+      <FileVideo className="h-16 w-16 text-muted-foreground mb-4" strokeWidth={1.5} />
+      <h3 className="text-xl font-medium text-foreground">Aucune vidéo trouvée</h3>
+      <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+        Essayez d'ajuster vos critères de recherche ou sélectionnez une autre catégorie pour voir les vidéos disponibles.
       </p>
+      {onRefresh && (
+        <Button 
+          variant="outline" 
+          className="mt-4"
+          onClick={onRefresh}
+        >
+          Actualiser les résultats
+        </Button>
+      )}
     </div>
   );
 };
