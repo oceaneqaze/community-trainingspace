@@ -25,19 +25,45 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
   const [category, setCategory] = useState(video?.category || '');
   const [videoUrl, setVideoUrl] = useState(video?.videoUrl || '');
   
+  // Safely parse the date or set a default
+  const getInitialDate = () => {
+    if (!video?.date) return new Date();
+    
+    try {
+      // Try to parse the date from the video.date string
+      const dateObj = new Date(video.date);
+      
+      // Check if the date is valid
+      if (isNaN(dateObj.getTime())) {
+        console.warn("Invalid date from video props, using current date instead");
+        return new Date();
+      }
+      
+      return dateObj;
+    } catch (err) {
+      console.warn("Error parsing date, using current date instead:", err);
+      return new Date();
+    }
+  };
+  
   // État pour stocker la date de publication
-  const [publishDate, setPublishDate] = useState<Date | undefined>(
-    video?.date ? new Date(video.date) : new Date()
-  );
+  const [publishDate, setPublishDate] = useState<Date | undefined>(getInitialDate());
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Formater la date au format français pour affichage
-    const formattedDate = publishDate 
-      ? format(publishDate, 'dd MMMM yyyy', { locale: fr })
-      : '';
-      
+    // Ensure we have a valid date before formatting
+    let formattedDate = '';
+    
+    try {
+      if (publishDate && !isNaN(publishDate.getTime())) {
+        formattedDate = format(publishDate, 'dd MMMM yyyy', { locale: fr });
+      }
+    } catch (err) {
+      console.error("Error formatting date:", err);
+      formattedDate = new Date().toLocaleDateString('fr-FR');
+    }
+    
     await onSubmit({ 
       title, 
       thumbnail, 
@@ -46,6 +72,20 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
       videoUrl,
       date: formattedDate
     });
+  };
+
+  // Safe date formatting function
+  const formatSafeDate = (date: Date | undefined): React.ReactNode => {
+    if (!date || isNaN(date.getTime())) {
+      return <span>Choisir une date</span>;
+    }
+    
+    try {
+      return format(date, 'dd MMMM yyyy', { locale: fr });
+    } catch (err) {
+      console.error("Error formatting display date:", err);
+      return <span>Date invalide</span>;
+    }
   };
 
   return (
@@ -109,7 +149,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onSubmit, video, onCancel, isLoad
               id="publishDate"
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {publishDate ? format(publishDate, 'dd MMMM yyyy', { locale: fr }) : <span>Choisir une date</span>}
+              {formatSafeDate(publishDate)}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">

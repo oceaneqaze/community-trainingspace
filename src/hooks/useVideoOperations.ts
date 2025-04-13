@@ -15,6 +15,19 @@ export const useVideoOperations = (
   const [selectedVideo, setSelectedVideo] = useState<VideoProps | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Helper to safely parse dates
+  const safeParseDate = (dateStr: string | undefined): Date => {
+    if (!dateStr) return new Date();
+    
+    try {
+      const parsedDate = new Date(dateStr);
+      return isNaN(parsedDate.getTime()) ? new Date() : parsedDate;
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      return new Date();
+    }
+  };
+
   // Add video function
   const handleAddVideo = async (videoData: Partial<VideoProps>) => {
     setIsLoading(true);
@@ -25,9 +38,8 @@ export const useVideoOperations = (
       
       // Si une date personnalisée a été spécifiée, l'utiliser pour created_at
       if (videoData.date) {
-        // Pour Supabase, nous avons besoin d'une date au format ISO
         try {
-          createdAt = new Date(videoData.date);
+          createdAt = safeParseDate(videoData.date);
         } catch (error) {
           console.error("Erreur lors du parsing de la date:", error);
         }
@@ -94,11 +106,8 @@ export const useVideoOperations = (
       // Si une date personnalisée a été spécifiée, mettre à jour created_at
       if (videoData.date) {
         try {
-          // Convertir la date formatée en objet Date puis en ISO string pour Supabase
-          const newDate = new Date(videoData.date);
-          if (!isNaN(newDate.getTime())) {
-            updateData.created_at = newDate.toISOString();
-          }
+          const newDate = safeParseDate(videoData.date);
+          updateData.created_at = newDate.toISOString();
         } catch (error) {
           console.error("Erreur lors du parsing de la date:", error);
         }
