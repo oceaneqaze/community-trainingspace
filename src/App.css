@@ -54,6 +54,21 @@ main {
   }
 }
 
+/* Extra small devices */
+@media (min-width: 480px) {
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
+  
+  .xs\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .mobile-safe-area {
   padding-bottom: env(safe-area-inset-bottom);
   padding-top: env(safe-area-inset-top);
@@ -62,4 +77,54 @@ main {
 /* Fix for iOS bottom safe area */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Animation utilities */
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Touch optimizations */
+@media (max-width: 768px) {
+  button, 
+  [role="button"], 
+  .interactive {
+    min-height: 38px;
+    min-width: 38px;
+  }
+  
+  input, 
+  select, 
+  textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Improve tap target size */
+  a, button {
+    padding: 0.5rem;
+  }
 }
