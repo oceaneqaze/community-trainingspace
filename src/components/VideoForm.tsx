@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ThumbnailUploader from './ThumbnailUploader';
 import { useVideoFormData } from './video-form/useVideoFormData';
 import BasicVideoDetails from './video-form/BasicVideoDetails';
 import FormButtons from './video-form/FormButtons';
 import UploadProgress from './video-form/UploadProgress';
 import VideoUploader from './VideoUploader';
-import VideoPlayer from './video/VideoPlayer';
+import ScreenRecUploader from './video-uploader/ScreenRecUploader';
 
 const VideoForm: React.FC = () => {
   const {
@@ -24,22 +25,11 @@ const VideoForm: React.FC = () => {
     handleExternalUrlChange,
   } = useVideoFormData();
 
-  const [screenRecVideoId, setScreenRecVideoId] = useState('');
-  const [screenRecPosterUrl, setScreenRecPosterUrl] = useState('');
-  const [previewVideoUrl, setPreviewVideoUrl] = useState('');
-  const [previewImage, setPreviewImage] = useState('');
-
-  const handleScreenRecVideoSubmit = () => {
-    if (screenRecVideoId && screenRecPosterUrl) {
-      // Construire l'URL de la vidéo au format m3u8
-      const videoUrl = `https://upww.screenrec.com/videos/f_${screenRecVideoId}.mp4/index.m3u8`;
-      setPreviewVideoUrl(videoUrl);
-      setPreviewImage(screenRecPosterUrl);
-      
-      // Passer l'URL externe au gestionnaire de formulaire
-      if (handleExternalUrlChange) {
-        handleExternalUrlChange(videoUrl);
-      }
+  // Gestionnaire pour les vidéos ScreenRec
+  const handleScreenRecVideoSubmit = (videoData: { videoUrl: string; thumbnailUrl: string; videoId: string }) => {
+    // Mise à jour de l'URL externe
+    if (handleExternalUrlChange) {
+      handleExternalUrlChange(videoData.videoUrl);
     }
   };
 
@@ -56,69 +46,27 @@ const VideoForm: React.FC = () => {
         setCategory={setCategory}
       />
 
-      {/* Section d'upload vidéo standard */}
-      <div className="mb-6">
-        <VideoUploader 
-          onVideoChange={handleVideoChange} 
-          onDurationExtracted={handleDurationExtracted} 
-          onExternalUrlChange={handleExternalUrlChange}
-          screenRecVideoId={screenRecVideoId}
-          screenRecPosterUrl={screenRecPosterUrl}
-        />
-      </div>
+      <Tabs defaultValue="upload" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="upload">Upload de fichier</TabsTrigger>
+          <TabsTrigger value="screenrec">Ajouter une vidéo ScreenRec</TabsTrigger>
+        </TabsList>
 
-      {/* Section ScreenRec simplifiée */}
-      <div className="border border-gray-200 rounded-lg p-4">
-        <h3 className="text-lg font-medium mb-3">Ajouter une vidéo ScreenRec</h3>
-        <div className="space-y-3">
-          <div>
-            <label htmlFor="screenRecVideoId" className="block text-sm font-medium text-gray-700">
-              ID de la vidéo ScreenRec
-            </label>
-            <input
-              type="text"
-              id="screenRecVideoId"
-              value={screenRecVideoId}
-              onChange={(e) => setScreenRecVideoId(e.target.value)}
-              placeholder="Ex: ixnzbml6CrZtDj8THq20haXUWLOdKypk"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Extracte l'ID depuis le lien partagé ScreenRec
-            </p>
-          </div>
-          <div>
-            <label htmlFor="screenRecPosterUrl" className="block text-sm font-medium text-gray-700">
-              URL du GIF d'aperçu
-            </label>
-            <input
-              type="text"
-              id="screenRecPosterUrl"
-              value={screenRecPosterUrl}
-              onChange={(e) => setScreenRecPosterUrl(e.target.value)}
-              placeholder="https://upww.screenrec.com/images/f_XXXX.gif"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleScreenRecVideoSubmit}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-          >
-            Prévisualiser la vidéo
-          </button>
-        </div>
-      </div>
+        <TabsContent value="upload">
+          <VideoUploader 
+            onVideoChange={handleVideoChange} 
+            onDurationExtracted={handleDurationExtracted} 
+            onExternalUrlChange={handleExternalUrlChange}
+          />
+        </TabsContent>
 
-      {/* Section de prévisualisation */}
-      {previewVideoUrl && (
-        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <h3 className="text-lg font-medium mb-3">Prévisualisation</h3>
-          <VideoPlayer videoUrl={previewVideoUrl} poster={previewImage} />
-        </div>
-      )}
+        <TabsContent value="screenrec">
+          <ScreenRecUploader onVideoSubmit={handleScreenRecVideoSubmit} />
+        </TabsContent>
+      </Tabs>
 
-      {/* Progression et boutons */}
+      <ThumbnailUploader />
+
       <UploadProgress progress={uploadStatus.progress} />
       <FormButtons 
         isLoading={uploadStatus.isLoading} 

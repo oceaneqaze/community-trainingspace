@@ -9,15 +9,12 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_THUMBNAIL }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const isScreenRecUrl = videoUrl?.includes('screenrec.com/share');
+  const isScreenRecUrl = videoUrl?.includes('screenrec.com') || videoUrl?.includes('.m3u8');
   
   // Handle WebVideoCore initialization for ScreenRec videos
   useEffect(() => {
     if (isScreenRecUrl && iframeRef.current) {
       const iframe = iframeRef.current;
-      const videoId = videoUrl.split('/').pop();
-      
-      if (!videoId) return;
       
       // Set up message event listener
       const handleMessage = (event: MessageEvent) => {
@@ -33,13 +30,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
       
       // Function to send initialization data to player
       const sendMessageToPlayer = () => {
-        // The m3u8 URL pattern for ScreenRec
-        const m3u8Url = `https://upww.screenrec.com/videos/${videoId}.mp4/index.m3u8`;
-        
         iframe.contentWindow?.postMessage({
           message: 'init',
           data: {
-            customUrl: m3u8Url,
+            customUrl: videoUrl,
             customPoster: poster,
             colorBase: '#8B5CF6',
             colorText: '#ffffff',
@@ -87,7 +81,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_TH
   // Handle other external video URLs
   const isExternalUrl = videoUrl?.startsWith('http') && !videoUrl?.includes('storage.googleapis.com');
   
-  if (isExternalUrl) {
+  if (isExternalUrl && !isScreenRecUrl) {
     return (
       <div className="rounded-lg overflow-hidden bg-black">
         <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>

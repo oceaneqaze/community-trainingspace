@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -21,6 +20,7 @@ import Invitation from "./pages/Invitation";
 import NotFound from "./pages/NotFound";
 import LibraryManager from "./pages/LibraryManager";
 import Announcements from "./pages/Announcements";
+import ScreenRecPreview from './pages/ScreenRecPreview';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,6 +109,7 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/invitation/:code" element={<Invitation />} />
+        <Route path="/screenrec-preview" element={<ScreenRecPreview />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
