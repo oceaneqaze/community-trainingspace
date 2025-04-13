@@ -1,0 +1,29 @@
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+interface MobileHeaderProps {
+  toggleMobileMenu: () => void;
+}
+
+const MobileHeader: React.FC<MobileHeaderProps> = ({ toggleMobileMenu }) => {
+  return (
+    <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-30">
+      <Link to="/" className="flex items-center gap-2">
+        <img
+          src="/lovable-uploads/bb7e7daa-74a3-4cd4-8457-13ba5ae39dce.png"
+          alt="DOPE CONTENT Logo"
+          className="h-8 w-auto"
+        />
+        <span className="font-bold text-lg">DOPE CONTENT</span>
+      </Link>
+      <Button variant="ghost" size="icon" onClick={toggleMobileMenu}>
+        <Menu className="h-6 w-6" />
+      </Button>
+    </div>
+  );
+};
+
+export default MobileHeader;
