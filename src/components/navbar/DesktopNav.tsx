@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Users } from 'lucide-react';
 import NavLink from './NavLink';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -40,6 +40,10 @@ const DesktopNav = ({ isAuthenticated, isAdmin }: DesktopNavProps) => {
       {isAdmin() && (
         <>
           <NavLink to="/members">Membres</NavLink>
+          <NavLink to="/invitations">
+            <Users className="mr-1 h-4 w-4" />
+            Invitations
+          </NavLink>
           <NavLink to="/dashboard">Dashboard</NavLink>
           <NavLink to="/library-manager">Bibliothèque</NavLink>
           <NavLink to="/announcements">Annonces</NavLink>
