@@ -203,16 +203,18 @@ const InvitationManager = () => {
     }
 
     try {
-      // Create a new user profile
+      // Create a new user profile - FIX: Generate a UUID for the new user
+      const newUserId = crypto.randomUUID();
+      
+      // Now insert with the manually generated ID
       const { data, error } = await supabase
         .from('profiles')
-        .insert([
-          { 
-            name: inviteName.trim(),
-            email: inviteEmail.trim() || null,
-            role: 'member'
-          }
-        ])
+        .insert({
+          id: newUserId,
+          name: inviteName.trim(),
+          email: inviteEmail.trim() || null,
+          role: 'member'
+        })
         .select()
         .single();
 
