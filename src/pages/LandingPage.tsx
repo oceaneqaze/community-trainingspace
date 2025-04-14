@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import components
 import CountdownTimer from '@/components/landing/CountdownTimer';
@@ -21,6 +22,7 @@ import ExitIntentDialog from '@/components/landing/ExitIntentDialog';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [timeLeft, setTimeLeft] = useState({
     hours: 23,
     minutes: 59,
@@ -53,8 +55,10 @@ const LandingPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Exit intent detection
+  // Exit intent detection - only on desktop
   useEffect(() => {
+    if (isMobile) return;
+    
     const handleMouseLeave = (e: MouseEvent) => {
       if (e.clientY <= 0 && !showExitIntent) {
         setShowExitIntent(true);
@@ -66,7 +70,7 @@ const LandingPage = () => {
     return () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [showExitIntent]);
+  }, [showExitIntent, isMobile]);
 
   const formattedTimer = `${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}`;
   
@@ -84,7 +88,7 @@ const LandingPage = () => {
       <CountdownTimer timeLeft={timeLeft} onClickCTA={handleJoinNow} />
       
       {/* Main content - with padding top for the fixed timer */}
-      <div className="pt-16">
+      <div className={`pt-16 ${isMobile ? 'pt-20' : 'pt-16'}`}>
         {/* SECTION 1: Hero section with headline & subheadline */}
         <HeroSection 
           timeLeft={timeLeft} 
@@ -133,12 +137,14 @@ const LandingPage = () => {
         <FooterSection formattedTimer={formattedTimer} />
       </div>
       
-      {/* Exit Intent Popup */}
-      <ExitIntentDialog 
-        showExitIntent={showExitIntent} 
-        setShowExitIntent={setShowExitIntent}
-        timeLeft={timeLeft}
-      />
+      {/* Exit Intent Popup - only shown on desktop */}
+      {!isMobile && (
+        <ExitIntentDialog 
+          showExitIntent={showExitIntent} 
+          setShowExitIntent={setShowExitIntent}
+          timeLeft={timeLeft}
+        />
+      )}
     </div>
   );
 };

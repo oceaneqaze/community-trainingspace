@@ -44,9 +44,15 @@
     @apply border-border;
   }
   
+  html {
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
+    text-size-adjust: 100%;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -71,6 +77,11 @@
   
   a {
     @apply transition-colors;
+  }
+
+  /* Better tap targets for mobile */
+  button, a, input, select, textarea {
+    @apply md:touch-auto;
   }
 
   .glass-panel {
@@ -219,4 +230,37 @@
 
 .gradient-bg-accent {
   @apply bg-gradient-to-br from-primary/20 via-background to-accent/10;
+}
+
+/* Mobile optimizations */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Extra small screen breakpoint */
+@media (min-width: 480px) {
+  .xs\:flex-row {
+    flex-direction: row;
+  }
+  
+  .xs\:block {
+    display: block;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
+  
+  .xs\:my-0 {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  
+  .xs\:gap-3 {
+    gap: 0.75rem;
+  }
 }
