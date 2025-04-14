@@ -7,7 +7,6 @@ import CountdownTimer from '@/components/landing/CountdownTimer';
 import HeroSection from '@/components/landing/HeroSection';
 import ProblemSection from '@/components/landing/ProblemSection';
 import SolutionSection from '@/components/landing/SolutionSection';
-import TestimonialsSection from '@/components/landing/TestimonialsSection';
 import AccessSection from '@/components/landing/AccessSection';
 import BenefitsSection from '@/components/landing/BenefitsSection';
 import PricingSection from '@/components/landing/PricingSection';
@@ -98,9 +97,6 @@ const LandingPage = () => {
         
         {/* SECTION 3: The Solution (The Shift) */}
         <SolutionSection onClickCTA={handleJoinNow} />
-        
-        {/* SECTION 4: Social Proof */}
-        <TestimonialsSection />
         
         {/* SECTION 5: ACCÈS UNIQUEMENT PAR CODE (Exclusivity) */}
         <AccessSection />
