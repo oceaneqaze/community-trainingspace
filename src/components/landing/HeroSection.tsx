@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, ShieldCheck, Lock, Gift, AlertTriangle } from 'lucide-react';
@@ -26,20 +25,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
 
       <div className="mx-auto max-w-5xl px-4 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          {/* Main headline - massive typography */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">CLONE-TOI AVEC L'IA.</span><br/>
             <span className="text-white">CRÉE DU CONTENU NON-STOP.</span><br/>
             <span className="text-primary animate-pulse">DEVIENS INARRÊTABLE.</span>
           </h1>
           
-          {/* Subheadline */}
           <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground font-light leading-tight mb-10 mt-6">
             Pas d'idées, pas le temps, pas de stratégie ?<br/>
             <span className="font-semibold text-white">Transforme-toi en machine à contenu en 30 jours.</span>
           </p>
           
-          {/* BLOC 1: URGENCE & COMPTE À REBOURS */}
           <Card className="mb-12 border-t border-l border-white/10 border-r border-b border-black/20 bg-gradient-to-br from-card/95 to-card/70 shadow-xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-primary/5"></div>
             <CardContent className="p-6 sm:p-8 relative">
@@ -66,27 +62,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
                 </div>
               </div>
               
-              <div className="bg-black/30 border border-white/5 rounded-lg p-6 mb-6">
-                <ul className="space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><AlertTriangle className="h-5 w-5" /></span> 
-                    <span className="font-semibold text-lg">Prix actuel : 15.000 FCFA – paiement unique</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><Lock className="h-5 w-5" /></span> 
-                    <span className="font-semibold text-lg">Accès sécurisé via code admin UNIQUE (1 seul accès par personne)</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><Gift className="h-5 w-5" /></span> 
-                    <span className="font-semibold text-lg">Bonus offerts aux 100 premiers uniquement</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><AlertTriangle className="h-5 w-5" /></span> 
-                    <span>Après ? Le prix monte et les bonus disparaissent.</span>
-                  </li>
-                </ul>
-              </div>
-              
               <div className="space-y-3 mb-6">
                 <p className="text-lg leading-relaxed">
                   Imagine un instant : tu as une chance unique de transformer ta manière de créer du contenu, de devenir une machine à attirer des clients, mais cette opportunité a une limite. Ce compte à rebours, là, juste au-dessus, c'est le temps qu'il te reste pour saisir cette formation à un prix ridicule de 15.000 FCFA.
@@ -106,7 +81,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             </CardContent>
           </Card>
           
-          {/* Call to action buttons */}
           <div className="flex flex-col sm:flex-row justify-center gap-5 mb-10">
             <Button 
               onClick={onJoinNow} 
@@ -130,7 +104,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
           </div>
         </div>
         
-        {/* Video/Image preview */}
         <div className="relative overflow-hidden rounded-xl pro-card backdrop-blur-sm mx-auto max-w-4xl">
           <div className="aspect-video w-full">
             <img 
