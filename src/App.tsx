@@ -1,5 +1,4 @@
-
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
@@ -43,6 +42,13 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <ChatBubble />
     </div>
   );
+};
+
+// Create a wrapper component for the redirect
+const VideoRedirect = () => {
+  const location = useLocation();
+  const id = location.pathname.split('/')[2];
+  return <Navigate to={`/videos/${id}`} replace />;
 };
 
 function App() {
@@ -109,10 +115,7 @@ function App() {
             } />
             
             {/* Redirect old /video/:id routes to /videos/:id */}
-            <Route path="/video/:id" element={<Navigate to={(location) => {
-              const id = location.pathname.split('/')[2];
-              return `/videos/${id}`;
-            }} />} />
+            <Route path="/video/:id" element={<VideoRedirect />} />
             
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
