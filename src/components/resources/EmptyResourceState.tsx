@@ -1,18 +1,15 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { FileText } from 'lucide-react';
+import { FileQuestion } from 'lucide-react';
 
 export const EmptyResourceState: React.FC = () => {
   return (
-    <Card className="text-center p-12">
-      <div className="flex flex-col items-center gap-4">
-        <FileText className="h-12 w-12 text-muted-foreground" />
-        <h3 className="text-xl font-semibold">Aucune ressource</h3>
-        <p className="text-muted-foreground">
-          Aucun document PDF n'est disponible pour cette vidéo.
-        </p>
-      </div>
-    </Card>
+    <div className="flex flex-col items-center justify-center py-10">
+      <FileQuestion className="h-12 w-12 text-muted-foreground mb-2" />
+      <h3 className="text-lg font-medium text-center">Aucun document</h3>
+      <p className="text-sm text-muted-foreground text-center mt-1">
+        Aucun document n'est associé à cette vidéo
+      </p>
+    </div>
   );
 };
