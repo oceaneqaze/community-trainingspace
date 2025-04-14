@@ -108,6 +108,12 @@ function App() {
               </AppLayout>
             } />
             
+            {/* Redirect old /video/:id routes to /videos/:id */}
+            <Route path="/video/:id" element={<Navigate to={(location) => {
+              const id = location.pathname.split('/')[2];
+              return `/videos/${id}`;
+            }} />} />
+            
             {/* Fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>

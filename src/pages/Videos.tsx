@@ -118,7 +118,7 @@ const Videos: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const handleVideoClick = (videoId: string) => {
-    navigate(`/video/${videoId}`);
+    navigate(`/videos/${videoId}`);
   };
 
   const videosByCategory = React.useMemo(() => {
