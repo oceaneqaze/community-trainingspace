@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Clock, ShieldCheck, Lock, Gift, Warning } from 'lucide-react';
+import { ArrowRight, Clock, ShieldCheck, Lock, Gift, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface HeroSectionProps {
@@ -69,7 +69,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
               <div className="bg-black/30 border border-white/5 rounded-lg p-6 mb-6">
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><Warning className="h-5 w-5" /></span> 
+                    <span className="text-destructive mr-3 mt-1"><AlertTriangle className="h-5 w-5" /></span> 
                     <span className="font-semibold text-lg">Prix actuel : 15.000 FCFA – paiement unique</span>
                   </li>
                   <li className="flex items-start">
@@ -81,7 +81,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
                     <span className="font-semibold text-lg">Bonus offerts aux 100 premiers uniquement</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-destructive mr-3 mt-1"><Warning className="h-5 w-5" /></span> 
+                    <span className="text-destructive mr-3 mt-1"><AlertTriangle className="h-5 w-5" /></span> 
                     <span>Après ? Le prix monte et les bonus disparaissent.</span>
                   </li>
                 </ul>

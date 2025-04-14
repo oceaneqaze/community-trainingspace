@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Key, XCircle, CheckCircle, Lock, Target, Shield } from 'lucide-react';
+import { Key, XCircle, CheckCircle, Lock, Target, Shield, Gift } from 'lucide-react';
 
 const AccessSection: React.FC = () => {
   return (
