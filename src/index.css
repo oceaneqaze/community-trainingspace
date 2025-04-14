@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -45,11 +45,12 @@
   }
   
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+    @apply font-medium tracking-tight font-poppins;
   }
   
   h1 {
@@ -73,7 +74,7 @@
   }
 
   .glass-panel {
-    @apply bg-black/40 backdrop-blur-lg border border-white/10 shadow-lg;
+    @apply bg-black/50 backdrop-blur-xl border border-white/10 shadow-xl;
   }
   
   .page-container {
@@ -135,7 +136,7 @@
 
 /* Tech futuristic styles */
 .tech-border {
-  @apply border border-primary/50 shadow-[0_0_15px_rgba(var(--primary)/0.3)];
+  @apply border border-primary/50 shadow-[0_0_20px_rgba(var(--primary)/0.3)];
 }
 
 .tech-glow {
@@ -145,7 +146,7 @@
 .tech-glow::after {
   content: '';
   @apply absolute inset-0 rounded-md bg-primary/10 opacity-0 transition-opacity;
-  box-shadow: 0 0 20px 2px rgba(var(--primary)/0.5);
+  box-shadow: 0 0 25px 4px rgba(var(--primary)/0.5);
 }
 
 .tech-glow:hover::after {
@@ -159,14 +160,63 @@
 /* Tech buttons */
 .tech-button {
   @apply relative overflow-hidden bg-gradient-to-r from-primary to-accent 
-  text-white font-medium py-2 px-6 rounded-md transition-all duration-300
-  hover:shadow-[0_0_15px_rgba(var(--primary)/0.5)] focus:outline-none focus:ring-2 
-  focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background;
+  text-white font-medium py-2.5 px-6 rounded-md transition-all duration-300
+  hover:shadow-[0_0_20px_rgba(var(--primary)/0.5)] focus:outline-none focus:ring-2 
+  focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background border border-white/10;
 }
 
 .tech-button-outline {
   @apply relative overflow-hidden bg-transparent border border-primary/50
-  text-primary font-medium py-2 px-6 rounded-md transition-all duration-300
+  text-primary font-medium py-2.5 px-6 rounded-md transition-all duration-300
   hover:border-primary hover:bg-primary/10 
-  hover:shadow-[0_0_15px_rgba(var(--primary)/0.3)] focus:outline-none;
+  hover:shadow-[0_0_20px_rgba(var(--primary)/0.3)] focus:outline-none;
+}
+
+/* Professional card styles */
+.pro-card {
+  @apply bg-gradient-to-br from-card/95 to-card/80 border-t border-white/10 border-l border-white/5 border-r border-black/20 border-b border-black/20 shadow-xl;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+.section-title {
+  @apply text-2xl sm:text-3xl font-bold mb-8 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent;
+}
+
+.highlight-text {
+  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-semibold;
+}
+
+.pro-button {
+  @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary 
+  text-white font-medium py-3 px-6 rounded-md shadow-lg transition-all duration-300 
+  hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] border border-white/10;
+}
+
+/* Animation enhancements */
+@keyframes gentle-pulse {
+  0%, 100% { opacity: 0.9; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 3s infinite ease-in-out;
+}
+
+@keyframes floating {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-floating {
+  animation: floating 6s infinite ease-in-out;
+}
+
+/* Gradient backgrounds */
+.gradient-bg-subtle {
+  @apply bg-gradient-to-br from-background/90 via-background to-background/80;
+}
+
+.gradient-bg-accent {
+  @apply bg-gradient-to-br from-primary/20 via-background to-accent/10;
 }

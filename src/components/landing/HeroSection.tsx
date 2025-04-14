@@ -16,73 +16,114 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCode }) => {
   return (
-    <section className="relative overflow-hidden pt-16 md:pt-24 lg:pt-32">
-      <div className="mx-auto max-w-5xl px-4 lg:px-8">
+    <section className="relative overflow-hidden pt-20 md:pt-28 lg:pt-32 pb-16">
+      <div className="absolute inset-0 z-0 opacity-30">
+        <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-primary/10 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[300px] bg-gradient-to-t from-background to-transparent"></div>
+        <div className="absolute -top-[300px] -right-[300px] w-[600px] h-[600px] rounded-full bg-primary/20 blur-[120px]"></div>
+        <div className="absolute -bottom-[300px] -left-[300px] w-[600px] h-[600px] rounded-full bg-accent/20 blur-[120px]"></div>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-4 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           {/* Main headline - massive typography */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-[80px] font-extrabold tracking-tight text-foreground mb-6 leading-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            CLONE-TOI AVEC L'IA.<br/>
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">CLONE-TOI AVEC L'IA.</span><br/>
             <span className="text-white">CRÉE DU CONTENU NON-STOP.</span><br/>
             <span className="text-primary animate-pulse">DEVIENS INARRÊTABLE.</span>
           </h1>
           
           {/* Subheadline */}
-          <p className="text-xl md:text-2xl lg:text-[40px] text-muted-foreground font-light leading-tight mb-8 mt-4">
+          <p className="text-xl md:text-2xl lg:text-3xl text-muted-foreground font-light leading-tight mb-10 mt-6">
             Pas d'idées, pas le temps, pas de stratégie ?<br/>
             <span className="font-semibold text-white">Transforme-toi en machine à contenu en 30 jours.</span>
           </p>
           
           {/* BLOC 1: URGENCE & COMPTE À REBOURS */}
-          <Card className="mb-10 border-destructive/50 bg-card/90 shadow-lg tech-border">
-            <CardContent className="p-4 sm:p-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-destructive mb-4">🕒 URGENCE & COMPTE À REBOURS</h2>
+          <Card className="mb-12 border-t border-l border-white/10 border-r border-b border-black/20 bg-gradient-to-br from-card/95 to-card/70 shadow-xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-primary/5"></div>
+            <CardContent className="p-6 sm:p-8 relative">
+              <h2 className="text-xl sm:text-2xl font-bold text-destructive mb-6 flex items-center">
+                <span className="mr-2">🕒</span>URGENCE & COMPTE À REBOURS
+              </h2>
               
-              <div className="mb-4 text-lg sm:text-xl font-bold">
-                ⏱️ Offre spéciale DOPE CONTENT expire dans: 
-                <div className="flex justify-center gap-2 mt-2">
-                  <span className="bg-destructive text-white px-3 py-1 rounded-md">{String(timeLeft.hours).padStart(2, '0')}</span>
-                  <span className="text-xl">:</span>
-                  <span className="bg-destructive text-white px-3 py-1 rounded-md">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                  <span className="text-xl">:</span>
-                  <span className="bg-destructive text-white px-3 py-1 rounded-md">{String(timeLeft.seconds).padStart(2, '0')}</span>
+              <div className="mb-6 text-lg sm:text-xl font-bold">
+                <div className="flex items-center justify-center mb-3">
+                  <span className="mr-2">⏱️</span> Offre spéciale DOPE CONTENT expire dans:
+                </div>
+                <div className="flex justify-center gap-3 mb-6">
+                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
+                    {String(timeLeft.hours).padStart(2, '0')}
+                  </div>
+                  <span className="text-2xl">:</span>
+                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
+                    {String(timeLeft.minutes).padStart(2, '0')}
+                  </div>
+                  <span className="text-2xl">:</span>
+                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
+                    {String(timeLeft.seconds).padStart(2, '0')}
+                  </div>
                 </div>
               </div>
               
-              <blockquote className="border-l-4 border-destructive pl-4 py-2 mb-4">
-                <p className="mb-2"><span className="text-destructive font-bold">💥</span> <strong>Prix actuel : 15.000 FCFA – paiement unique</strong></p>
-                <p className="mb-2"><span className="text-destructive font-bold">🔒</span> <strong>Accès sécurisé via code admin UNIQUE (1 seul accès par personne)</strong></p>
-                <p className="mb-2"><span className="text-destructive font-bold">🎁</span> <strong>Bonus offerts aux 100 premiers uniquement</strong></p>
-                <p><span className="text-destructive font-bold">🚫</span> Après ? Le prix monte et les bonus disparaissent.</p>
-              </blockquote>
+              <div className="bg-black/30 border border-white/5 rounded-lg p-6 mb-6">
+                <ul className="space-y-3">
+                  <li className="flex items-start">
+                    <span className="text-destructive font-bold mr-3 mt-1">💥</span> 
+                    <span className="font-semibold text-lg">Prix actuel : 15.000 FCFA – paiement unique</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-destructive font-bold mr-3 mt-1">🔒</span> 
+                    <span className="font-semibold text-lg">Accès sécurisé via code admin UNIQUE (1 seul accès par personne)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-destructive font-bold mr-3 mt-1">🎁</span> 
+                    <span className="font-semibold text-lg">Bonus offerts aux 100 premiers uniquement</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-destructive font-bold mr-3 mt-1">🚫</span> 
+                    <span>Après ? Le prix monte et les bonus disparaissent.</span>
+                  </li>
+                </ul>
+              </div>
               
-              <p className="text-sm md:text-base mb-4">
-                Imagine un instant : tu as une chance unique de transformer ta manière de créer du contenu, de devenir une machine à attirer des clients, mais cette opportunité a une limite. Ce compte à rebours, là, juste au-dessus, c'est le temps qu'il te reste pour saisir cette formation à un prix ridicule de 15.000 FCFA.
-              </p>
+              <div className="space-y-3 mb-6">
+                <p className="text-lg leading-relaxed">
+                  Imagine un instant : tu as une chance unique de transformer ta manière de créer du contenu, de devenir une machine à attirer des clients, mais cette opportunité a une limite. Ce compte à rebours, là, juste au-dessus, c'est le temps qu'il te reste pour saisir cette formation à un prix ridicule de 15.000 FCFA.
+                </p>
+                
+                <p className="mb-2 text-lg">Dès que tu payes, tu reçois un <strong className="text-primary">code confidentiel d'accès</strong>.</p>
+                <p className="mb-2 text-lg">Ce code est <strong className="text-primary">unique, valable une seule fois</strong>.</p>
+                <p className="mb-2 text-lg">C'est lui qui débloque <strong className="text-primary">l'inscription à la plateforme</strong>.</p>
+                <p className="mb-2 text-lg"><strong className="text-primary">Pas de double usage. Pas de partage. Pas de triche.</strong></p>
+              </div>
               
-              <p className="mb-2">Dès que tu payes, tu reçois un <strong>code confidentiel d'accès</strong>.</p>
-              <p className="mb-2">Ce code est <strong>unique, valable une seule fois</strong>.</p>
-              <p className="mb-2">C'est lui qui débloque <strong>l'inscription à la plateforme</strong>.</p>
-              <p className="mb-4"><strong>Pas de double usage. Pas de partage. Pas de triche.</strong></p>
-              
-              <p className="font-bold">Tu veux cette clé ? Bouge avant que le timer ne tombe.</p>
+              <div className="bg-gradient-to-r from-destructive/20 to-destructive/10 p-4 rounded-lg border border-destructive/30">
+                <p className="text-xl font-bold text-center">
+                  Tu veux cette clé ? Bouge avant que le timer ne tombe.
+                </p>
+              </div>
             </CardContent>
           </Card>
           
           {/* Call to action buttons */}
-          <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-5 mb-10">
             <Button 
               onClick={onJoinNow} 
-              className="tech-button text-lg shadow-md hover:shadow-lg transition-all" 
+              className="pro-button text-lg group relative overflow-hidden" 
               size="lg"
             >
-              Obtenir mon code d'accès
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="relative z-10 flex items-center">
+                Obtenir mon code d'accès
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </span>
             </Button>
             <Button 
               variant="outline" 
               onClick={onHaveCode} 
               size="lg"
-              className="border-primary/50 text-primary hover:bg-primary/20"
+              className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300"
             >
               J'ai déjà un code
             </Button>
@@ -90,21 +131,23 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
         </div>
         
         {/* Video/Image preview */}
-        <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-card/50 backdrop-blur-sm shadow-xl mx-auto max-w-4xl">
+        <div className="relative overflow-hidden rounded-xl pro-card backdrop-blur-sm mx-auto max-w-4xl">
           <div className="aspect-video w-full">
             <img 
               src="/lovable-uploads/0cc014bc-d4f7-4cba-9002-f23dfd3daf89.png" 
               alt="DOPE CONTENT Preview" 
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-              <div className="text-center p-6">
-                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3">Salut, moi c'est Emma-Alk</h3>
-                <p className="text-white text-lg mb-4">
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/80 to-black/70">
+              <div className="text-center p-8 max-w-3xl">
+                <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                  Salut, moi c'est Emma-Alk
+                </h3>
+                <p className="text-white text-lg leading-relaxed mb-6">
                   Il y a encore 2 ans, j'étais comme toi : zéro idée, zéro temps, et mes contenus ne décollaient pas.
                   Aujourd'hui, je crée des posts qui buzzent, des vidéos qui captivent, et des clients qui affluent.
                 </p>
-                <p className="text-primary text-xl font-bold">
+                <p className="text-primary text-xl font-bold bg-black/50 p-4 rounded-lg backdrop-blur-sm border border-primary/20 inline-block">
                   Comment ? L'IA. J'ai appris à me cloner avec elle, et en 20 vidéos, je te montre tout.
                 </p>
               </div>
