@@ -33,13 +33,13 @@ const VideoCard: React.FC<VideoCardProps> = ({ video, className, onClick }) => {
     if (onClick) {
       onClick();
     } else {
-      navigate(`/video/${video.id}`);
+      navigate(`/videos/${video.id}`);
     }
   };
 
   const handleComments = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/video/${video.id}`);
+    navigate(`/videos/${video.id}`);
   };
 
   return (
