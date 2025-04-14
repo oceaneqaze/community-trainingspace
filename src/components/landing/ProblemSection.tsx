@@ -8,68 +8,68 @@ const ProblemSection: React.FC = () => {
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
         <Card className="border-primary/30 bg-card/80 shadow-lg">
           <CardContent className="p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-6">🧠 IDENTIFICATION</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-6">🧠 LA FRUSTRATION QUE TU CONNAIS TROP BIEN</h2>
             
             <p className="text-lg mb-6">
-              Tu veux publier tous les jours, être visible, dominer ta niche…<br/>
-              Mais t'as :
+              Tu aspires à une présence digitale dominante, à devenir incontournable dans ta niche...<br/>
+              Mais tu te heurtes constamment à :
             </p>
             <ul className="list-none space-y-3 mb-6">
               <li className="flex items-center">
                 <span className="mr-2 text-destructive text-xl">•</span>
-                <span className="text-lg">Pas d'idées</span>
+                <span className="text-lg">Le syndrome de la page blanche qui paralyse</span>
               </li>
               <li className="flex items-center">
                 <span className="mr-2 text-destructive text-xl">•</span>
-                <span className="text-lg">Pas de temps</span>
+                <span className="text-lg">L'agenda surchargé qui t'empêche de créer</span>
               </li>
               <li className="flex items-center">
                 <span className="mr-2 text-destructive text-xl">•</span>
-                <span className="text-lg">Pas de méthode</span>
+                <span className="text-lg">L'absence d'une méthode systématique fiable</span>
               </li>
             </ul>
             
             <p className="font-bold text-lg mb-6">
-              <strong>Et surtout : aucune solution simple pour créer sans y passer ta vie.</strong>
+              <strong>Et surtout : l'absence totale d'une solution qui t'éviterait d'y sacrifier tes nuits et ta santé mentale.</strong>
             </p>
             
             <p className="text-lg mb-6">
-              Tu sais ce que ça fait, hein ? Tu te lèves, motivé, prêt à créer un truc qui déchire pour ta boîte, ton business, ta marque. 
-              Et puis, rien. Ton cerveau est vide, comme une page blanche qui te nargue.
+              Tu connais cette sensation démoralisante. Tu démarres ta journée avec détermination, prêt à créer du contenu d'exception pour ton entreprise, ta marque personnelle. 
+              Et puis — le néant. Un vide créatif qui te nargue comme une toile inachevée.
             </p>
             
             <p className="text-lg mb-6">
-              Tu passes une heure à écrire trois lignes pourries, et au final, tu postes un truc moyen qui fait 2 likes – dont un de ta mère.
+              Tu perds une heure entière pour produire quelques lignes médiocres, et finalement, tu publies un contenu tiède qui récolte une poignée d'engagements — dont la moitié vient de ton cercle proche.
             </p>
             
             <p className="text-lg mb-6">
-              Pendant ce temps, tes concurrents, eux, balancent du contenu à tour de bras : des posts qui accrochent, des vidéos qui tournent, et des clients qui affluent.
+              Pendant ce temps, tes compétiteurs semblent avoir percé le code. Ils inondent le marché de contenus pertinents, vidéos captivantes, et voient leur audience — et leurs revenus — croître exponentiellement.
             </p>
             
             <div className="p-4 bg-background/40 border border-destructive/30 rounded-lg mb-6">
-              <h3 className="font-bold text-lg text-destructive mb-2">Cette frustration te bouffe, avoue-le.</h3>
+              <h3 className="font-bold text-lg text-destructive mb-2">Cette sensation d'être à la traîne te consume de l'intérieur.</h3>
               <p className="text-lg">
-                Ce sentiment d'être à la traîne, de voir les autres briller pendant que toi, t'es invisible.
+                Ce sentiment persistant d'impuissance, d'observer les autres briller tandis que ton potentiel reste invisible et inexploité.
               </p>
             </div>
             
             <p className="mb-4">
-              DOPE CONTENT te donne la solution.<br/>
-              Et <strong>l'accès est ultra-sécurisé</strong> :
+              DOPE CONTENT brise définitivement ce cycle.<br/>
+              Avec un accès <strong>ultra-sécurisé et exclusif</strong> :
             </p>
             
             <ul className="list-none space-y-2 mb-4">
               <li className="flex items-center">
                 <span className="mr-2 text-green-500">✅</span>
-                <span>Tu paies une fois</span>
+                <span>Un unique investissement pour un accès illimité</span>
               </li>
               <li className="flex items-center">
                 <span className="mr-2 text-green-500">✅</span>
-                <span>Tu reçois ton code admin unique</span>
+                <span>Ton code d'administrateur personnel et sécurisé</span>
               </li>
               <li className="flex items-center">
                 <span className="mr-2 text-green-500">✅</span>
-                <span>Tu actives ton compte pour toujours</span>
+                <span>Ton compte activé pour toujours — sans abonnement</span>
               </li>
             </ul>
           </CardContent>

@@ -12,31 +12,31 @@ const RiskSection: React.FC = () => {
           <CardContent className="p-8 sm:p-10 relative z-10">
             <div className="flex items-center gap-4 mb-6">
               <AlertTriangle className="h-8 w-8 text-destructive" />
-              <h2 className="text-2xl sm:text-3xl font-bold text-destructive">ATTENTION</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-destructive">DERNIÈRE CHANCE</h2>
             </div>
             
             <div className="space-y-6">
               <div className="border-l-4 border-destructive/80 pl-6 py-2">
                 <p className="text-lg mb-3 flex items-center">
                   <span className="text-destructive font-bold mr-2">❌</span> 
-                  <span className="text-foreground/90">Si tu perds ton code → tu perds l'accès</span>
+                  <span className="text-foreground/90">Ton code est personnel — le perdre, c'est perdre ton accès</span>
                 </p>
                 <p className="text-lg mb-3 flex items-center">
                   <span className="text-destructive font-bold mr-2">❌</span> 
-                  <span className="text-foreground/90">Si quelqu'un d'autre l'utilise avant toi → il sera désactivé</span>
+                  <span className="text-foreground/90">Tout partage non autorisé = désactivation immédiate et définitive</span>
                 </p>
                 <p className="text-lg flex items-center">
                   <span className="text-green-500 font-bold mr-2">✅</span> 
-                  <span className="text-foreground/90">Dès ton paiement, tu es prioritaire → ton code est réservé immédiatement</span>
+                  <span className="text-foreground/90">Ton paiement sécurise instantanément ton code — priorité absolue</span>
                 </p>
               </div>
               
               <p className="text-lg leading-relaxed">
-                Quand ce timer atteint zéro, cette page change. Le prix passe à 30.000 FCFA, les bonus s'envolent, et toi, tu restes là, à te demander pourquoi t'as laissé passer ça.
+                Quand le compteur atteindra zéro, tout change. Le prix double à 30.000 FCFA, les bonus exceptionnels disparaissent, et tu te retrouveras face à une décision que tu regretteras.
               </p>
               
               <p className="text-xl font-bold text-foreground/90 bg-destructive/10 p-4 rounded-lg border border-destructive/30">
-                Chaque jour sans cette méthode, c'est un jour où tes concurrents te doublent.
+                Pendant que tu hésites, tes concurrents progressent. Chaque jour sans cette méthode est un jour où ils prennent l'avantage.
               </p>
             </div>
           </CardContent>

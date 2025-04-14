@@ -19,7 +19,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft, onClickCTA })
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
         <div className="flex items-center">
           <Clock className="h-5 w-5 text-destructive mr-2 animate-pulse" />
-          <span className="text-sm sm:text-base font-semibold">Offre spéciale expire dans:</span>
+          <span className="text-sm sm:text-base font-semibold">Offre exclusive expire dans:</span>
         </div>
         
         <div className="flex items-center gap-1">
@@ -41,7 +41,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft, onClickCTA })
           size="sm" 
           className="bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive border border-destructive/20 shadow-lg transition-all hover:scale-105 text-white"
         >
-          Rejoindre maintenant
+          Sécuriser mon accès maintenant
           <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
         </Button>
       </div>

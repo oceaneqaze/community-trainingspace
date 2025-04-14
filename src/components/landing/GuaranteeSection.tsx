@@ -18,16 +18,16 @@ const GuaranteeSection: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-2xl sm:text-3xl font-bold mb-6 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                  Garantie 30 jours satisfait ou remboursé
+                  Garantie "Succès Assuré" 30 jours
                 </h2>
                 <p className="text-lg mb-4 text-foreground/90 leading-relaxed">
-                  Je sais ce que tu te dis peut-être : "Et si ça marche pas pour moi ?" Pas de panique. Avec "DOPE CONTENT", t'as une garantie 100 % satisfait ou remboursé sous 30 jours.
+                  Je comprends ton hésitation. "Et si ça ne fonctionne pas pour moi?" C'est légitime. C'est pourquoi DOPE CONTENT vient avec une garantie 100% satisfait ou remboursé pendant 30 jours complets.
                 </p>
                 <p className="text-lg mb-6 text-foreground/90 leading-relaxed">
-                  Tu testes tout : les vidéos, les prompts, l'IA. Tu appliques ma méthode, tu vois les résultats. Si, pour une raison folle, tu trouves que ça vaut pas le coup, tu m'écris, et je te rends chaque centime – sans questions, sans chichi.
+                  Explore toute la formation. Applique les techniques. Utilise les prompts IA. Si tu ne vois pas ta production de contenu se transformer radicalement, envoie-moi simplement un message et je te rembourse intégralement — sans questions, sans conditions, sans délai.
                 </p>
-                <p className="font-bold text-lg text-primary">
-                  T'as zéro risque, parce que je crois à fond en ce que je te donne.
+                <p className="font-bold text-xl text-primary">
+                  Ton risque? Zéro. Ton potentiel? Illimité.
                 </p>
               </div>
             </div>
