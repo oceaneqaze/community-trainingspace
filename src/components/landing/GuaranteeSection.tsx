@@ -3,9 +3,12 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ShieldCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const GuaranteeSection: React.FC = () => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
     <section className="py-8 sm:py-16 md:py-20 bg-gradient-to-b from-background/20 to-background">
@@ -29,9 +32,18 @@ const GuaranteeSection: React.FC = () => {
                 <p className="text-xs sm:text-base md:text-lg mb-3 sm:mb-6 text-foreground/90 leading-tight sm:leading-relaxed">
                   Explore toute la formation. Applique les techniques. Utilise les prompts IA. Si tu ne vois pas ta production de contenu se transformer radicalement, envoie-moi simplement un message et je te rembourse intégralement — sans questions, sans conditions, sans délai.
                 </p>
-                <p className="font-bold text-sm sm:text-lg md:text-xl text-primary">
-                  Ton risque? Zéro. Ton potentiel? Illimité.
-                </p>
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <p className="font-bold text-sm sm:text-lg md:text-xl text-primary">
+                    Ton risque? Zéro. Ton potentiel? Illimité.
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/invitation')} 
+                    variant="outline" 
+                    className="w-full sm:w-auto mt-2 sm:mt-0"
+                  >
+                    J'ai un code d'accès
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

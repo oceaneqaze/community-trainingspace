@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, ShieldCheck, Lock, Gift, AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroSectionProps {
   timeLeft: {
@@ -17,6 +18,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCode }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
     <section className="relative overflow-hidden pt-16 md:pt-28 lg:pt-32 pb-6 md:pb-16">
@@ -57,7 +59,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             </Button>
             <Button 
               variant="outline" 
-              onClick={onHaveCode} 
+              onClick={() => navigate('/invitation')}
               size={isMobile ? "default" : "lg"}
               className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 w-full sm:w-auto text-sm md:text-base"
             >

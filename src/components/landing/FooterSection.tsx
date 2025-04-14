@@ -2,6 +2,8 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface FooterSectionProps {
   formattedTimer: string;
@@ -9,6 +11,7 @@ interface FooterSectionProps {
 
 const FooterSection: React.FC<FooterSectionProps> = ({ formattedTimer }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
     <section className="py-8 sm:py-16 bg-gradient-to-b from-destructive/10 to-background">
@@ -30,17 +33,24 @@ const FooterSection: React.FC<FooterSectionProps> = ({ formattedTimer }) => {
           Contactez-nous dès maintenant pour obtenir votre code d'accès ou en savoir plus sur notre méthode révolutionnaire
         </p>
         
-        <div className="inline-flex items-center justify-center rounded-md border border-input bg-background p-2 sm:p-4">
-          <span className="font-medium mr-2 text-xs sm:text-base">Contact direct:</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
           <a 
             href="https://wa.me/22954155702" 
-            className="text-primary hover:text-accent flex items-center text-xs sm:text-base"
+            className="text-primary hover:text-accent flex items-center text-xs sm:text-base bg-background p-2 sm:p-4 rounded-md border border-input w-full sm:w-auto justify-center"
             target="_blank" 
             rel="noopener noreferrer"
           >
-            wa.me/22954155702
+            Contact direct: wa.me/22954155702
             <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
           </a>
+          
+          <Button 
+            onClick={() => navigate('/invitation')} 
+            variant="outline" 
+            className="w-full sm:w-auto text-xs sm:text-base"
+          >
+            J'ai déjà un code d'accès
+          </Button>
         </div>
         
         <div className="mt-6 sm:mt-12">

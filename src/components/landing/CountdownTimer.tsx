@@ -4,6 +4,7 @@ import { Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface CountdownTimerProps {
   timeLeft: {
@@ -16,6 +17,7 @@ interface CountdownTimerProps {
 
 const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft, onClickCTA }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-lg border-b border-primary/40 py-1.5 md:py-3 px-2 md:px-4 safe-area-top">
@@ -39,14 +41,25 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft, onClickCTA })
           </div>
         </div>
         
-        <Button 
-          onClick={onClickCTA} 
-          size="sm" 
-          className="bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive border border-destructive/20 shadow-lg transition-all hover:scale-105 text-white text-[10px] md:text-sm py-0.5 h-auto"
-        >
-          Sécuriser mon accès
-          <ArrowRight className="ml-1 h-2.5 w-2.5 md:h-3.5 md:w-3.5" />
-        </Button>
+        <div className="flex flex-row xs:flex-row gap-2 xs:gap-2">
+          <Button 
+            onClick={onClickCTA} 
+            size="sm" 
+            className="bg-gradient-to-r from-destructive to-destructive/90 hover:from-destructive/90 hover:to-destructive border border-destructive/20 shadow-lg transition-all hover:scale-105 text-white text-[10px] md:text-sm py-0.5 h-auto"
+          >
+            Sécuriser mon accès
+            <ArrowRight className="ml-1 h-2.5 w-2.5 md:h-3.5 md:w-3.5" />
+          </Button>
+          
+          <Button
+            onClick={() => navigate('/invitation')}
+            size="sm"
+            variant="outline"
+            className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all text-[10px] md:text-sm py-0.5 h-auto"
+          >
+            J'ai un code
+          </Button>
+        </div>
       </div>
     </div>
   );
