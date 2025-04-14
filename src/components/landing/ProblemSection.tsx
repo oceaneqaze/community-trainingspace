@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Brain, CircleDot, CheckCircle } from 'lucide-react';
 
 const ProblemSection: React.FC = () => {
   return (
@@ -8,7 +9,9 @@ const ProblemSection: React.FC = () => {
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
         <Card className="border-primary/30 bg-card/80 shadow-lg">
           <CardContent className="p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-6">🧠 LA FRUSTRATION QUE TU CONNAIS TROP BIEN</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-6 flex items-center">
+              <Brain className="h-5 w-5 mr-2" /> LA FRUSTRATION QUE TU CONNAIS TROP BIEN
+            </h2>
             
             <p className="text-lg mb-6">
               Tu aspires à une présence digitale dominante, à devenir incontournable dans ta niche...<br/>
@@ -16,15 +19,15 @@ const ProblemSection: React.FC = () => {
             </p>
             <ul className="list-none space-y-3 mb-6">
               <li className="flex items-center">
-                <span className="mr-2 text-destructive text-xl">•</span>
+                <span className="mr-2 text-destructive"><CircleDot className="h-5 w-5" /></span>
                 <span className="text-lg">Le syndrome de la page blanche qui paralyse</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-destructive text-xl">•</span>
+                <span className="mr-2 text-destructive"><CircleDot className="h-5 w-5" /></span>
                 <span className="text-lg">L'agenda surchargé qui t'empêche de créer</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-destructive text-xl">•</span>
+                <span className="mr-2 text-destructive"><CircleDot className="h-5 w-5" /></span>
                 <span className="text-lg">L'absence d'une méthode systématique fiable</span>
               </li>
             </ul>
@@ -60,15 +63,15 @@ const ProblemSection: React.FC = () => {
             
             <ul className="list-none space-y-2 mb-4">
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Un unique investissement pour un accès illimité</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Ton code d'administrateur personnel et sécurisé</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Ton compte activé pour toujours — sans abonnement</span>
               </li>
             </ul>

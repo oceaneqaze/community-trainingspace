@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Gift, Users, Award } from 'lucide-react';
+import { Gift, Users, Award, CheckCircle } from 'lucide-react';
 
 interface BonusesSectionProps {
   formattedTimer: string;
@@ -13,8 +13,8 @@ const BonusesSection: React.FC<BonusesSectionProps> = ({ formattedTimer }) => {
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
         <Card className="border-primary/30 bg-card/80 shadow-lg">
           <CardContent className="p-6 sm:p-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-4">
-              🎁 BONUS SI TU AGIS AVANT <span className="bg-primary/90 text-white px-3 py-1 rounded-md">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary mb-4 flex items-center">
+              <Gift className="h-5 w-5 mr-2" /> BONUS SI TU AGIS AVANT <span className="bg-primary/90 text-white px-3 py-1 rounded-md">
                 {formattedTimer}
               </span>
             </h2>
@@ -65,19 +65,19 @@ const BonusesSection: React.FC<BonusesSectionProps> = ({ formattedTimer }) => {
             
             <ul className="list-none space-y-2 mb-6">
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Accès à vie aux mises à jour</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Accès à la communauté IA privée</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Prompts premium + accès ChatGPT 4 gratuit</span>
               </li>
               <li className="flex items-center">
-                <span className="mr-2 text-green-500">✅</span>
+                <span className="mr-2 text-green-500"><CheckCircle className="h-5 w-5" /></span>
                 <span>Et bien sûr : ton <strong>code d'accès réservé</strong>, non partageable</span>
               </li>
             </ul>

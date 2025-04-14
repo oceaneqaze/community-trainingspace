@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Clock, ShieldCheck, Lock, Gift, Warning } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface HeroSectionProps {
@@ -44,12 +44,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-primary/5"></div>
             <CardContent className="p-6 sm:p-8 relative">
               <h2 className="text-xl sm:text-2xl font-bold text-destructive mb-6 flex items-center">
-                <span className="mr-2">🕒</span>URGENCE & COMPTE À REBOURS
+                <Clock className="h-5 w-5 mr-2" /> URGENCE & COMPTE À REBOURS
               </h2>
               
               <div className="mb-6 text-lg sm:text-xl font-bold">
                 <div className="flex items-center justify-center mb-3">
-                  <span className="mr-2">⏱️</span> Offre spéciale DOPE CONTENT expire dans:
+                  <Clock className="h-5 w-5 mr-2" /> Offre spéciale DOPE CONTENT expire dans:
                 </div>
                 <div className="flex justify-center gap-3 mb-6">
                   <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
@@ -69,19 +69,19 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
               <div className="bg-black/30 border border-white/5 rounded-lg p-6 mb-6">
                 <ul className="space-y-3">
                   <li className="flex items-start">
-                    <span className="text-destructive font-bold mr-3 mt-1">💥</span> 
+                    <span className="text-destructive mr-3 mt-1"><Warning className="h-5 w-5" /></span> 
                     <span className="font-semibold text-lg">Prix actuel : 15.000 FCFA – paiement unique</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-destructive font-bold mr-3 mt-1">🔒</span> 
+                    <span className="text-destructive mr-3 mt-1"><Lock className="h-5 w-5" /></span> 
                     <span className="font-semibold text-lg">Accès sécurisé via code admin UNIQUE (1 seul accès par personne)</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-destructive font-bold mr-3 mt-1">🎁</span> 
+                    <span className="text-destructive mr-3 mt-1"><Gift className="h-5 w-5" /></span> 
                     <span className="font-semibold text-lg">Bonus offerts aux 100 premiers uniquement</span>
                   </li>
                   <li className="flex items-start">
-                    <span className="text-destructive font-bold mr-3 mt-1">🚫</span> 
+                    <span className="text-destructive mr-3 mt-1"><Warning className="h-5 w-5" /></span> 
                     <span>Après ? Le prix monte et les bonus disparaissent.</span>
                   </li>
                 </ul>

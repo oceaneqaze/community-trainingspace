@@ -1,13 +1,15 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users } from 'lucide-react';
+import { Users, Percent, Calendar, TrendingUp } from 'lucide-react';
 
 const TestimonialsSection: React.FC = () => {
   return (
     <section className="py-12 sm:py-16 bg-card/30">
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
-        <h2 className="text-xl sm:text-3xl font-bold text-center mb-8">👥 CE QU'ILS EN DISENT</h2>
+        <h2 className="text-xl sm:text-3xl font-bold text-center mb-8 flex items-center justify-center">
+          <Users className="h-6 w-6 mr-2" /> CE QU'ILS EN DISENT
+        </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="border-primary/30 bg-card/80 shadow-lg">

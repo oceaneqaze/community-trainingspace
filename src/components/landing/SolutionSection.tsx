@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Zap, Users, BarChart3, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Zap, Users, BarChart3, ShieldCheck, Lightbulb } from 'lucide-react';
 
 interface SolutionSectionProps {
   onClickCTA: () => void;
@@ -14,7 +14,9 @@ const SolutionSection: React.FC<SolutionSectionProps> = ({ onClickCTA }) => {
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
         <Card className="border-primary/30 bg-card/80 shadow-lg">
           <CardContent className="p-6 sm:p-8">
-            <h2 className="text-xl sm:text-3xl font-bold text-primary mb-4">💡 LA SOLUTION</h2>
+            <h2 className="text-xl sm:text-3xl font-bold text-primary mb-4 flex items-center">
+              <Lightbulb className="h-6 w-6 mr-2" /> LA SOLUTION
+            </h2>
             
             <div className="mb-8 text-center">
               <p className="text-2xl font-bold mb-2">Et si je te disais que tu peux arrêter de galérer dès aujourd'hui ?</p>

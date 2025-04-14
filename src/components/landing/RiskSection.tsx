@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, XCircle, CheckCircle } from 'lucide-react';
 
 const RiskSection: React.FC = () => {
   return (
@@ -18,15 +18,15 @@ const RiskSection: React.FC = () => {
             <div className="space-y-6">
               <div className="border-l-4 border-destructive/80 pl-6 py-2">
                 <p className="text-lg mb-3 flex items-center">
-                  <span className="text-destructive font-bold mr-2">❌</span> 
+                  <span className="text-destructive font-bold mr-2"><XCircle className="h-5 w-5" /></span> 
                   <span className="text-foreground/90">Ton code est personnel — le perdre, c'est perdre ton accès</span>
                 </p>
                 <p className="text-lg mb-3 flex items-center">
-                  <span className="text-destructive font-bold mr-2">❌</span> 
+                  <span className="text-destructive font-bold mr-2"><XCircle className="h-5 w-5" /></span> 
                   <span className="text-foreground/90">Tout partage non autorisé = désactivation immédiate et définitive</span>
                 </p>
                 <p className="text-lg flex items-center">
-                  <span className="text-green-500 font-bold mr-2">✅</span> 
+                  <span className="text-green-500 font-bold mr-2"><CheckCircle className="h-5 w-5" /></span> 
                   <span className="text-foreground/90">Ton paiement sécurise instantanément ton code — priorité absolue</span>
                 </p>
               </div>
