@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PricingSectionProps {
   timeLeft: {
@@ -13,6 +14,8 @@ interface PricingSectionProps {
 }
 
 const PricingSection: React.FC<PricingSectionProps> = ({ timeLeft, onClickCTA }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <section className="py-12 sm:py-16 bg-card/30">
       <div className="mx-auto max-w-5xl px-4 lg:px-8">
@@ -68,8 +71,8 @@ const PricingSection: React.FC<PricingSectionProps> = ({ timeLeft, onClickCTA })
               <div className="text-center">
                 <Button 
                   onClick={onClickCTA}
-                  className="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-8 rounded-lg text-lg shadow-lg hover:shadow-xl transition-all"
-                  size="lg"
+                  className={`bg-primary hover:bg-primary/90 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all w-full sm:w-auto ${isMobile ? 'py-3 px-5 text-base' : 'py-4 px-8 text-lg'}`}
+                  size={isMobile ? "default" : "lg"}
                 >
                   Sécuriser ma place maintenant
                 </Button>
