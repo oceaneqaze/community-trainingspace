@@ -134,8 +134,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
         <div className="relative overflow-hidden rounded-xl pro-card backdrop-blur-sm mx-auto max-w-4xl">
           <div className="aspect-video w-full">
             <img 
-              src="/lovable-uploads/0cc014bc-d4f7-4cba-9002-f23dfd3daf89.png" 
-              alt="DOPE CONTENT Preview" 
+              src="/lovable-uploads/b6c88338-3a6c-4e48-b5f6-accf90245eb2.png" 
+              alt="Emma-Alk DOHOU" 
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/80 to-black/70">
