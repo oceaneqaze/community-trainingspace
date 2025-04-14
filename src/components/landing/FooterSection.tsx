@@ -45,7 +45,7 @@ const FooterSection: React.FC<FooterSectionProps> = ({ formattedTimer }) => {
           </a>
           
           <Button 
-            onClick={() => navigate('/invitation')} 
+            onClick={() => navigate('/signup')} 
             variant="outline" 
             className="w-full sm:w-auto text-xs sm:text-base"
           >

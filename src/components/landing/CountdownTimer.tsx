@@ -52,7 +52,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ timeLeft, onClickCTA })
           </Button>
           
           <Button
-            onClick={() => navigate('/invitation')}
+            onClick={() => navigate('/signup')}
             size="sm"
             variant="outline"
             className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all text-[10px] md:text-sm py-0.5 h-auto"

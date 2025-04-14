@@ -37,7 +37,7 @@ const GuaranteeSection: React.FC = () => {
                     Ton risque? Zéro. Ton potentiel? Illimité.
                   </p>
                   <Button 
-                    onClick={() => navigate('/invitation')} 
+                    onClick={() => navigate('/signup')} 
                     variant="outline" 
                     className="w-full sm:w-auto mt-2 sm:mt-0"
                   >

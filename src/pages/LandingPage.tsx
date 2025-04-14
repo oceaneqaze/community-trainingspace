@@ -79,7 +79,7 @@ const LandingPage = () => {
   };
 
   const handleHaveCode = () => {
-    navigate('/invitation');
+    navigate('/signup');
   };
   
   return (

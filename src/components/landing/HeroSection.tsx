@@ -59,7 +59,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/invitation')}
+              onClick={() => navigate('/signup')}
               size={isMobile ? "default" : "lg"}
               className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 w-full sm:w-auto text-sm md:text-base"
             >
