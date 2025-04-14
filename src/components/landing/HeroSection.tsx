@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock, ShieldCheck, Lock, Gift, AlertTriangle } from 'lucide-react';
@@ -36,51 +35,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             Pas d'idées, pas le temps, pas de stratégie ?<br/>
             <span className="font-semibold text-white">Transforme-toi en machine à contenu en 30 jours.</span>
           </p>
-          
-          <Card className="mb-12 border-t border-l border-white/10 border-r border-b border-black/20 bg-gradient-to-br from-card/95 to-card/70 shadow-xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-destructive/5 via-transparent to-primary/5"></div>
-            <CardContent className="p-6 sm:p-8 relative">
-              <h2 className="text-xl sm:text-2xl font-bold text-destructive mb-6 flex items-center">
-                <Clock className="h-5 w-5 mr-2" /> URGENCE & COMPTE À REBOURS
-              </h2>
-              
-              <div className="mb-6 text-lg sm:text-xl font-bold">
-                <div className="flex items-center justify-center mb-3">
-                  <Clock className="h-5 w-5 mr-2" /> Offre spéciale DOPE CONTENT expire dans:
-                </div>
-                <div className="flex justify-center gap-3 mb-6">
-                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
-                    {String(timeLeft.hours).padStart(2, '0')}
-                  </div>
-                  <span className="text-2xl">:</span>
-                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
-                    {String(timeLeft.minutes).padStart(2, '0')}
-                  </div>
-                  <span className="text-2xl">:</span>
-                  <div className="bg-gradient-to-b from-destructive to-destructive/80 text-white px-4 py-2 rounded shadow-lg">
-                    {String(timeLeft.seconds).padStart(2, '0')}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3 mb-6">
-                <p className="text-lg leading-relaxed">
-                  Imagine un instant : tu as une chance unique de transformer ta manière de créer du contenu, de devenir une machine à attirer des clients, mais cette opportunité a une limite. Ce compte à rebours, là, juste au-dessus, c'est le temps qu'il te reste pour saisir cette formation à un prix ridicule de 15.000 FCFA.
-                </p>
-                
-                <p className="mb-2 text-lg">Dès que tu payes, tu reçois un <strong className="text-primary">code confidentiel d'accès</strong>.</p>
-                <p className="mb-2 text-lg">Ce code est <strong className="text-primary">unique, valable une seule fois</strong>.</p>
-                <p className="mb-2 text-lg">C'est lui qui débloque <strong className="text-primary">l'inscription à la plateforme</strong>.</p>
-                <p className="mb-2 text-lg"><strong className="text-primary">Pas de double usage. Pas de partage. Pas de triche.</strong></p>
-              </div>
-              
-              <div className="bg-gradient-to-r from-destructive/20 to-destructive/10 p-4 rounded-lg border border-destructive/30">
-                <p className="text-xl font-bold text-center">
-                  Tu veux cette clé ? Bouge avant que le timer ne tombe.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
           
           <div className="flex flex-col sm:flex-row justify-center gap-5 mb-10">
             <Button 
