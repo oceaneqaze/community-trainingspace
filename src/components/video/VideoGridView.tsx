@@ -45,6 +45,7 @@ const VideoGridView: React.FC<VideoGridViewProps> = ({
                   video={video}
                   onClick={() => onVideoClick(video.id)}
                   className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+                  showProgress={true}
                 />
               ))}
             </div>
@@ -62,6 +63,7 @@ const VideoGridView: React.FC<VideoGridViewProps> = ({
           video={video}
           onClick={() => onVideoClick(video.id)}
           className="h-full hover:shadow-lg hover:shadow-primary/10 transition-all duration-300"
+          showProgress={true}
         />
       ))}
     </div>

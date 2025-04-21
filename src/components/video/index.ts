@@ -8,3 +8,5 @@ export { default as VideoThumbnail } from './VideoThumbnail';
 export { default as VideoActions } from './VideoActions';
 export { default as VideoProgress } from './VideoProgress';
 export { default as VideoCard } from './VideoCard';
+export { default as VideoProgressBar } from './VideoProgressBar';
+

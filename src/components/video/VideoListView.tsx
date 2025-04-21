@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/table';
 import NoVideosFound from './NoVideosFound';
 import LoadingState from './LoadingState';
+import VideoProgressBar from './VideoProgressBar';
 
 interface VideoListViewProps {
   isLoading: boolean;
@@ -64,6 +65,13 @@ const VideoListView: React.FC<VideoListViewProps> = ({
               </div>
             </div>
           </div>
+          {typeof video.progress === 'number' && (
+            <VideoProgressBar 
+              progress={video.progress}
+              completed={video.completed}
+              className="mt-2 mb-2"
+            />
+          )}
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>{video.date}</span>
             <Button 
@@ -104,6 +112,7 @@ const VideoListView: React.FC<VideoListViewProps> = ({
                       <TableHead className="w-[300px]">Titre</TableHead>
                       <TableHead>Durée</TableHead>
                       <TableHead>Date</TableHead>
+                      <TableHead>Progression</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -124,6 +133,17 @@ const VideoListView: React.FC<VideoListViewProps> = ({
                         </TableCell>
                         <TableCell>{video.duration}</TableCell>
                         <TableCell>{video.date}</TableCell>
+                        <TableCell>
+                          {typeof video.progress === 'number' ? (
+                            <VideoProgressBar 
+                              progress={video.progress} 
+                              completed={video.completed}
+                              className="w-32"
+                            />
+                          ) : (
+                            <span className="text-muted-foreground text-sm">Non commencée</span>
+                          )}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button 
                             variant="outline" 
@@ -163,6 +183,7 @@ const VideoListView: React.FC<VideoListViewProps> = ({
                 <TableHead>Catégorie</TableHead>
                 <TableHead>Durée</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead>Progression</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -188,6 +209,17 @@ const VideoListView: React.FC<VideoListViewProps> = ({
                   </TableCell>
                   <TableCell>{video.duration}</TableCell>
                   <TableCell>{video.date}</TableCell>
+                  <TableCell>
+                    {typeof video.progress === 'number' ? (
+                      <VideoProgressBar 
+                        progress={video.progress} 
+                        completed={video.completed}
+                        className="w-32"
+                      />
+                    ) : (
+                      <span className="text-muted-foreground text-sm">Non commencée</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button 
                       variant="outline" 

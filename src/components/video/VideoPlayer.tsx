@@ -1,119 +1,60 @@
 
-import React, { useEffect, useRef } from 'react';
-import { DEFAULT_THUMBNAIL } from '@/data/mockData';
+import React, { useRef, useEffect, forwardRef, ForwardRefRenderFunction } from 'react';
 
 interface VideoPlayerProps {
   videoUrl: string;
-  poster?: string;
+  onTimeUpdate?: (e: React.SyntheticEvent<HTMLVideoElement>) => void;
+  onEnded?: () => void;
+  initialTime?: number;
+  className?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, poster = DEFAULT_THUMBNAIL }) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const isScreenRecUrl = videoUrl?.includes('screenrec.com') || videoUrl?.includes('.m3u8');
+const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> = (
+  { videoUrl, onTimeUpdate, onEnded, initialTime = 0, className = "" },
+  ref
+) => {
+  const internalRef = useRef<HTMLVideoElement>(null);
+  const resolvedRef = ref || internalRef;
   
-  // Handle WebVideoCore initialization for ScreenRec videos
+  // Set initial time if provided
   useEffect(() => {
-    if (isScreenRecUrl && iframeRef.current) {
-      const iframe = iframeRef.current;
-      
-      // Set up message event listener
-      const handleMessage = (event: MessageEvent) => {
-        if (event.source !== iframe.contentWindow) return;
-        
-        const key = 'data' in event ? 'data' : 'message';
-        const details = event[key];
-        
-        if (details?.message === 'init') {
-          sendMessageToPlayer();
-        }
-      };
-      
-      // Function to send initialization data to player
-      const sendMessageToPlayer = () => {
-        iframe.contentWindow?.postMessage({
-          message: 'init',
-          data: {
-            customUrl: videoUrl,
-            customPoster: poster,
-            colorBase: '#8B5CF6',
-            colorText: '#ffffff',
-            colorHover: '#9b87f5',
-            threeColorsMode: true,
-            playButton: true,
-            playButtonStyle: 'pulsing'
-          }
-        }, '*');
-      };
-      
-      // Add event listener
-      window.addEventListener('message', handleMessage, false);
-      
-      // Initialize the player
-      sendMessageToPlayer();
-      
-      // Clean up event listener on unmount
-      return () => {
-        window.removeEventListener('message', handleMessage, false);
-      };
+    if (initialTime > 0 && typeof resolvedRef !== 'function' && resolvedRef.current) {
+      resolvedRef.current.currentTime = initialTime;
     }
-  }, [videoUrl, isScreenRecUrl, poster]);
-  
-  // Render WebVideoCore player for ScreenRec videos
-  if (isScreenRecUrl) {
+  }, [initialTime, resolvedRef]);
+
+  const isExternalVideo = videoUrl?.includes('screenrec.com') || 
+                         (videoUrl?.startsWith('http') && 
+                          !videoUrl?.includes('storage.googleapis.com'));
+
+  // Render iframe for external videos
+  if (isExternalVideo) {
     return (
-      <div className="rounded-lg overflow-hidden bg-black">
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-          <iframe
-            ref={iframeRef}
-            src="https://play.webvideocore.net/html5.html"
-            className="absolute top-0 left-0 w-full h-full"
-            frameBorder="0"
-            allowFullScreen
-            allowTransparency
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            title="ScreenRec Video"
-          ></iframe>
-        </div>
+      <div className={`aspect-video w-full bg-black ${className}`}>
+        <iframe 
+          src={videoUrl} 
+          title="Video player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowFullScreen
+          className="w-full h-full"
+        />
       </div>
     );
   }
-  
-  // Handle other external video URLs
-  const isExternalUrl = videoUrl?.startsWith('http') && !videoUrl?.includes('storage.googleapis.com');
-  
-  if (isExternalUrl && !isScreenRecUrl) {
-    return (
-      <div className="rounded-lg overflow-hidden bg-black">
-        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-          <iframe
-            src={videoUrl}
-            className="absolute top-0 left-0 w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title="External Video"
-          ></iframe>
-        </div>
-      </div>
-    );
-  }
-  
-  // Default video player for uploaded videos
+
+  // Render native video player for uploaded videos
   return (
-    <div className="rounded-lg overflow-hidden bg-black">
-      <video 
-        controls 
-        className="w-full aspect-video"
-        poster={poster}
-        src={videoUrl}
-        preload="metadata"
-        controlsList="nodownload"
-        playsInline
-      >
-        Votre navigateur ne supporte pas la lecture de vidéos.
-      </video>
-    </div>
+    <video
+      ref={resolvedRef as React.RefObject<HTMLVideoElement>}
+      controls
+      className={`aspect-video w-full bg-black ${className}`}
+      onTimeUpdate={onTimeUpdate}
+      onEnded={onEnded}
+    >
+      <source src={videoUrl} type="video/mp4" />
+      Votre navigateur ne prend pas en charge la lecture vidéo.
+    </video>
   );
 };
 
-export default VideoPlayer;
+export default forwardRef(VideoPlayer);

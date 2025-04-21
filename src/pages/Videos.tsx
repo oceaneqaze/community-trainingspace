@@ -12,6 +12,7 @@ import {
   CardContent 
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from '@/components/ui/badge';
 
 // Importing our components
 import VideosHeader from '@/components/video/VideosHeader';
@@ -20,6 +21,7 @@ import VideoFilters from '@/components/video/VideoFilters';
 import VideoViewToggle from '@/components/video/VideoViewToggle';
 import VideoGridView from '@/components/video/VideoGridView';
 import VideoListView from '@/components/video/VideoListView';
+import { useVideoProgress } from '@/hooks/useVideoProgress';
 
 type DBVideo = {
   id: string;
@@ -42,8 +44,10 @@ const Videos: React.FC = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeView, setActiveView] = useState<'grid' | 'list'>('grid');
-  const { isAuthenticated, isAdmin } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<'all' | 'in-progress' | 'completed'>('all');
+  const { isAuthenticated, isAdmin, user } = useAuth();
   const navigate = useNavigate();
+  const { fetchMultipleProgress } = useVideoProgress();
 
   const fetchVideos = async () => {
     try {
@@ -68,10 +72,26 @@ const Videos: React.FC = () => {
           year: 'numeric'
         }),
         likes: 0,
-        comments: 0
+        comments: 0,
+        videoUrl: video.video_url,
       }));
 
-      setVideos(transformedVideos);
+      // Fetch progress data for all videos
+      if (user) {
+        const videoIds = transformedVideos.map(v => v.id);
+        const progressData = await fetchMultipleProgress(videoIds);
+        
+        // Merge progress data with videos
+        const videosWithProgress = transformedVideos.map(video => ({
+          ...video,
+          progress: progressData[video.id]?.progress || 0,
+          completed: progressData[video.id]?.completed || false,
+        }));
+        
+        setVideos(videosWithProgress);
+      } else {
+        setVideos(transformedVideos);
+      }
     } catch (error) {
       console.error('Error fetching videos:', error);
       toast({
@@ -88,7 +108,7 @@ const Videos: React.FC = () => {
     if (isAuthenticated) {
       fetchVideos();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     setCategories(getCategories(videos));
@@ -97,6 +117,7 @@ const Videos: React.FC = () => {
   useEffect(() => {
     let results = videos;
     
+    // Filter by search term
     if (searchTerm) {
       results = results.filter(video => 
         video.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,12 +125,22 @@ const Videos: React.FC = () => {
       );
     }
     
+    // Filter by category
     if (selectedCategory) {
       results = results.filter(video => video.category === selectedCategory);
     }
     
+    // Filter by status
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'completed') {
+        results = results.filter(video => video.completed);
+      } else if (statusFilter === 'in-progress') {
+        results = results.filter(video => video.progress && video.progress > 0 && !video.completed);
+      }
+    }
+    
     setFilteredVideos(results);
-  }, [searchTerm, selectedCategory, videos]);
+  }, [searchTerm, selectedCategory, videos, statusFilter]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -149,13 +180,52 @@ const Videos: React.FC = () => {
             <VideoSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
             
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <VideoFilters
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-              />
+              <div className="flex flex-wrap items-center gap-3">
+                <VideoFilters
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                />
+                
+                <div className="relative">
+                  <select
+                    className="h-full px-2.5 sm:px-3 pr-8 py-2 sm:py-2 text-sm border border-input rounded-md shadow-sm focus:ring-primary focus:border-primary appearance-none bg-background"
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as 'all' | 'in-progress' | 'completed')}
+                  >
+                    <option value="all">Tous les statuts</option>
+                    <option value="in-progress">En cours</option>
+                    <option value="completed">Terminés</option>
+                  </select>
+                </div>
+              </div>
               
               <VideoViewToggle activeView={activeView} setActiveView={setActiveView} />
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {statusFilter !== 'all' && (
+                <Badge variant="outline" className="bg-primary/10">
+                  {statusFilter === 'completed' ? 'Vidéos terminées' : 'Vidéos en cours'}
+                </Badge>
+              )}
+              {selectedCategory && (
+                <Badge variant="outline" className="bg-secondary/10">
+                  {selectedCategory}
+                </Badge>
+              )}
+              {(statusFilter !== 'all' || selectedCategory) && (
+                <Badge 
+                  variant="outline" 
+                  className="bg-destructive/10 cursor-pointer"
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setSelectedCategory(null);
+                  }}
+                >
+                  Effacer les filtres
+                </Badge>
+              )}
             </div>
           </div>
           

@@ -1,78 +1,84 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import VideoThumbnail from './VideoThumbnail';
-import VideoActions from './VideoActions';
-import VideoProgress from './VideoProgress';
-import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import VideoProgressBar from './VideoProgressBar';
 
-export type VideoProps = {
+export interface VideoProps {
   id: string;
   title: string;
   thumbnail: string;
   duration: string;
   category: string;
   date: string;
-  viewed?: boolean;
-  progress?: number;
   likes?: number;
   comments?: number;
+  progress?: number;
+  completed?: boolean;
   videoUrl?: string;
-};
+}
 
 interface VideoCardProps {
   video: VideoProps;
-  className?: string;
   onClick?: () => void;
+  className?: string;
+  showProgress?: boolean;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({ video, className, onClick }) => {
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (onClick) {
-      onClick();
-    } else {
-      navigate(`/videos/${video.id}`);
-    }
-  };
-
-  const handleComments = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    navigate(`/videos/${video.id}`);
-  };
+const VideoCard: React.FC<VideoCardProps> = ({ 
+  video, 
+  onClick, 
+  className,
+  showProgress = true
+}) => {
+  const { 
+    title, 
+    thumbnail, 
+    duration, 
+    category, 
+    date, 
+    progress, 
+    completed 
+  } = video;
 
   return (
-    <div 
-      className={cn(
-        "overflow-hidden rounded-lg bg-white shadow card-hover cursor-pointer animate-scale-in", 
-        className
-      )}
-      onClick={handleClick}
+    <Card 
+      className={cn("overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer", className)}
+      onClick={onClick}
     >
-      <VideoThumbnail 
-        thumbnail={video.thumbnail}
-        title={video.title}
-        duration={video.duration}
-        viewed={video.viewed}
-      />
+      <div className="aspect-video relative">
+        <img 
+          src={thumbnail} 
+          alt={title} 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 text-xs font-medium text-white bg-black/70 rounded">
+          {duration}
+        </div>
+        {category && (
+          <div className="absolute top-2 left-2">
+            <Badge variant="secondary" className="bg-black/50 hover:bg-black/60 text-white border-none">
+              {category}
+            </Badge>
+          </div>
+        )}
+      </div>
       
-      <div className="p-4">
-        <span className="text-xs font-medium text-blue-600">{video.category}</span>
-        <h3 className="mt-1 line-clamp-2 text-base font-semibold text-gray-900">{video.title}</h3>
-        <div className="mt-2 flex items-center justify-between">
-          <span className="text-xs text-gray-500">{video.date}</span>
-          
-          <VideoActions 
-            initialLikes={video.likes || 0}
-            commentsCount={video.comments || 0}
-            onComments={handleComments}
-          />
+      <CardContent className="p-3">
+        <h3 className="font-medium line-clamp-2 mb-1">{title}</h3>
+        <div className="flex justify-between text-xs text-muted-foreground mb-1">
+          <span>{date}</span>
         </div>
         
-        <VideoProgress progress={video.progress} />
-      </div>
-    </div>
+        {showProgress && typeof progress === 'number' && (
+          <VideoProgressBar 
+            progress={progress} 
+            completed={completed}
+          />
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

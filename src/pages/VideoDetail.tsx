@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, BookmarkCheck, RotateCcw } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { VideoProps } from '@/components/VideoCard';
 import { 
@@ -14,15 +14,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 import { useVideoLike } from "@/hooks/useVideoLike";
+import { useVideoProgress } from '@/hooks/useVideoProgress';
+import { Button } from '@/components/ui/button';
+import VideoProgressBar from '@/components/video/VideoProgressBar';
 
-// Nouvelle interface pour le commentaire DB brut
 interface DBComment {
   id: string;
   user_id: string | null;
   video_id: string | null;
   content: string;
   created_at: string | null;
-  // updated_at non utilisé ici pour l’instant
 }
 
 interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
@@ -34,6 +35,13 @@ interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { liked, likesCount, toggleLike, processing } = useVideoLike(id || "");
+  const { 
+    progress, 
+    completed, 
+    updateProgress, 
+    markAsCompleted, 
+    resetProgress 
+  } = useVideoProgress(id);
 
   const [video, setVideo] = useState<VideoDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,8 +49,53 @@ const VideoDetail: React.FC = () => {
   const [loadingComments, setLoadingComments] = useState(false);
   const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Récupération des commentaires
+  const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    if (!id) return;
+    
+    const video = e.currentTarget;
+    const currentProgress = Math.floor((video.currentTime / video.duration) * 100);
+    
+    if (currentProgress % 5 === 0 || currentProgress > 95) {
+      const isCompleted = currentProgress > 95;
+      updateProgress(id, currentProgress, isCompleted);
+    }
+  };
+
+  const handleVideoEnd = () => {
+    if (id) {
+      markAsCompleted(id);
+      toast({
+        title: "Vidéo terminée",
+        description: "Cette vidéo a été marquée comme terminée",
+      });
+    }
+  };
+  
+  const handleMarkCompleted = () => {
+    if (id) {
+      markAsCompleted(id);
+      toast({
+        title: "Vidéo marquée comme terminée",
+        description: "Vous pouvez continuer à la regarder à tout moment",
+      });
+    }
+  };
+  
+  const handleResetProgress = () => {
+    if (id) {
+      resetProgress(id);
+      if (videoRef.current) {
+        videoRef.current.currentTime = 0;
+      }
+      toast({
+        title: "Progression réinitialisée",
+        description: "La progression de cette vidéo a été remise à zéro",
+      });
+    }
+  };
+
   const fetchComments = async (videoId: string) => {
     setLoadingComments(true);
     try {
@@ -54,8 +107,6 @@ const VideoDetail: React.FC = () => {
 
       if (error) throw error;
 
-      // On va aussi charger les profils utilisateurs si besoin (par défaut on fake l’avatar/nickname)
-      // Idéalement à optimiser (jointure ou cache), ici simple.
       const mappedComments: CommentProps[] = await Promise.all(
         (dbComments || []).map(async (comment: DBComment) => {
           let username = "Utilisateur";
@@ -84,7 +135,7 @@ const VideoDetail: React.FC = () => {
                 })
               : 'Maintenant',
             likes: 0,
-            onLike: () => {}, // à implémenter plus tard
+            onLike: () => {},
           };
         })
       );
@@ -100,7 +151,6 @@ const VideoDetail: React.FC = () => {
     }
   };
 
-  // Ajout de commentaire en base
   const handleAddComment = async (content: string) => {
     if (!user || !id) {
       toast({
@@ -123,7 +173,6 @@ const VideoDetail: React.FC = () => {
 
       if (error) throw error;
 
-      // Rafraîchit la liste après ajout
       fetchComments(id);
     } catch (error) {
       toast({
@@ -134,9 +183,7 @@ const VideoDetail: React.FC = () => {
     }
   };
 
-  // Like d’un commentaire (à implémenter en base plus tard)
   const handleCommentLike = (commentId: string) => {
-    // Pas d’implémentation de likes persistants ici (structure supabase non prévue pour les commentaires)
     setComments((prev) =>
       prev.map((comment) =>
         comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment
@@ -155,7 +202,6 @@ const VideoDetail: React.FC = () => {
     }
     if (!id) return;
 
-    // Récupère vidéo détails
     const fetchVideoData = async () => {
       setIsLoading(true);
       try {
@@ -189,8 +235,9 @@ const VideoDetail: React.FC = () => {
             year: 'numeric'
           }),
           likes: 0,
-          progress: 0,
-          comments: [], // ignoré ici, géré séparément
+          progress: progress,
+          completed: completed,
+          comments: [],
         };
         setVideo(formattedVideo);
       } catch (error) {
@@ -206,11 +253,10 @@ const VideoDetail: React.FC = () => {
 
     fetchVideoData();
     fetchComments(id);
-  }, [id, isAuthenticated, navigate]);
+  }, [id, isAuthenticated, navigate, progress, completed]);
 
   useEffect(() => {
     if (video) setVideo({ ...video, likes: likesCount });
-    // eslint-disable-next-line
   }, [likesCount]);
 
   if (isLoading) return <div className="page-container">Chargement...</div>;
@@ -228,7 +274,48 @@ const VideoDetail: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <VideoPlayer videoUrl={video.videoUrl} />
+          <div className="mb-4 relative">
+            <VideoPlayer 
+              videoUrl={video.videoUrl} 
+              onTimeUpdate={handleTimeUpdate}
+              onEnded={handleVideoEnd}
+              ref={videoRef}
+              initialTime={progress ? (progress / 100) * (videoRef.current?.duration || 0) : 0}
+            />
+          </div>
+
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium">Progression</h3>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={completed}
+                  onClick={handleMarkCompleted}
+                  className="text-xs"
+                >
+                  <BookmarkCheck className="h-4 w-4 mr-1" />
+                  Marquer comme terminé
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleResetProgress}
+                  className="text-xs"
+                >
+                  <RotateCcw className="h-4 w-4 mr-1" />
+                  Réinitialiser
+                </Button>
+              </div>
+            </div>
+            <VideoProgressBar 
+              progress={progress} 
+              completed={completed} 
+              className="h-2"
+              showTooltip={false}
+            />
+          </div>
 
           <VideoInfo
             title={video.title}
