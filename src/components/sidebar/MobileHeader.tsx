@@ -10,7 +10,7 @@ interface MobileHeaderProps {
 
 const MobileHeader: React.FC<MobileHeaderProps> = ({ toggleMobileMenu }) => {
   return (
-    <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-30">
+    <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-50 w-full">
       <Link to="/" className="flex items-center gap-2">
         <img
           src="/lovable-uploads/0cc014bc-d4f7-4cba-9002-f23dfd3daf89.png"
@@ -27,4 +27,3 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ toggleMobileMenu }) => {
 };
 
 export default MobileHeader;
-

@@ -4,6 +4,7 @@ body {
   padding: 0;
   height: 100%;
   width: 100%;
+  overflow-x: hidden;
 }
 
 #root {
@@ -13,12 +14,14 @@ body {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  position: relative;
 }
 
 main {
   flex: 1;
   overflow-y: auto;
   width: 100%;
+  position: relative;
 }
 
 .container {
@@ -127,4 +130,10 @@ main {
   a, button {
     padding: 0.5rem;
   }
+}
+
+/* Ensure sticky elements work properly */
+.sticky {
+  position: sticky;
+  z-index: 40;
 }
