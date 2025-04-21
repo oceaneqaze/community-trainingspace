@@ -11,17 +11,19 @@ export interface CommentProps {
   content: string;
   timestamp: string;
   likes: number;
+  liked?: boolean;
   onLike: (commentId: string) => void;
 }
 
-const CommentItem: React.FC<CommentProps> = ({ 
-  id, 
-  username, 
-  avatar, 
-  content, 
-  timestamp, 
-  likes, 
-  onLike 
+const CommentItem: React.FC<CommentProps> = ({
+  id,
+  username,
+  avatar,
+  content,
+  timestamp,
+  likes,
+  liked,
+  onLike,
 }) => {
   return (
     <div className="bg-gray-50 p-4 rounded-lg">
@@ -36,11 +38,15 @@ const CommentItem: React.FC<CommentProps> = ({
           </div>
           <p className="mt-1 text-gray-700">{content}</p>
           <div className="mt-2 flex items-center">
-            <button 
+            <button
               onClick={() => onLike(id)}
-              className="flex items-center text-gray-500 text-sm hover:text-rose-500"
+              className={`flex items-center text-gray-500 text-sm hover:text-rose-500 ${
+                liked ? "font-bold text-rose-500" : ""
+              }`}
             >
-              <Heart className="h-3 w-3 mr-1" />
+              <Heart
+                className={`h-3 w-3 mr-1 ${liked ? "fill-rose-500 text-rose-500" : ""}`}
+              />
               {likes} J'aime
             </button>
           </div>

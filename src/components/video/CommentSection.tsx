@@ -5,17 +5,19 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import CommentItem, { CommentProps } from './CommentItem';
+import { useCommentLike } from "@/hooks/useCommentLike";
 
 interface CommentSectionProps {
   comments: CommentProps[];
   onAddComment: (content: string) => void;
   onLikeComment: (commentId: string) => void;
+  videoId?: string;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ 
-  comments, 
-  onAddComment, 
-  onLikeComment 
+const CommentSection: React.FC<CommentSectionProps> = ({
+  comments,
+  onAddComment,
+  videoId,
 }) => {
   const [newComment, setNewComment] = useState('');
   const { toast } = useToast();
@@ -26,7 +28,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     onAddComment(newComment);
     setNewComment('');
-    
+
     toast({
       title: "Commentaire ajouté",
       description: "Votre commentaire a été publié avec succès.",
@@ -54,13 +56,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       </form>
 
       <div className="mt-6 space-y-4">
-        {comments.map((comment) => (
-          <CommentItem
-            key={comment.id}
-            {...comment}
-            onLike={onLikeComment}
-          />
-        ))}
+        {comments.map((comment) => {
+          // Comment like state
+          const { liked, likesCount, toggleLike } = useCommentLike(comment.id);
+          return (
+            <CommentItem
+              key={comment.id}
+              {...comment}
+              likes={likesCount}
+              liked={liked}
+              onLike={() => toggleLike()}
+            />
+          );
+        })}
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -14,6 +13,7 @@ import { CommentProps } from '@/components/video/CommentItem';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DEFAULT_THUMBNAIL } from '@/data/mockData';
+import { useVideoLike } from "@/hooks/useVideoLike";
 
 // Nouvelle interface pour le commentaire DB brut
 interface DBComment {
@@ -33,6 +33,8 @@ interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
 
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { liked, likesCount, toggleLike, processing } = useVideoLike(id || "");
+
   const [video, setVideo] = useState<VideoDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [comments, setComments] = useState<CommentProps[]>([]);
@@ -206,12 +208,17 @@ const VideoDetail: React.FC = () => {
     fetchComments(id);
   }, [id, isAuthenticated, navigate]);
 
+  useEffect(() => {
+    if (video) setVideo({ ...video, likes: likesCount });
+    // eslint-disable-next-line
+  }, [likesCount]);
+
   if (isLoading) return <div className="page-container">Chargement...</div>;
   if (!video) return <div className="page-container">Vidéo non trouvée</div>;
 
   return (
     <div className="page-container">
-      <button 
+      <button
         onClick={goBack}
         className="flex items-center text-blue-600 mb-4 hover:underline"
       >
@@ -222,23 +229,29 @@ const VideoDetail: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <VideoPlayer videoUrl={video.videoUrl} />
-          
-          <VideoInfo 
+
+          <VideoInfo
             title={video.title}
             description={video.description}
             category={video.category}
             date={video.date}
-            initialLikes={video.likes}
+            initialLikes={likesCount}
             videoId={video.id}
+            liked={liked}
+            onLike={toggleLike}
+            likeProcessing={processing}
           />
 
-          <CommentSection 
+          <CommentSection
             comments={comments}
             onAddComment={handleAddComment}
             onLikeComment={handleCommentLike}
+            videoId={id || ""}
           />
           {loadingComments && (
-            <div className="text-sm text-muted-foreground mt-2">Chargement des commentaires...</div>
+            <div className="text-sm text-muted-foreground mt-2">
+              Chargement des commentaires...
+            </div>
           )}
         </div>
 
@@ -251,4 +264,3 @@ const VideoDetail: React.FC = () => {
 };
 
 export default VideoDetail;
-
