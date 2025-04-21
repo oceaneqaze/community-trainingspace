@@ -15,7 +15,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { DEFAULT_THUMBNAIL } from '@/data/mockData';
 
-// Modified interface to include all the fields we need
+// Nouvelle interface pour le commentaire DB brut
+interface DBComment {
+  id: string;
+  user_id: string | null;
+  video_id: string | null;
+  content: string;
+  created_at: string | null;
+  // updated_at non utilisé ici pour l’instant
+}
+
 interface VideoDetail extends Omit<VideoProps, "thumbnail" | "comments"> {
   description: string;
   videoUrl: string;
@@ -26,26 +35,133 @@ const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [video, setVideo] = useState<VideoDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [comments, setComments] = useState<CommentProps[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
   const { isAuthenticated, user, profile } = useAuth();
   const navigate = useNavigate();
+
+  // Récupération des commentaires
+  const fetchComments = async (videoId: string) => {
+    setLoadingComments(true);
+    try {
+      const { data: dbComments, error } = await supabase
+        .from('video_comments')
+        .select('*')
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // On va aussi charger les profils utilisateurs si besoin (par défaut on fake l’avatar/nickname)
+      // Idéalement à optimiser (jointure ou cache), ici simple.
+      const mappedComments: CommentProps[] = await Promise.all(
+        (dbComments || []).map(async (comment: DBComment) => {
+          let username = "Utilisateur";
+          let avatar = "https://i.pravatar.cc/150?img=3";
+          if (comment.user_id) {
+            const { data: profileData } = await supabase
+              .from('profiles')
+              .select('name, avatar_url')
+              .eq('id', comment.user_id)
+              .maybeSingle();
+            if (profileData) {
+              username = profileData.name || username;
+              avatar = profileData.avatar_url || avatar;
+            }
+          }
+          return {
+            id: comment.id,
+            userId: comment.user_id || '',
+            username,
+            avatar,
+            content: comment.content,
+            timestamp: comment.created_at
+              ? new Date(comment.created_at).toLocaleString('fr-FR', {
+                  day: '2-digit', month: '2-digit', year: '2-digit',
+                  hour: '2-digit', minute: '2-digit'
+                })
+              : 'Maintenant',
+            likes: 0,
+            onLike: () => {}, // à implémenter plus tard
+          };
+        })
+      );
+      setComments(mappedComments);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les commentaires.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  // Ajout de commentaire en base
+  const handleAddComment = async (content: string) => {
+    if (!user || !id) {
+      toast({
+        title: "Non authentifié",
+        description: "Veuillez vous connecter pour commenter.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      const { data, error } = await supabase
+        .from('video_comments')
+        .insert({
+          video_id: id,
+          user_id: user.id,
+          content,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Rafraîchit la liste après ajout
+      fetchComments(id);
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter le commentaire.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Like d’un commentaire (à implémenter en base plus tard)
+  const handleCommentLike = (commentId: string) => {
+    // Pas d’implémentation de likes persistants ici (structure supabase non prévue pour les commentaires)
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment
+      )
+    );
+  };
+
+  const goBack = () => {
+    navigate(-1);
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-
     if (!id) return;
 
+    // Récupère vidéo détails
     const fetchVideoData = async () => {
       setIsLoading(true);
       try {
-        // Fetch the video data from Supabase
         const { data: videoData, error: videoError } = await supabase
           .from('videos')
           .select('*')
           .eq('id', id)
-          .single();
+          .maybeSingle();
 
         if (videoError) throw videoError;
         if (!videoData) {
@@ -58,11 +174,6 @@ const VideoDetail: React.FC = () => {
           return;
         }
 
-        // Fetch comments for this video (if we had a comments table)
-        // For now, we'll use empty comments
-        const comments: CommentProps[] = [];
-
-        // Format the video data for our component
         const formattedVideo: VideoDetail = {
           id: videoData.id,
           title: videoData.title,
@@ -77,12 +188,10 @@ const VideoDetail: React.FC = () => {
           }),
           likes: 0,
           progress: 0,
-          comments: comments
+          comments: [], // ignoré ici, géré séparément
         };
-
         setVideo(formattedVideo);
       } catch (error) {
-        console.error('Error fetching video:', error);
         toast({
           title: "Erreur",
           description: "Impossible de charger la vidéo",
@@ -94,43 +203,8 @@ const VideoDetail: React.FC = () => {
     };
 
     fetchVideoData();
+    fetchComments(id);
   }, [id, isAuthenticated, navigate]);
-
-  const handleCommentLike = (commentId: string) => {
-    if (video) {
-      const updatedComments = video.comments.map(comment => {
-        if (comment.id === commentId) {
-          return { ...comment, likes: comment.likes + 1 };
-        }
-        return comment;
-      });
-      setVideo({ ...video, comments: updatedComments });
-    }
-  };
-
-  const handleAddComment = (content: string) => {
-    if (video && user) {
-      const newCommentObj: CommentProps = {
-        id: `comment-${Date.now()}`,
-        userId: user.id,
-        username: profile?.name || 'Utilisateur',
-        avatar: profile?.avatar_url || 'https://i.pravatar.cc/150?img=3',
-        content: content,
-        timestamp: 'À l\'instant',
-        likes: 0,
-        onLike: () => {}
-      };
-
-      setVideo({
-        ...video,
-        comments: [newCommentObj, ...video.comments]
-      });
-    }
-  };
-
-  const goBack = () => {
-    navigate(-1);
-  };
 
   if (isLoading) return <div className="page-container">Chargement...</div>;
   if (!video) return <div className="page-container">Vidéo non trouvée</div>;
@@ -159,10 +233,13 @@ const VideoDetail: React.FC = () => {
           />
 
           <CommentSection 
-            comments={video.comments}
+            comments={comments}
             onAddComment={handleAddComment}
             onLikeComment={handleCommentLike}
           />
+          {loadingComments && (
+            <div className="text-sm text-muted-foreground mt-2">Chargement des commentaires...</div>
+          )}
         </div>
 
         <div className="lg:col-span-1">
@@ -174,3 +251,4 @@ const VideoDetail: React.FC = () => {
 };
 
 export default VideoDetail;
+
