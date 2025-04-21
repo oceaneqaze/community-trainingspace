@@ -24,6 +24,17 @@ main {
   position: relative;
 }
 
+/* Add left padding for desktop to account for the fixed sidebar */
+@media (min-width: 768px) {
+  main {
+    margin-left: 4rem; /* Default width for collapsed sidebar */
+  }
+  
+  .sidebar-expanded main {
+    margin-left: 16rem; /* Width when sidebar is expanded */
+  }
+}
+
 .container {
   width: 100%;
   max-width: 1280px;
@@ -136,4 +147,13 @@ main {
 .sticky {
   position: sticky;
   z-index: 40;
+}
+
+/* Fixed sidebar styles */
+.fixed-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 50;
 }

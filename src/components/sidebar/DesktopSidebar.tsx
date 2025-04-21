@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, LogOut } from 'lucide-react';
@@ -41,7 +40,7 @@ const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
 
   return (
     <div className={cn(
-      "h-screen border-r border-border bg-background transition-all duration-300 flex flex-col hidden md:flex",
+      "fixed h-screen border-r border-border bg-background transition-all duration-300 flex flex-col hidden md:flex",
       expanded ? "w-64" : "w-16"
     )}>
       {/* Logo and toggle button */}
@@ -224,4 +223,3 @@ const DesktopSidebar: React.FC<DesktopSidebarProps> = ({
 };
 
 export default DesktopSidebar;
-

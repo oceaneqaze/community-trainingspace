@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -5,6 +6,7 @@ import { AuthProvider } from './context/AuthContext';
 import VerticalNavbar from './components/sidebar/VerticalNavbar';
 import { useIsMobile } from './hooks/use-mobile';
 import ChatBubble from './components/chat/ChatBubble';
+import { useState } from 'react';
 
 // Pages
 import Index from './pages/Index';
@@ -30,9 +32,10 @@ const queryClient = new QueryClient();
 // Layout component to handle responsive layout
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className={`flex flex-col md:flex-row min-h-screen ${sidebarExpanded ? 'sidebar-expanded' : ''}`}>
       <VerticalNavbar />
       <main className={`flex-1 overflow-auto ${isMobile ? 'pt-[60px]' : ''}`}>
         <div className="container mx-auto p-4 md:p-4">
