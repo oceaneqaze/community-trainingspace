@@ -12,6 +12,9 @@ interface WatchHistoryItemProps {
 }
 
 const WatchHistoryItem: React.FC<WatchHistoryItemProps> = ({ item, onClick }) => {
+  // Convert duration string to number if it's a string
+  const durationNumber = typeof item.duration === 'string' ? parseInt(item.duration) : item.duration;
+  
   return (
     <Card 
       className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer mb-2"
@@ -26,7 +29,7 @@ const WatchHistoryItem: React.FC<WatchHistoryItemProps> = ({ item, onClick }) =>
               className="w-full h-full object-cover"
             />
             <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 px-1.5 py-0.5 rounded text-xs text-white">
-              {formatDuration(item.duration)}
+              {formatDuration(durationNumber)}
             </div>
             {item.completed && (
               <div className="absolute top-1 right-1 bg-green-600 rounded-full p-1">
