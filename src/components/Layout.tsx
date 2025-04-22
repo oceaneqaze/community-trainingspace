@@ -13,8 +13,9 @@ const Layout: React.FC = () => {
   const isSignupPage = location.pathname.includes('/signup');
   const isInvitationPage = location.pathname.includes('/invitation/');
   const is404Page = location.pathname.includes('/404');
+  const isLandingPage = location.pathname === '/';
 
-  const hideNav = isLoginPage || isSignupPage || isInvitationPage || is404Page;
+  const hideNav = isLoginPage || isSignupPage || isInvitationPage || is404Page || isLandingPage;
 
   return (
     <div className="min-h-screen bg-background">
