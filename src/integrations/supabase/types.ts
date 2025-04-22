@@ -39,6 +39,54 @@ export type Database = {
         }
         Relationships: []
       }
+      articles: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          excerpt: string | null
+          featured_image: string | null
+          id: string
+          published: boolean | null
+          seo_description: string | null
+          seo_keywords: string | null
+          seo_title: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          excerpt?: string | null
+          featured_image?: string | null
+          id?: string
+          published?: boolean | null
+          seo_description?: string | null
+          seo_keywords?: string | null
+          seo_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           avatar_url: string | null

@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/AuthContext';
@@ -24,6 +23,7 @@ import Chat from '@/pages/Chat';
 import Announcements from '@/pages/Announcements';
 import WatchHistory from '@/pages/WatchHistory';
 import Ebooks from '@/pages/Ebooks';
+import BlogManager from '@/pages/BlogManager';
 
 function App() {
   return (
@@ -47,12 +47,11 @@ function App() {
             <Route path="announcements" element={<Announcements />} />
             <Route path="history" element={<WatchHistory />} />
             <Route path="ebooks" element={<Ebooks />} />
+            <Route path="blog/manage" element={<BlogManager />} />
             <Route path="404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Route>
-          {/* Redirect /videos directly to /videos to fix the route not found error */}
           <Route path="/videos" element={<Navigate to="/videos" replace />} />
-          {/* Add catchall redirect for any unmatched routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />

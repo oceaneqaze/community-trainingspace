@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { HomeIcon, Clock, BookOpen, MessageSquare, Bell, Users } from 'lucide-react';
+import { HomeIcon, Clock, BookOpen, MessageSquare, Bell, Users, FileText } from 'lucide-react';
 import NavLink from './NavLink';
 
 export interface NavigationItem {
@@ -10,7 +9,6 @@ export interface NavigationItem {
   adminOnly?: boolean;
 }
 
-// Define all navigation items in one central place
 export const getNavigationItems = (): NavigationItem[] => [
   {
     path: '/videos',
@@ -47,6 +45,12 @@ export const getNavigationItems = (): NavigationItem[] => [
     label: 'Invitations',
     icon: <Users className="h-4 w-4" />,
     adminOnly: true
+  },
+  {
+    path: '/blog/manage',
+    label: 'Blog',
+    icon: <FileText className="h-4 w-4" />,
+    adminOnly: true
   }
 ];
 
@@ -66,7 +70,6 @@ const NavigationItems: React.FC<NavigationItemsProps> = ({
   return (
     <>
       {items.map((item) => {
-        // Skip admin-only items if user is not admin
         if (item.adminOnly && !isAdmin) return null;
         
         return (
