@@ -24,6 +24,8 @@ import Announcements from '@/pages/Announcements';
 import WatchHistory from '@/pages/WatchHistory';
 import Ebooks from '@/pages/Ebooks';
 import BlogManager from '@/pages/BlogManager';
+import Blog from '@/pages/Blog';
+import BlogPost from '@/pages/BlogPost';
 
 function App() {
   return (
@@ -48,6 +50,8 @@ function App() {
             <Route path="history" element={<WatchHistory />} />
             <Route path="ebooks" element={<Ebooks />} />
             <Route path="blog/manage" element={<BlogManager />} />
+            <Route path="blog" element={<Blog />} />
+            <Route path="blog/:slug" element={<BlogPost />} />
             <Route path="404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/404" replace />} />
           </Route>
