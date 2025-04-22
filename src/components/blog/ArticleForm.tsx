@@ -3,8 +3,9 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import BlogEditor from './BlogEditor';
+import { useFileUpload } from '@/hooks/useFileUpload';
 import {
   Form,
   FormControl,
@@ -30,18 +31,31 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, initialData, isLoad
       seo_title: '',
       seo_description: '',
       seo_keywords: '',
-      published: false
+      published: false,
+      featured_image: ''
     }
   });
 
-  const handleSubmit = (data: Partial<Article>) => {
-    // Générer un slug à partir du titre
+  const { uploadFile, status } = useFileUpload();
+
+  const handleSubmit = async (data: Partial<Article>) => {
     const slug = data.title
       ?.toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
 
     onSubmit({ ...data, slug });
+  };
+
+  const handleImageUpload = async (file: File) => {
+    try {
+      const imageUrl = await uploadFile(file, 'blog-images', 'articles/');
+      if (imageUrl) {
+        form.setValue('featured_image', imageUrl);
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
   };
 
   return (
@@ -68,7 +82,11 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, initialData, isLoad
             <FormItem>
               <FormLabel>Contenu</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Contenu de l'article" rows={10} />
+                <BlogEditor 
+                  content={field.value || ''} 
+                  onContentChange={(content) => field.onChange(content)}
+                  onImageUpload={(file, previewUrl) => handleImageUpload(file)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,7 +100,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, initialData, isLoad
             <FormItem>
               <FormLabel>Extrait</FormLabel>
               <FormControl>
-                <Textarea {...field} placeholder="Bref résumé de l'article" rows={3} />
+                <Input {...field} placeholder="Bref résumé de l'article" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -153,7 +171,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({ onSubmit, initialData, isLoad
           )}
         />
 
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || status.isLoading}>
           {isLoading ? 'Enregistrement...' : 'Enregistrer'}
         </Button>
       </form>
