@@ -4,11 +4,15 @@ import { useFetchProgress } from './video-progress/useFetchProgress';
 import { useUpdateProgress } from './video-progress/useUpdateProgress';
 
 export const useVideoProgress = (videoId?: string) => {
+  // Initialiser tous les états d'abord
   const [progress, setProgress] = useState<number>(0);
   const [completed, setCompleted] = useState<boolean>(false);
-  const { loading: fetchLoading, error: fetchError, fetchProgress, fetchMultipleProgress } = useFetchProgress(videoId);
+  
+  // Ensuite, initialiser les hooks personnalisés
+  const { loading: fetchLoading, error: fetchError, fetchProgress, fetchMultipleProgress } = useFetchProgress();
   const { loading: updateLoading, error: updateError, updateProgress } = useUpdateProgress();
 
+  // Enfin, utiliser useEffect
   useEffect(() => {
     if (videoId) {
       fetchProgress(videoId).then(data => {
@@ -18,7 +22,7 @@ export const useVideoProgress = (videoId?: string) => {
         }
       });
     }
-  }, [videoId]);
+  }, [videoId, fetchProgress]);
 
   const markAsCompleted = async (id: string) => {
     const result = await updateProgress(id, 100, true);

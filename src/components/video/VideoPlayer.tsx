@@ -25,9 +25,41 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     }
   }, [initialTime, resolvedRef]);
 
+  useEffect(() => {
+    console.log("VideoPlayer mounted with URL:", videoUrl);
+    return () => {
+      console.log("VideoPlayer unmounted");
+    };
+  }, []);
+
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     console.error("Erreur de lecture vidéo:", e);
-    setError("Impossible de lire cette vidéo. Vérifiez l'URL ou le format.");
+    const videoElement = e.currentTarget;
+    const errorCode = videoElement.error?.code;
+    const errorMessage = videoElement.error?.message;
+    
+    console.error(`Code d'erreur: ${errorCode}, Message: ${errorMessage}`);
+    
+    let userMessage = "Impossible de lire cette vidéo. ";
+    
+    switch(errorCode) {
+      case 1:
+        userMessage += "L'opération d'extraction a été interrompue par l'utilisateur.";
+        break;
+      case 2:
+        userMessage += "Erreur réseau, vérifiez votre connexion.";
+        break;
+      case 3:
+        userMessage += "Problème de décodage, format non supporté.";
+        break;
+      case 4:
+        userMessage += "La vidéo est inaccessible ou corrompue.";
+        break;
+      default:
+        userMessage += "Vérifiez l'URL ou le format de la vidéo.";
+    }
+    
+    setError(userMessage);
   };
 
   const isExternalVideo = videoUrl?.includes('screenrec.com') || 
@@ -53,7 +85,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
           onError={() => setError("Impossible de charger la vidéo externe")}
         />
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white">
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
             <p>{error}</p>
           </div>
         )}

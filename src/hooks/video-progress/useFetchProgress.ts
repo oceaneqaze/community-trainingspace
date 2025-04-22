@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 
-export const useFetchProgress = (videoId?: string) => {
+export const useFetchProgress = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const fetchProgress = async (id: string) => {
-    if (!user) return;
+    if (!user) return null;
     
     try {
       setLoading(true);
