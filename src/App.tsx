@@ -22,7 +22,6 @@ import Invitation from '@/pages/Invitation';
 import InvitationManager from '@/pages/InvitationManager';
 import Chat from '@/pages/Chat';
 import Announcements from '@/pages/Announcements';
-import LandingPage from '@/pages/LandingPage';
 import WatchHistory from '@/pages/WatchHistory';
 import Ebooks from '@/pages/Ebooks';
 
@@ -31,8 +30,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} /> {/* Landing page without layout */}
-          <Route path="/app" element={<Layout />}>
+          <Route path="/" element={<Layout />}>
             <Route index element={<Index />} />
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
@@ -50,10 +48,10 @@ function App() {
             <Route path="history" element={<WatchHistory />} />
             <Route path="ebooks" element={<Ebooks />} />
             <Route path="404" element={<NotFound />} />
-            <Route path="*" element={<Navigate to="/app/404" replace />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
           </Route>
-          {/* Redirect /videos directly to /app/videos to fix the route not found error */}
-          <Route path="/videos" element={<Navigate to="/app/videos" replace />} />
+          {/* Redirect /videos directly to /videos to fix the route not found error */}
+          <Route path="/videos" element={<Navigate to="/videos" replace />} />
           {/* Add catchall redirect for any unmatched routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
