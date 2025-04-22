@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useNavigate } from 'react-router-dom';
 
 interface HeroSectionProps {
   timeLeft: {
@@ -17,8 +16,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCode }) => {
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
-  
+
   return (
     <section className="relative overflow-hidden pt-16 md:pt-28 lg:pt-32 pb-6 md:pb-16">
       <div className="absolute inset-0 z-0 opacity-30">
@@ -30,18 +28,16 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
 
       <div className="mx-auto max-w-5xl px-3 md:px-4 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-6 md:mb-16">
-          <h1 className={`${isMobile ? "text-2xl sm:text-3xl" : "text-4xl sm:text-5xl md:text-6xl lg:text-7xl"} font-extrabold tracking-tight mb-3 md:mb-6 leading-tight`}>
-            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">CLONE-TOI AVEC L'IA.</span>
-            <br className="hidden xs:block" />
-            <span className="text-white">CRÉE DU CONTENU NON-STOP.</span>
-            <br className="hidden xs:block" />
-            <span className="text-primary animate-pulse">DEVIENS INARRÊTABLE.</span>
+          <h1 className={`${isMobile ? "text-2xl sm:text-3xl" : "text-4xl sm:text-5xl md:text-6xl"} font-extrabold tracking-tight mb-3 md:mb-6 leading-tight`}>
+            La communauté privée #1 pour créer du contenu avec l'IA
           </h1>
           
           <p className="text-base md:text-xl lg:text-2xl text-muted-foreground font-light leading-tight mb-4 md:mb-10 mt-3 md:mt-6">
-            Pas d'idées, pas le temps, pas de stratégie ? 
-            <br/>
-            <span className="font-semibold text-white">Transforme-toi en machine à contenu en 30 jours.</span>
+            Automatise ta création de contenu, clone ton style, vends plus… sans y passer des heures.
+          </p>
+          
+          <p className="text-base md:text-lg font-medium text-foreground/90 mb-4 md:mb-10">
+            <strong>Rejoins DOPE Content pour seulement 15.000 FCFA et débloque ton code d'accès privé.</strong>
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
@@ -52,7 +48,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             >
               <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               <span className="relative z-10 flex items-center">
-                Obtenir mon code d'accès
+                🎯 Obtenir mon accès maintenant
                 <ArrowRight className="ml-2 h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" />
               </span>
             </Button>
@@ -64,30 +60,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             >
               J'ai déjà un code
             </Button>
-          </div>
-        </div>
-        
-        <div className="relative overflow-hidden rounded-xl pro-card backdrop-blur-sm mx-auto max-w-4xl">
-          <div className={`${isMobile ? "aspect-[6/5]" : "aspect-video"} w-full`}>
-            <img 
-              src="/lovable-uploads/b6c88338-3a6c-4e48-b5f6-accf90245eb2.png" 
-              alt="Emma-Alk DOHOU" 
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-black/80 to-black/70">
-              <div className="text-center p-3 md:p-8 max-w-3xl">
-                <h3 className="text-lg sm:text-xl md:text-3xl font-bold mb-2 md:mb-5 bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                  Salut, moi c'est Emma-Alk
-                </h3>
-                <p className="text-white text-xs md:text-base lg:text-lg leading-tight md:leading-relaxed mb-3 md:mb-6">
-                  Il y a encore 2 ans, j'étais comme toi : zéro idée, zéro temps, et mes contenus ne décollaient pas.
-                  Aujourd'hui, je crée des posts qui buzzent, des vidéos qui captivent, et des clients qui affluent.
-                </p>
-                <p className="text-primary text-sm md:text-lg lg:text-xl font-bold bg-black/50 p-2 md:p-4 rounded-lg backdrop-blur-sm border border-primary/20 inline-block">
-                  Comment ? L'IA. J'ai appris à me cloner avec elle, et en 20 vidéos, je te montre tout.
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
