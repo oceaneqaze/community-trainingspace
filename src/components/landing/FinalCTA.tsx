@@ -10,19 +10,24 @@ const FinalCTA = () => {
   return (
     <section className="py-16 bg-primary/5">
       <div className="container px-4 md:px-6">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-center space-y-6">
           <h2 className="text-3xl font-bold tracking-tight mb-6">
-            Tu veux passer du mode "je galère" au mode "je performe" ?
+            Tu veux automatiser ton contenu ou galérer encore 6 mois ?
           </h2>
-          <p className="text-lg mb-4">
-            DOPE Content, c'est bien plus qu'un groupe. C'est ta machine à créer du contenu, 
-            booster ta visibilité, et vendre mieux avec l'IA.
+          <div className="space-y-4">
+            <p className="text-lg">DOPE Content, c'est ton raccourci.</p>
+            <p className="text-lg">Ta machine à créer du contenu.</p>
+            <p className="text-lg">Ton arme pour vendre avec l'IA.</p>
+            <p className="text-lg">Ta team de créateurs déterminés.</p>
+          </div>
+          <p className="text-xl font-semibold">
+            Le tout pour seulement 15.000 FCFA une fois.
           </p>
-          <p className="text-lg font-semibold mb-8">
-            💥 L'accès est privé. L'inscription se fait uniquement par code d'activation. 
-            Rejoins maintenant tant qu'il reste des places !
-          </p>
-          <Button onClick={() => navigate('/signup')} size="lg">
+          <div className="space-y-4">
+            <p className="text-yellow-500">🕒 Les inscriptions sont limitées. Le code est unique.</p>
+            <p className="text-primary">📩 Reçois ton code d'accès privé dès maintenant.</p>
+          </div>
+          <Button onClick={() => navigate('/signup')} size="lg" className="mt-8">
             🚀 Obtenir mon accès privé (15.000 FCFA)
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>

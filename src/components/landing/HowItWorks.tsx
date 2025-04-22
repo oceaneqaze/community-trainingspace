@@ -11,7 +11,8 @@ const HowItWorks = () => {
     "Clique sur le bouton ci-dessous",
     "Règle les 15.000 FCFA via Mobile Money ou carte",
     "Reçois ton code d'activation unique par email",
-    "Crée ton compte et accède à la communauté"
+    "Crée ton compte sur notre espace privé",
+    "Accède immédiatement aux formations + communauté"
   ];
 
   return (
@@ -19,7 +20,7 @@ const HowItWorks = () => {
       <div className="container px-4 md:px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-8">
-            Comment rejoindre DOPE Content ?
+            Comment ça marche ?
           </h2>
           <div className="space-y-4 mb-8">
             {steps.map((step, index) => (
@@ -29,10 +30,10 @@ const HowItWorks = () => {
               </div>
             ))}
           </div>
-          <p className="text-lg font-semibold text-center mb-6 text-yellow-600">
-            ⚠️ Attention : accès limité, aucun code gratuit ne sera distribué.
-          </p>
-          <div className="text-center">
+          <div className="text-center space-y-4">
+            <p className="text-lg font-semibold">🟢 Ton accès est valable à vie.</p>
+            <p className="text-yellow-500 font-semibold">❌ Aucun remboursement. Aucune version gratuite.</p>
+            <p className="text-lg">👉 Tu prends ta place ou tu restes à la traîne.</p>
             <Button onClick={() => navigate('/signup')} size="lg">
               💥 Rejoindre maintenant
               <ArrowRight className="ml-2 h-4 w-4" />

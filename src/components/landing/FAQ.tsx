@@ -4,20 +4,24 @@ import React from 'react';
 const FAQ = () => {
   const faqs = [
     {
-      question: "Est-ce que je dois être expert en IA ?",
-      answer: "Pas du tout. Tout est expliqué étape par étape, même si tu es débutant complet."
+      question: "Est-ce que je dois être expert en intelligence artificielle ?",
+      answer: "Non. Tu es guidé pas à pas même si tu débutes complètement."
     },
     {
-      question: "Est-ce que je dois déjà vendre une formation ?",
-      answer: "Non. La communauté t'aide aussi à construire ton offre ou à développer ton personal branding."
+      question: "Est-ce que je peux accéder depuis mon téléphone ?",
+      answer: "Oui. Tout est accessible sur mobile, tablette ou ordinateur."
     },
     {
-      question: "Puis-je payer en plusieurs fois ?",
-      answer: "Non. L'accès est à 15.000 FCFA une seule fois, c'est une offre à vie."
+      question: "Comment payer ?",
+      answer: "Tu peux régler via Mobile Money (MTN, Moov) ou par carte bancaire."
     },
     {
-      question: "Est-ce que les vidéos sont mises à jour ?",
-      answer: "Oui, tu auras accès aux nouvelles méthodes dès qu'elles sont disponibles dans la communauté."
+      question: "Y a-t-il des paiements récurrents ?",
+      answer: "Non. Tu paies une fois 15.000 FCFA, ton accès est à vie."
+    },
+    {
+      question: "Puis-je partager mon accès ?",
+      answer: "Non. Ton code est personnel et actif pour un seul compte."
     }
   ];
 
