@@ -3,51 +3,26 @@ import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardOverview from '@/components/dashboard/DashboardOverview';
-import VideoManagement from '@/components/dashboard/VideoManagement';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import MemberDashboardOverview from '@/components/dashboard/MemberDashboardOverview';
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuth();
   const navigate = useNavigate();
   
-  const {
-    videos,
-    isLoading,
-    userCount,
-    viewCount,
-    handleVideoAdded,
-    handleVideoUpdated,
-    handleVideoDeleted
-  } = useDashboardData(isAuthenticated, isAdmin);
-
   React.useEffect(() => {
-    // Check if user is authenticated and admin
-    if (!isAuthenticated || !isAdmin()) {
+    // Redirect non-authenticated users or admin users to appropriate pages
+    if (!isAuthenticated) {
       navigate('/login');
+    } else if (isAdmin()) {
+      // If an admin tries to access this page, redirect to admin dashboard
+      navigate('/admin/dashboard');
     }
   }, [isAuthenticated, isAdmin, navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="page-container">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl font-bold">Tableau de bord</h1>
-        </div>
-        <div className="flex items-center justify-center h-[60vh]">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-            <p className="text-xl font-medium">Chargement des données...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="page-container">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold">Tableau de bord</h1>
+        <h1 className="text-4xl font-bold">Mon Tableau de Bord</h1>
       </div>
       
       <Tabs defaultValue="overview" className="mb-8">
@@ -55,26 +30,10 @@ const Dashboard: React.FC = () => {
           <TabsTrigger value="overview" className="px-6 py-2.5">
             Vue d'ensemble
           </TabsTrigger>
-          <TabsTrigger value="videos" className="px-6 py-2.5">
-            Gestion des vidéos
-          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
-          <DashboardOverview 
-            userCount={userCount}
-            videoCount={videos.length}
-            viewCount={viewCount}
-          />
-        </TabsContent>
-        
-        <TabsContent value="videos">
-          <VideoManagement 
-            videos={videos}
-            onVideoAdded={handleVideoAdded}
-            onVideoUpdated={handleVideoUpdated}
-            onVideoDeleted={handleVideoDeleted}
-          />
+          <MemberDashboardOverview />
         </TabsContent>
       </Tabs>
     </div>
