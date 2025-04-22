@@ -139,10 +139,10 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
             <p>{error}</p>
-          )}
-        </div>
-      );
-    }
+          </div>
+        )}
+      </div>
+    );
   }
 
   // Render native video player for uploaded videos
