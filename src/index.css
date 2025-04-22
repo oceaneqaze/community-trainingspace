@@ -290,7 +290,9 @@
       border-radius: 100px;
     }
   }
-  
+}
+
+@layer spotlight {
   .lit {
     filter: url('#spotlight');
   }
@@ -304,4 +306,27 @@
     border: 1px solid hsl(var(--primary));
     filter: url('#ambience') brightness(2);
   }
+  
+  ul.lit {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  [data-active='true'] {
+    opacity: 0.8 !important;
+  }
+}
+
+/* Utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

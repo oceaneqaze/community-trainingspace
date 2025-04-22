@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SpotlightFilter from '@/components/ui/spotlight-filter';
 
 interface NavItem {
@@ -12,20 +12,29 @@ interface NavItem {
 const SpotlightNav = () => {
   const [activeItem, setActiveItem] = useState<string>('newsletter');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const navItems: NavItem[] = [
-    { label: "La Communauté", href: "#", active: activeItem === 'newsletter' },
+    { label: "La Communauté", href: "#newsletter", active: activeItem === 'newsletter' },
     { label: "Formation", href: "#product", active: activeItem === 'product' },
     { label: "Tarifs", href: "#price", active: activeItem === 'price' },
     { label: "Inscription", href: "#subscribe", active: activeItem === 'subscribe' },
   ];
 
+  // Set active item based on URL hash on component mount or location change
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash && navItems.some(item => item.href.replace('#', '') === hash)) {
+      setActiveItem(hash);
+    }
+  }, [location]);
+
   return (
-    <div className="relative">
+    <div className="relative ml-8">
       <SpotlightFilter />
       
       <nav className="h-11 rounded-full border border-primary/30 relative backdrop-blur-sm">
-        <ul aria-hidden="true" className="lit absolute inset-0 z-[2] flex items-center h-full m-0 p-0 list-none text-sm">
+        <ul aria-hidden="true" className="lit flex items-center h-full m-0 p-0 list-none text-sm">
           {navItems.map((item) => (
             <li key={`lit-${item.href}`} className="h-full flex items-center px-5">
               {item.label}
@@ -33,7 +42,7 @@ const SpotlightNav = () => {
           ))}
         </ul>
         
-        <ul className="content relative flex items-center h-full m-0 p-0 list-none text-sm">
+        <ul className="content flex items-center h-full m-0 p-0 list-none text-sm">
           {navItems.map((item) => (
             <li key={item.href} className="h-full flex items-center">
               <a
@@ -43,6 +52,7 @@ const SpotlightNav = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   setActiveItem(item.href.replace('#', ''));
+                  navigate(item.href);
                 }}
               >
                 <span className="pointer-events-none">{item.label}</span>

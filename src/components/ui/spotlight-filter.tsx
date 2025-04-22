@@ -1,4 +1,6 @@
 
+import React from 'react';
+
 const SpotlightFilter = () => {
   return (
     <svg className="sr-only">
@@ -16,8 +18,8 @@ const SpotlightFilter = () => {
         </feSpecularLighting>
         <feComposite in="lighting" in2="SourceAlpha" operator="in" result="composite" />
         <feComposite
-          in="merged"
-          in2="composite"
+          in="composite"
+          in2="SourceAlpha"
           operator="arithmetic"
           k1="0"
           k2="1"
@@ -37,12 +39,12 @@ const SpotlightFilter = () => {
           specularExponent="120"
           lightingColor="hsl(var(--primary))"
         >
-          <fePointLight x="50" y="50" z="300" />
+          <fePointLight x="120" y="-154" z="160" />
         </feSpecularLighting>
         <feComposite in="lighting" in2="SourceAlpha" operator="in" result="composite" />
         <feComposite
-          in="merged"
-          in2="composite"
+          in="composite"
+          in2="SourceAlpha"
           operator="arithmetic"
           k1="0"
           k2="1"
