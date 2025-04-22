@@ -52,6 +52,10 @@ function App() {
             <Route path="404" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/app/404" replace />} />
           </Route>
+          {/* Redirect /videos directly to /app/videos to fix the route not found error */}
+          <Route path="/videos" element={<Navigate to="/app/videos" replace />} />
+          {/* Add catchall redirect for any unmatched routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />
       </AuthProvider>

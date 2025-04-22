@@ -8,6 +8,8 @@ import { SidebarProvider } from './ui/sidebar';
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  console.log('Rendu du Layout, chemin actuel:', location.pathname);
+  
   const isLoginPage = location.pathname.includes('/login');
   const isSignupPage = location.pathname.includes('/signup');
   const isInvitationPage = location.pathname.includes('/invitation/');
