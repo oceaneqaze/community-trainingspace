@@ -6,6 +6,7 @@ import { Book, Download, Trash } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEbooks } from '@/hooks/useEbooks';
 import { formatBytes } from '@/utils/fileUtils';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,13 +34,34 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook }) => {
   const { isAdmin } = useAuth();
   const { deleteEbook } = useEbooks();
 
+  // Fonction pour générer une couleur basée sur le titre
+  const generateColor = (title: string) => {
+    const colors = [
+      'from-blue-500 to-cyan-500',
+      'from-purple-500 to-pink-500',
+      'from-amber-500 to-red-500',
+      'from-green-500 to-emerald-500',
+      'from-indigo-500 to-purple-500'
+    ];
+    const index = title.length % colors.length;
+    return colors[index];
+  };
+
   return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Book className="h-5 w-5" />
-          <span className="truncate">{ebook.title}</span>
-        </CardTitle>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="pb-4">
+        <div className="mb-4">
+          <AspectRatio ratio={3/4}>
+            <div className={`w-full h-full rounded-lg bg-gradient-to-br ${generateColor(ebook.title)} relative shadow-lg`}>
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-white">
+                <Book className="h-12 w-12 mb-4 opacity-90" />
+                <h3 className="font-bold text-center text-sm line-clamp-3">
+                  {ebook.title}
+                </h3>
+              </div>
+            </div>
+          </AspectRatio>
+        </div>
       </CardHeader>
       
       <CardContent className="flex-grow">
