@@ -81,7 +81,7 @@ const VideoDetail: React.FC = () => {
         />
 
         <div className="lg:col-span-1">
-          <RelatedVideos />
+          <RelatedVideos videoId={video.id} category={video.category} />
         </div>
       </div>
     </div>
