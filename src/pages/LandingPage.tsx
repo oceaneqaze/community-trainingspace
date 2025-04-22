@@ -12,6 +12,9 @@ import PricingSection from '@/components/landing/PricingSection';
 import FAQSection from '@/components/landing/FAQSection';
 import FooterSection from '@/components/landing/FooterSection';
 import CountdownTimer from '@/components/landing/CountdownTimer';
+import AccessSection from '@/components/landing/AccessSection';
+import CommunitySection from '@/components/landing/CommunitySection';
+import FinalCTA from '@/components/landing/FinalCTA';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -42,7 +45,6 @@ const LandingPage = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Handle FAQ toggle
   const toggleFaq = (id: string) => {
     setExpandedFaq(expandedFaq === id ? null : id);
   };
@@ -68,6 +70,10 @@ const LandingPage = () => {
           onHaveCode={handleHaveCode} 
         />
         
+        <AccessSection />
+        
+        <CommunitySection />
+        
         <ProblemSection />
         
         <SolutionSection onClickCTA={handleJoinNow} />
@@ -80,6 +86,11 @@ const LandingPage = () => {
           expandedFaq={expandedFaq} 
           toggleFaq={toggleFaq}
           formattedTimer={formattedTimer}
+        />
+        
+        <FinalCTA 
+          timeLeft={timeLeft}
+          onClickCTA={handleJoinNow}
         />
         
         <FooterSection formattedTimer={formattedTimer} />
