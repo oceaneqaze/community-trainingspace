@@ -1,4 +1,3 @@
-
 export { default as VideoPlayer } from './VideoPlayer';
 export { default as VideoInfo } from './VideoInfo';
 export { default as CommentSection } from './CommentSection';
@@ -9,4 +8,6 @@ export { default as VideoActions } from './VideoActions';
 export { default as VideoProgress } from './VideoProgress';
 export { default as VideoCard } from './VideoCard';
 export { default as VideoProgressBar } from './VideoProgressBar';
-
+export { default as VideoHeader } from './detail/VideoHeader';
+export { default as VideoProgressSection } from './detail/VideoProgressSection';
+export { default as VideoMainContent } from './detail/VideoMainContent';

@@ -1,0 +1,103 @@
+
+import React from 'react';
+import { VideoPlayer, VideoInfo, CommentSection } from '@/components/video';
+import VideoProgressSection from './VideoProgressSection';
+import { toast } from '@/components/ui/use-toast';
+import { CommentProps } from '@/components/video/CommentItem';
+
+interface VideoMainContentProps {
+  videoUrl: string;
+  videoRef: React.RefObject<HTMLVideoElement>;
+  onTimeUpdate: (e: React.SyntheticEvent<HTMLVideoElement>) => void;
+  onEnded: () => void;
+  progress: number;
+  completed: boolean;
+  onMarkCompleted: () => void;
+  onResetProgress: () => void;
+  initialTime: number;
+  title: string;
+  description: string;
+  category: string;
+  date: string;
+  likesCount: number;
+  videoId: string;
+  liked: boolean;
+  onLike: () => void;
+  likeProcessing: boolean;
+  comments: CommentProps[];
+  onAddComment: (content: string) => void;
+  onLikeComment: (commentId: string) => void;
+  loadingComments: boolean;
+}
+
+const VideoMainContent: React.FC<VideoMainContentProps> = ({
+  videoUrl,
+  videoRef,
+  onTimeUpdate,
+  onEnded,
+  progress,
+  completed,
+  onMarkCompleted,
+  onResetProgress,
+  initialTime,
+  title,
+  description,
+  category,
+  date,
+  likesCount,
+  videoId,
+  liked,
+  onLike,
+  likeProcessing,
+  comments,
+  onAddComment,
+  onLikeComment,
+  loadingComments,
+}) => {
+  return (
+    <div className="lg:col-span-2">
+      <div className="mb-4 relative">
+        <VideoPlayer 
+          videoUrl={videoUrl} 
+          onTimeUpdate={onTimeUpdate}
+          onEnded={onEnded}
+          ref={videoRef}
+          initialTime={initialTime}
+        />
+      </div>
+
+      <VideoProgressSection
+        progress={progress}
+        completed={completed}
+        onMarkCompleted={onMarkCompleted}
+        onResetProgress={onResetProgress}
+      />
+
+      <VideoInfo
+        title={title}
+        description={description}
+        category={category}
+        date={date}
+        initialLikes={likesCount}
+        videoId={videoId}
+        liked={liked}
+        onLike={onLike}
+        likeProcessing={likeProcessing}
+      />
+
+      <CommentSection
+        comments={comments}
+        onAddComment={onAddComment}
+        onLikeComment={onLikeComment}
+        videoId={videoId}
+      />
+      {loadingComments && (
+        <div className="text-sm text-muted-foreground mt-2">
+          Chargement des commentaires...
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default VideoMainContent;
