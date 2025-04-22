@@ -10,6 +10,8 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
+  Bell,
+  Users,
 } from "lucide-react";
 import { useAuth } from '@/context/AuthContext';
 import { 
@@ -56,6 +58,26 @@ const VerticalNavbar = () => {
       icon: <User className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/profile',
     },
+    {
+      name: 'Annonces',
+      path: '/announcements',
+      icon: <Bell className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/announcements',
+    },
+    {
+      name: 'Dashboard',
+      path: '/dashboard',
+      icon: <User className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/dashboard',
+      adminOnly: true,
+    },
+    {
+      name: 'Invitations',
+      path: '/invitations',
+      icon: <Users className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/invitations',
+      adminOnly: true,
+    },
   ];
 
   return (
@@ -86,22 +108,27 @@ const VerticalNavbar = () => {
         </div>
 
         <div className="space-y-1 px-3">
-          {navItems.map((item) => (
-            <Link to={item.path} key={item.path}>
-              <Button
-                variant={item.isActive ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full justify-start",
-                  item.isActive && "bg-secondary text-secondary-foreground",
-                  !open && "justify-center px-2"
-                )}
-                title={!open ? item.name : undefined}
-              >
-                {item.icon}
-                {open && <span className="ml-3">{item.name}</span>}
-              </Button>
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            // Skip admin-only items if user is not admin
+            if (item.adminOnly && !isAdmin()) return null;
+            
+            return (
+              <Link to={item.path} key={item.path}>
+                <Button
+                  variant={item.isActive ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start",
+                    item.isActive && "bg-secondary text-secondary-foreground",
+                    !open && "justify-center px-2"
+                  )}
+                  title={!open ? item.name : undefined}
+                >
+                  {item.icon}
+                  {open && <span className="ml-3">{item.name}</span>}
+                </Button>
+              </Link>
+            );
+          })}
         </div>
       </SidebarContent>
     </Sidebar>
