@@ -2,10 +2,11 @@
 import React from 'react';
 import { LayoutGrid, List, Folder } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { VideoViewType } from '@/hooks/useVideos';
 
 interface VideoViewToggleProps {
-  activeView: 'grid' | 'list' | 'explorer';
-  setActiveView: (view: 'grid' | 'list' | 'explorer') => void;
+  activeView: VideoViewType;
+  setActiveView: (view: VideoViewType) => void;
 }
 
 const VideoViewToggle: React.FC<VideoViewToggleProps> = ({ 

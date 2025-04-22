@@ -1,3 +1,4 @@
+
 export { default as VideoPlayer } from './VideoPlayer';
 export { default as VideoInfo } from './VideoInfo';
 export { default as CommentSection } from './CommentSection';
@@ -11,3 +12,8 @@ export { default as VideoProgressBar } from './VideoProgressBar';
 export { default as VideoHeader } from './detail/VideoHeader';
 export { default as VideoProgressSection } from './detail/VideoProgressSection';
 export { default as VideoMainContent } from './detail/VideoMainContent';
+export { default as FileExplorerView } from './FileExplorerView';
+export { default as VideoViewToggle } from './VideoViewToggle';
+export { default as VideoGridView } from './VideoGridView';
+export { default as VideoListView } from './VideoListView';
+export { default as VideoContent } from './VideoContent';

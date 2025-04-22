@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { VideoProps } from '@/components/VideoCard';
 import { useAuth } from '@/context/AuthContext';
@@ -17,6 +18,8 @@ type DBVideo = {
   created_at: string;
 };
 
+export type VideoViewType = 'grid' | 'list' | 'explorer';
+
 export const useVideos = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [videos, setVideos] = useState<VideoProps[]>([]);
@@ -24,7 +27,7 @@ export const useVideos = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeView, setActiveView] = useState<'grid' | 'list' | 'explorer'>('grid');
+  const [activeView, setActiveView] = useState<VideoViewType>('grid');
   const [statusFilter, setStatusFilter] = useState<'all' | 'in-progress' | 'completed'>('all');
   const { isAuthenticated, user } = useAuth();
   const { fetchMultipleProgress } = useVideoProgress();

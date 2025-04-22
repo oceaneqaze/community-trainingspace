@@ -5,10 +5,11 @@ import VideoGridView from './VideoGridView';
 import VideoListView from './VideoListView';
 import FileExplorerView from './FileExplorerView';
 import { VideoProps } from '@/components/VideoCard';
+import { VideoViewType } from '@/hooks/useVideos';
 
 interface VideoContentProps {
-  activeView: 'grid' | 'list' | 'explorer';
-  setActiveView: (view: 'grid' | 'list' | 'explorer') => void;
+  activeView: VideoViewType;
+  setActiveView: (view: VideoViewType) => void;
   isLoading: boolean;
   videosByCategory: Record<string, VideoProps[]>;
   filteredVideos: VideoProps[];
@@ -28,7 +29,7 @@ const VideoContent: React.FC<VideoContentProps> = ({
   onVideoClick
 }) => {
   return (
-    <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'grid' | 'list' | 'explorer')}>
+    <Tabs value={activeView} onValueChange={(value) => setActiveView(value as VideoViewType)}>
       <TabsList className="hidden">
         <TabsTrigger value="grid">Grille</TabsTrigger>
         <TabsTrigger value="list">Liste</TabsTrigger>
