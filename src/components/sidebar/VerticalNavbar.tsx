@@ -1,4 +1,3 @@
-
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,6 +51,12 @@ const VerticalNavbar = () => {
       icon: <BookOpen className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/library',
       adminOnly: true,
+    },
+    {
+      name: 'Documents',
+      path: '/ebooks',
+      icon: <BookOpen className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/ebooks',
     },
     {
       name: 'Discussion',
