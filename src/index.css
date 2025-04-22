@@ -330,3 +330,26 @@
   white-space: nowrap;
   border-width: 0;
 }
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-orange-500;
+  animation: gradientMove 3s ease infinite;
+  background-size: 200% auto;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+  100% { background-position: 0% center; }
+}
+
+.glow {
+  filter: drop-shadow(0 0 0.5rem rgba(234, 179, 8, 0.3));
+}
+
+.grid-bg {
+  background: 
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
