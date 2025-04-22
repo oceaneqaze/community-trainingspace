@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Clock, ShieldCheck, Lock, Gift, AlertTriangle } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,13 +38,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             <span className="text-primary animate-pulse">DEVIENS INARRÊTABLE.</span>
           </h1>
           
-          <p className="text-base md:text-xl lg:text-2xl text-muted-foreground font-light leading-tight mb-4 md:mb-10 mt-3 md:mt-6 px-2">
-            Pas d'idées, pas le temps, pas de stratégie ?
+          <p className="text-base md:text-xl lg:text-2xl text-muted-foreground font-light leading-tight mb-4 md:mb-10 mt-3 md:mt-6">
+            Pas d'idées, pas le temps, pas de stratégie ? 
             <br/>
             <span className="font-semibold text-white">Transforme-toi en machine à contenu en 30 jours.</span>
           </p>
           
-          <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4 mb-4 md:mb-10 px-2">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 md:gap-4">
             <Button 
               onClick={onJoinNow} 
               className="pro-button text-sm md:text-lg group relative overflow-hidden w-full sm:w-auto" 
@@ -59,7 +58,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ timeLeft, onJoinNow, onHaveCo
             </Button>
             <Button 
               variant="outline" 
-              onClick={() => navigate('/signup')}
+              onClick={onHaveCode}
               size={isMobile ? "default" : "lg"}
               className="border-primary/50 text-primary hover:bg-primary/20 hover:border-primary transition-all duration-300 w-full sm:w-auto text-sm md:text-base"
             >
