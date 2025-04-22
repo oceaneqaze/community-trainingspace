@@ -40,6 +40,11 @@ const EbookUploader = () => {
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      category: ''
+    }
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -125,7 +130,7 @@ const EbookUploader = () => {
             <FormField
               control={form.control}
               name="file"
-              render={({ field: { onChange, ...field } }) => (
+              render={({ field: { onChange, value, ...fieldProps } }) => (
                 <FormItem>
                   <FormLabel>Fichier PDF</FormLabel>
                   <FormControl>
@@ -138,7 +143,7 @@ const EbookUploader = () => {
                           onChange(file);
                         }
                       }}
-                      {...field}
+                      {...fieldProps}
                     />
                   </FormControl>
                   <FormMessage />

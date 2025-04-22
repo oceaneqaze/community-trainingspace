@@ -40,12 +40,14 @@ export const useEbooks = () => {
     }
   };
 
-  const uploadEbook = async (values: {
+  interface UploadEbookParams {
     title: string;
     description?: string;
     category?: string;
     file: File;
-  }) => {
+  }
+
+  const uploadEbook = async (values: UploadEbookParams) => {
     try {
       // Upload file to storage
       const fileExt = values.file.name.split('.').pop();
