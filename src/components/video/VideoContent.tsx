@@ -3,11 +3,12 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VideoGridView from './VideoGridView';
 import VideoListView from './VideoListView';
+import FileExplorerView from './FileExplorerView';
 import { VideoProps } from '@/components/VideoCard';
 
 interface VideoContentProps {
-  activeView: 'grid' | 'list';
-  setActiveView: (view: 'grid' | 'list') => void;
+  activeView: 'grid' | 'list' | 'explorer';
+  setActiveView: (view: 'grid' | 'list' | 'explorer') => void;
   isLoading: boolean;
   videosByCategory: Record<string, VideoProps[]>;
   filteredVideos: VideoProps[];
@@ -27,10 +28,11 @@ const VideoContent: React.FC<VideoContentProps> = ({
   onVideoClick
 }) => {
   return (
-    <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'grid' | 'list')}>
+    <Tabs value={activeView} onValueChange={(value) => setActiveView(value as 'grid' | 'list' | 'explorer')}>
       <TabsList className="hidden">
         <TabsTrigger value="grid">Grille</TabsTrigger>
         <TabsTrigger value="list">Liste</TabsTrigger>
+        <TabsTrigger value="explorer">Explorateur</TabsTrigger>
       </TabsList>
       
       <TabsContent value="grid" className="mt-0">
@@ -51,6 +53,13 @@ const VideoContent: React.FC<VideoContentProps> = ({
           filteredVideos={filteredVideos}
           selectedCategory={selectedCategory}
           sortedCategories={sortedCategories}
+          onVideoClick={onVideoClick}
+        />
+      </TabsContent>
+
+      <TabsContent value="explorer" className="mt-0">
+        <FileExplorerView
+          videosByCategory={videosByCategory}
           onVideoClick={onVideoClick}
         />
       </TabsContent>
