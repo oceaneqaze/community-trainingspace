@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, forwardRef, ForwardRefRenderFunction, useState } from 'react';
 
 interface VideoPlayerProps {
@@ -17,8 +16,8 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
   const internalRef = useRef<HTMLVideoElement>(null);
   const resolvedRef = ref || internalRef;
   const [error, setError] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
-  // Set initial time if provided
   useEffect(() => {
     if (initialTime > 0 && typeof resolvedRef !== 'function' && resolvedRef.current) {
       resolvedRef.current.currentTime = initialTime;
@@ -62,46 +61,68 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     setError(userMessage);
   };
 
-  // Pour les vidéos ScreenRec, utiliser leur lecteur intégré
   if (videoUrl && videoUrl.includes('screenrec.com')) {
-    // Convertir l'URL en HTTPS si nécessaire
-    const secureUrl = videoUrl.replace('http://', 'https://');
+    const regex = /(?:share\/|videos\/f_|embed\/)([A-Za-z0-9_-]+)/;
+    const match = videoUrl.match(regex);
+    const videoId = match ? match[1] : null;
     
-    // Extraire l'ID de la vidéo si c'est une URL directe
-    let embedUrl = secureUrl;
-    
-    // Si c'est une URL de vidéo directe, la convertir en URL d'intégration
-    if (secureUrl.includes('/videos/f_') || secureUrl.includes('/share/')) {
-      const regex = /(?:share\/|videos\/f_)([A-Za-z0-9_-]+)/;
-      const match = secureUrl.match(regex);
-      const videoId = match ? match[1] : null;
+    if (videoId) {
+      const embedUrl = `https://screenrec.com/embed/${videoId}`;
       
-      if (videoId) {
-        embedUrl = `https://screenrec.com/embed/${videoId}`;
-      }
+      useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+          if (event.source !== iframeRef.current?.contentWindow) {
+            return;
+          }
+
+          const details = event.data;
+          const message = details.message;
+
+          if (message === 'init') {
+            iframeRef.current?.contentWindow?.postMessage({
+              message: 'init',
+              data: {
+                customUrl: videoUrl,
+                customPoster: poster,
+                colorBase: '#250864',
+                colorText: '#ffffff',
+                colorHover: '#7f54f8',
+                threeColorsMode: true,
+                playButton: true,
+                playButtonStyle: 'pulsing'
+              }
+            }, '*');
+          }
+        };
+
+        window.addEventListener('message', handleMessage, false);
+        
+        return () => {
+          window.removeEventListener('message', handleMessage);
+        };
+      }, [videoUrl, poster]);
+
+      return (
+        <div className={`relative aspect-video w-full bg-black ${className}`}>
+          <iframe 
+            ref={iframeRef}
+            src={embedUrl}
+            title="ScreenRec video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowFullScreen
+            className="w-full h-full"
+          />
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
+              <p>{error}</p>
+            </div>
+          )}
+        </div>
+      );
     }
-    
-    return (
-      <div className={`relative aspect-video w-full bg-black ${className}`}>
-        <iframe 
-          src={embedUrl}
-          title="ScreenRec video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-          allowFullScreen
-          className="w-full h-full"
-        />
-        {error && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
-            <p>{error}</p>
-          </div>
-        )}
-      </div>
-    );
   }
-  
-  // Pour vidéos externes non-ScreenRec
+
   if (videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com')) {
-    // S'assurer que l'URL utilise HTTPS
     const secureUrl = videoUrl.replace('http://', 'https://');
     
     return (
@@ -122,7 +143,6 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     );
   }
 
-  // Lecteur de vidéo par défaut pour les vidéos téléchargées
   return (
     <div className="relative">
       <video
