@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Users, LayoutDashboard, BookOpen, Bell, MessageCircle } from 'lucide-react';
+import { HomeIcon, Clock, BookOpen, MessageSquare } from 'lucide-react';
 import NavLink from './NavLink';
 
 export interface NavigationItem {
@@ -15,44 +15,26 @@ export const getNavigationItems = (): NavigationItem[] => [
   {
     path: '/videos',
     label: 'Vidéos',
-    icon: null,
+    icon: <HomeIcon className="h-4 w-4" />,
+    adminOnly: false
+  },
+  {
+    path: '/ebooks',
+    label: 'Documents',
+    icon: <BookOpen className="h-4 w-4" />,
     adminOnly: false
   },
   {
     path: '/chat',
     label: 'Chat',
-    icon: <MessageCircle className="h-4 w-4" />,
+    icon: <MessageSquare className="h-4 w-4" />,
     adminOnly: false
   },
   {
-    path: '/members',
-    label: 'Membres',
-    icon: <Users className="h-4 w-4" />,
-    adminOnly: true
-  },
-  {
-    path: '/invitations',
-    label: 'Invitations',
-    icon: <Users className="mr-1 h-4 w-4" />,
-    adminOnly: true
-  },
-  {
-    path: '/dashboard',
-    label: 'Dashboard',
-    icon: <LayoutDashboard className="h-4 w-4" />,
-    adminOnly: true
-  },
-  {
-    path: '/library-manager',
-    label: 'Bibliothèque',
-    icon: <BookOpen className="h-4 w-4" />,
-    adminOnly: true
-  },
-  {
-    path: '/announcements',
-    label: 'Annonces',
-    icon: <Bell className="h-4 w-4" />,
-    adminOnly: true
+    path: '/history',
+    label: 'Historique',
+    icon: <Clock className="h-4 w-4" />,
+    adminOnly: false
   }
 ];
 

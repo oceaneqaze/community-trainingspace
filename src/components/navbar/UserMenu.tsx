@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Settings, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -33,11 +33,6 @@ const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
       .toUpperCase();
   };
 
-  const handleLogout = async () => {
-    await onLogout();
-    navigate('/');
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -63,29 +58,23 @@ const UserMenu = ({ profile, isAdmin, onLogout }: UserMenuProps) => {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate('/profile')}>
-          <Settings className="mr-2 h-4 w-4" />
-          <span>Mon profil</span>
-        </DropdownMenuItem>
         
-        {/* Map through navigation items */}
-        {navigationItems.map(item => {
-          // Skip admin-only items if user is not admin
-          if (item.adminOnly && !isAdmin()) return null;
-          
-          return (
+        {/* Basic user navigation items */}
+        {navigationItems
+          .filter(item => !item.adminOnly || isAdmin())
+          .map(item => (
             <DropdownMenuItem 
-              key={item.path} 
+              key={item.path}
               onClick={() => navigate(item.path)}
             >
-              {item.icon && React.cloneElement(item.icon as React.ReactElement, { className: "mr-2 h-4 w-4" })}
-              <span>{item.label}</span>
+              {item.icon}
+              <span className="ml-2">{item.label}</span>
             </DropdownMenuItem>
-          );
-        })}
+          ))
+        }
         
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout}>
+        <DropdownMenuItem onClick={onLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Déconnexion</span>
         </DropdownMenuItem>

@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   HomeIcon,
-  CameraIcon,
   BookOpen,
   MessageSquare,
-  Bell,
   User,
   Clock,
   ChevronLeft,
@@ -41,7 +39,7 @@ const VerticalNavbar = () => {
       isActive: currentPath === '/ebooks',
     },
     {
-      name: 'Discussion',
+      name: 'Chat',
       path: '/chat',
       icon: <MessageSquare className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/chat',
@@ -58,32 +56,6 @@ const VerticalNavbar = () => {
       icon: <User className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/profile',
     },
-    ...(isAdmin ? [
-      {
-        name: 'Tableau de bord',
-        path: '/dashboard',
-        icon: <HomeIcon className="h-5 w-5 mr-2" />,
-        isActive: currentPath === '/dashboard',
-      },
-      {
-        name: 'Membres',
-        path: '/members',
-        icon: <User className="h-5 w-5 mr-2" />,
-        isActive: currentPath === '/members',
-      },
-      {
-        name: 'Bibliothèque',
-        path: '/library',
-        icon: <BookOpen className="h-5 w-5 mr-2" />,
-        isActive: currentPath === '/library',
-      },
-      {
-        name: 'Annonces',
-        path: '/announcements',
-        icon: <Bell className="h-5 w-5 mr-2" />,
-        isActive: currentPath === '/announcements',
-      },
-    ] : []),
   ];
 
   return (
