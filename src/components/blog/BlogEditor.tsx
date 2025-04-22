@@ -32,8 +32,9 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
             'alignright alignjustify | bullist numlist outdent indent | ' +
             'removeformat | image | help',
           content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+          language: 'fr_FR',
+          language_url: '/tinymce/langs/fr_FR.js',
           file_picker_types: 'image',
-          // Fixed handler signature to match TinyMCE's UploadHandler interface
           images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
             try {
               const file = new File([blobInfo.blob()], blobInfo.filename());
