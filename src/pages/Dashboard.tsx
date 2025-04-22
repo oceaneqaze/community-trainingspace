@@ -5,10 +5,11 @@ import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import { useAuth } from '@/context/AuthContext';
+import VideoManagement from '@/components/dashboard/VideoManagement';
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isAdmin } = useAuthRedirect();
-  const { userCount, videos, viewCount, isLoading } = useDashboardData(isAuthenticated, isAdmin);
+  const { userCount, videos, viewCount, isLoading, handleVideoAdded, handleVideoUpdated, handleVideoDeleted } = useDashboardData(isAuthenticated, isAdmin);
   const { profile } = useAuth();
 
   return (
@@ -18,11 +19,20 @@ const Dashboard: React.FC = () => {
       </div>
       
       {isAdmin() ? (
-        <DashboardOverview 
-          userCount={userCount} 
-          videoCount={videos.length} 
-          viewCount={viewCount} 
-        />
+        <div className="space-y-8">
+          <DashboardOverview 
+            userCount={userCount} 
+            videoCount={videos.length} 
+            viewCount={viewCount} 
+          />
+          
+          <VideoManagement 
+            videos={videos}
+            onVideoAdded={handleVideoAdded}
+            onVideoUpdated={handleVideoUpdated}
+            onVideoDeleted={handleVideoDeleted}
+          />
+        </div>
       ) : (
         <DashboardTabs />
       )}
