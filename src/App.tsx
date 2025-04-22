@@ -31,7 +31,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<LandingPage />} /> {/* Ajout de la route racine sans Layout */}
+          <Route path="/" element={<LandingPage />} /> {/* Landing page without layout */}
           <Route path="/app" element={<Layout />}>
             <Route index element={<Index />} />
             <Route path="login" element={<Login />} />
@@ -47,7 +47,6 @@ function App() {
             <Route path="invitations" element={<InvitationManager />} />
             <Route path="chat" element={<Chat />} />
             <Route path="announcements" element={<Announcements />} />
-            <Route path="landing" element={<LandingPage />} />
             <Route path="history" element={<WatchHistory />} />
             <Route path="ebooks" element={<Ebooks />} />
             <Route path="404" element={<NotFound />} />
