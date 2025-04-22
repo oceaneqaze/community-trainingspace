@@ -33,16 +33,17 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
             'removeformat | image | help',
           content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
           file_picker_types: 'image',
-          images_upload_handler: async (blobInfo, success, failure) => {
+          // Fixed handler signature to match TinyMCE's UploadHandler interface
+          images_upload_handler: (blobInfo, progress) => new Promise((resolve, reject) => {
             try {
               const file = new File([blobInfo.blob()], blobInfo.filename());
               const previewUrl = URL.createObjectURL(file);
               onImageUpload(file, previewUrl);
-              success(previewUrl);
+              resolve(previewUrl);
             } catch (e) {
-              failure('Erreur lors du téléchargement de l\'image');
+              reject('Erreur lors du téléchargement de l\'image');
             }
-          }
+          })
         }}
         value={content}
         onEditorChange={onContentChange}
