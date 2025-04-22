@@ -30,11 +30,15 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
   };
 
   const execCommand = (command: string, value: string | boolean = false) => {
+    // Prévenir le comportement par défaut et la propagation de l'événement
     document.execCommand(command, false, value ? value.toString() : '');
     handleContentChange();
   };
 
-  const handleInsertImage = () => {
+  const handleInsertImage = (e: React.MouseEvent) => {
+    // Empêcher le comportement par défaut du bouton
+    e.preventDefault();
+    
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -70,6 +74,19 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
     }
   };
 
+  const handleButtonClick = (e: React.MouseEvent, command: string, value?: string | boolean) => {
+    e.preventDefault(); // Empêcher la soumission du formulaire
+    execCommand(command, value);
+  };
+
+  const handleLinkInsert = (e: React.MouseEvent) => {
+    e.preventDefault(); // Empêcher la soumission du formulaire
+    const url = prompt('URL du lien:');
+    if (url) {
+      execCommand('createLink', url);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <ThumbnailUploader
@@ -79,40 +96,94 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
       <div className="border border-gray-200 rounded-md shadow-sm">
         {/* Barre d'outils */}
         <div className="bg-gray-50 p-2 border-b border-gray-200 flex flex-wrap gap-1">
-          <Button variant="outline" size="sm" onClick={() => execCommand('bold')} title="Gras">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'bold')} 
+            title="Gras"
+          >
             <b>G</b>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('italic')} title="Italique">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'italic')} 
+            title="Italique"
+          >
             <i>I</i>
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('underline')} title="Souligné">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'underline')} 
+            title="Souligné"
+          >
             <u>S</u>
           </Button>
           
           <div className="h-6 border-r border-gray-300 mx-1" />
           
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyLeft')} title="Aligner à gauche">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'justifyLeft')} 
+            title="Aligner à gauche"
+          >
             ⟨⟨
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyCenter')} title="Centrer">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'justifyCenter')} 
+            title="Centrer"
+          >
             ≡
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyRight')} title="Aligner à droite">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'justifyRight')} 
+            title="Aligner à droite"
+          >
             ⟩⟩
           </Button>
           
           <div className="h-6 border-r border-gray-300 mx-1" />
           
-          <Button variant="outline" size="sm" onClick={() => execCommand('insertUnorderedList')} title="Liste à puces">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'insertUnorderedList')} 
+            title="Liste à puces"
+          >
             • Liste
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('insertOrderedList')} title="Liste numérotée">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => handleButtonClick(e, 'insertOrderedList')} 
+            title="Liste numérotée"
+          >
             1. Liste
           </Button>
           
           <div className="h-6 border-r border-gray-300 mx-1" />
           
-          <Button variant="outline" size="sm" onClick={handleInsertImage} title="Insérer une image">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={handleInsertImage} 
+            title="Insérer une image"
+          >
             🖼️ Image
           </Button>
           <input
@@ -125,7 +196,13 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
           
           <div className="h-6 border-r border-gray-300 mx-1" />
           
-          <Button variant="outline" size="sm" onClick={() => execCommand('createLink', prompt('URL du lien:'))} title="Insérer un lien">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={handleLinkInsert} 
+            title="Insérer un lien"
+          >
             🔗 Lien
           </Button>
         </div>
