@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -12,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import Logo from '@/components/Logo';
 import SpotlightNav from '@/components/SpotlightNav';
 import UserMenu from '@/components/UserMenu';
@@ -21,6 +22,7 @@ import MobileMenu from '@/components/MobileMenu';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   const { isAuthenticated, logout, profile, isAdmin } = useAuth();
   const isMobile = useIsMobile();
 

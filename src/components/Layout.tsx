@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from './navbar/Navbar';
 import { cn } from '@/lib/utils';
 import VerticalNavbar from './sidebar/VerticalNavbar';
 import { SidebarProvider } from './ui/sidebar';
