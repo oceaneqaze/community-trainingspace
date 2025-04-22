@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
 import ThumbnailUploader from '@/components/ThumbnailUploader';
 
@@ -10,6 +10,8 @@ interface BlogEditorProps {
 }
 
 const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onImageUpload }) => {
+  const editorRef = useRef(null);
+
   return (
     <div className="space-y-6">
       <ThumbnailUploader 
@@ -18,6 +20,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
       
       <Editor
         apiKey="b2e7b22dcdf2377ea14e48ea9f455339c892373c0757465bf48fa4bc8c2a3a1b"
+        onInit={(evt, editor) => editorRef.current = editor}
         init={{
           height: 500,
           menubar: true,
