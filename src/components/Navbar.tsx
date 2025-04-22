@@ -2,29 +2,19 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { MenuIcon, X, User, LogOut, Video, MessageSquare, Users, LayoutDashboard } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { MenuIcon, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Logo from '@/components/Logo';
-import SpotlightNav from '@/components/SpotlightNav';
-import UserMenu from '@/components/UserMenu';
-import AuthButtons from '@/components/AuthButtons';
-import MobileMenu from '@/components/MobileMenu';
+import Logo from '@/components/navbar/Logo';
+import SpotlightNav from '@/components/navbar/SpotlightNav';
+import UserMenu from '@/components/navbar/UserMenu';
+import AuthButtons from '@/components/navbar/AuthButtons';
+import MobileMenu from '@/components/navbar/MobileMenu';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
   const { isAuthenticated, logout, profile, isAdmin } = useAuth();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -32,19 +22,6 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsOpen(false);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
   };
 
   return (
