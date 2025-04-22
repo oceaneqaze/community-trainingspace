@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
 import { AuthContextType } from './auth/types';
 import { useAuthProvider } from './auth/useAuthProvider';
 
@@ -7,8 +7,7 @@ import { useAuthProvider } from './auth/useAuthProvider';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Provider component
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // We'll use the hook inside the component function, not at module level
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useAuthProvider();
   return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
 };
