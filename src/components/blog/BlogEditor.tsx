@@ -17,15 +17,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ content, onContentChange, onIma
       />
       
       <Editor
-        apiKey="votre-clé-api-tinymce"
+        apiKey="b2e7b22dcdf2377ea14e48ea9f455339c892373c0757465bf48fa4bc8c2a3a1b"
         init={{
           height: 500,
           menubar: true,
           plugins: [
             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
             'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
-            'image'
+            'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
           ],
           toolbar: 'undo redo | blocks | ' +
             'bold italic forecolor | alignleft aligncenter ' +
