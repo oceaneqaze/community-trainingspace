@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/AuthContext';
@@ -30,7 +31,8 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<LandingPage />} /> {/* Ajout de la route racine sans Layout */}
+          <Route path="/app" element={<Layout />}>
             <Route index element={<Index />} />
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
@@ -49,7 +51,7 @@ function App() {
             <Route path="history" element={<WatchHistory />} />
             <Route path="ebooks" element={<Ebooks />} />
             <Route path="404" element={<NotFound />} />
-            <Route path="*" element={<Navigate to="/404" replace />} />
+            <Route path="*" element={<Navigate to="/app/404" replace />} />
           </Route>
         </Routes>
         <Toaster />
