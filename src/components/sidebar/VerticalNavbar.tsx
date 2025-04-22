@@ -5,12 +5,10 @@ import { Button } from "@/components/ui/button";
 import {
   HomeIcon,
   CameraIcon,
-  UsersIcon,
   BookOpen,
   MessageSquare,
   Bell,
   User,
-  Award,
   Clock,
   ChevronLeft,
   ChevronRight,
@@ -31,36 +29,10 @@ const VerticalNavbar = () => {
 
   const navItems = [
     {
-      name: 'Tableau de bord',
-      path: '/dashboard',
-      icon: <HomeIcon className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/dashboard',
-    },
-    {
-      name: 'Vidéos',
+      name: 'Accueil',
       path: '/videos',
-      icon: <CameraIcon className="h-5 w-5 mr-2" />,
-      isActive: currentPath.startsWith('/videos'),
-    },
-    {
-      name: 'Historique',
-      path: '/history',
-      icon: <Clock className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/history',
-    },
-    {
-      name: 'Membres',
-      path: '/members',
-      icon: <UsersIcon className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/members',
-      adminOnly: true,
-    },
-    {
-      name: 'Bibliothèque',
-      path: '/library',
-      icon: <BookOpen className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/library',
-      adminOnly: true,
+      icon: <HomeIcon className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/videos',
     },
     {
       name: 'Documents',
@@ -75,10 +47,10 @@ const VerticalNavbar = () => {
       isActive: currentPath === '/chat',
     },
     {
-      name: 'Annonces',
-      path: '/announcements',
-      icon: <Bell className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/announcements',
+      name: 'Historique',
+      path: '/history',
+      icon: <Clock className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/history',
     },
     {
       name: 'Profil',
@@ -86,12 +58,32 @@ const VerticalNavbar = () => {
       icon: <User className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/profile',
     },
-    {
-      name: 'Invitations',
-      path: '/invitations',
-      icon: <Award className="h-5 w-5 mr-2" />,
-      isActive: currentPath === '/invitations',
-    },
+    ...(isAdmin ? [
+      {
+        name: 'Tableau de bord',
+        path: '/dashboard',
+        icon: <HomeIcon className="h-5 w-5 mr-2" />,
+        isActive: currentPath === '/dashboard',
+      },
+      {
+        name: 'Membres',
+        path: '/members',
+        icon: <User className="h-5 w-5 mr-2" />,
+        isActive: currentPath === '/members',
+      },
+      {
+        name: 'Bibliothèque',
+        path: '/library',
+        icon: <BookOpen className="h-5 w-5 mr-2" />,
+        isActive: currentPath === '/library',
+      },
+      {
+        name: 'Annonces',
+        path: '/announcements',
+        icon: <Bell className="h-5 w-5 mr-2" />,
+        isActive: currentPath === '/announcements',
+      },
+    ] : []),
   ];
 
   return (
@@ -122,26 +114,22 @@ const VerticalNavbar = () => {
         </div>
 
         <div className="space-y-1 px-3">
-          {navItems.map((item) => {
-            if (item.adminOnly && !isAdmin) return null;
-            
-            return (
-              <Link to={item.path} key={item.path}>
-                <Button
-                  variant={item.isActive ? "secondary" : "ghost"}
-                  className={cn(
-                    "w-full justify-start",
-                    item.isActive && "bg-secondary text-secondary-foreground",
-                    !open && "justify-center px-2"
-                  )}
-                  title={!open ? item.name : undefined}
-                >
-                  {item.icon}
-                  {open && <span className="ml-3">{item.name}</span>}
-                </Button>
-              </Link>
-            );
-          })}
+          {navItems.map((item) => (
+            <Link to={item.path} key={item.path}>
+              <Button
+                variant={item.isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  item.isActive && "bg-secondary text-secondary-foreground",
+                  !open && "justify-center px-2"
+                )}
+                title={!open ? item.name : undefined}
+              >
+                {item.icon}
+                {open && <span className="ml-3">{item.name}</span>}
+              </Button>
+            </Link>
+          ))}
         </div>
       </SidebarContent>
     </Sidebar>
