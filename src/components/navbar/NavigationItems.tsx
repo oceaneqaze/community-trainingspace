@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HomeIcon, Clock, BookOpen, MessageSquare } from 'lucide-react';
+import { HomeIcon, Clock, BookOpen, MessageSquare, Bell, Users } from 'lucide-react';
 import NavLink from './NavLink';
 
 export interface NavigationItem {
@@ -35,6 +35,18 @@ export const getNavigationItems = (): NavigationItem[] => [
     label: 'Historique',
     icon: <Clock className="h-4 w-4" />,
     adminOnly: false
+  },
+  {
+    path: '/announcements',
+    label: 'Annonces',
+    icon: <Bell className="h-4 w-4" />,
+    adminOnly: false
+  },
+  {
+    path: '/invitations',
+    label: 'Invitations',
+    icon: <Users className="h-4 w-4" />,
+    adminOnly: true
   }
 ];
 
