@@ -4,6 +4,8 @@ import { VideoPlayer, VideoInfo, CommentSection } from '@/components/video';
 import VideoProgressSection from './VideoProgressSection';
 import { toast } from '@/components/ui/use-toast';
 import { CommentProps } from '@/components/video/CommentItem';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from 'lucide-react';
 
 interface VideoMainContentProps {
   videoUrl: string;
@@ -28,6 +30,7 @@ interface VideoMainContentProps {
   onAddComment: (content: string) => void;
   onLikeComment: (commentId: string) => void;
   loadingComments: boolean;
+  videoError?: string | null;
 }
 
 const VideoMainContent: React.FC<VideoMainContentProps> = ({
@@ -53,9 +56,18 @@ const VideoMainContent: React.FC<VideoMainContentProps> = ({
   onAddComment,
   onLikeComment,
   loadingComments,
+  videoError,
 }) => {
   return (
     <div className="lg:col-span-2">
+      {videoError && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{videoError}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="mb-4 relative">
         <VideoPlayer 
           videoUrl={videoUrl} 

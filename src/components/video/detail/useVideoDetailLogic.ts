@@ -32,6 +32,7 @@ export const useVideoDetailLogic = (videoId: string | undefined) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { liked, likesCount, toggleLike, processing } = useVideoLike(videoId || "");
   const { progress, completed, updateProgress, markAsCompleted, resetProgress } = useVideoProgress(videoId);
+  const [videoError, setVideoError] = useState<string | null>(null);
 
   const fetchComments = async (id: string) => {
     setLoadingComments(true);
@@ -121,12 +122,16 @@ export const useVideoDetailLogic = (videoId: string | undefined) => {
   const handleTimeUpdate = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     if (!videoId) return;
     
-    const video = e.currentTarget;
-    const currentProgress = Math.floor((video.currentTime / video.duration) * 100);
-    
-    if (currentProgress % 5 === 0 || currentProgress > 95) {
-      const isCompleted = currentProgress > 95;
-      updateProgress(videoId, currentProgress, isCompleted);
+    try {
+      const video = e.currentTarget;
+      const currentProgress = Math.floor((video.currentTime / video.duration) * 100);
+      
+      if (currentProgress % 5 === 0 || currentProgress > 95) {
+        const isCompleted = currentProgress > 95;
+        updateProgress(videoId, currentProgress, isCompleted);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour du temps de lecture:", error);
     }
   };
 
@@ -190,6 +195,8 @@ export const useVideoDetailLogic = (videoId: string | undefined) => {
           return;
         }
 
+        console.log("Données vidéo chargées:", videoData);
+
         const formattedVideo: VideoDetail = {
           id: videoData.id,
           title: videoData.title,
@@ -209,6 +216,8 @@ export const useVideoDetailLogic = (videoId: string | undefined) => {
         };
         setVideo(formattedVideo);
       } catch (error) {
+        console.error("Erreur lors du chargement de la vidéo:", error);
+        setVideoError("Impossible de charger les détails de la vidéo");
         toast({
           title: "Erreur",
           description: "Impossible de charger la vidéo",
@@ -244,6 +253,7 @@ export const useVideoDetailLogic = (videoId: string | undefined) => {
     handleMarkCompleted,
     handleResetProgress,
     handleAddComment,
-    navigate
+    navigate,
+    videoError
   };
 };

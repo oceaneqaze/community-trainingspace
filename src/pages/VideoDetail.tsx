@@ -5,6 +5,7 @@ import { RelatedVideos } from '@/components/video';
 import VideoHeader from '@/components/video/detail/VideoHeader';
 import VideoMainContent from '@/components/video/detail/VideoMainContent';
 import { useVideoDetailLogic } from '@/components/video/detail/useVideoDetailLogic';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const VideoDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -25,10 +26,27 @@ const VideoDetail: React.FC = () => {
     handleMarkCompleted,
     handleResetProgress,
     handleAddComment,
-    navigate
+    navigate,
+    videoError
   } = useVideoDetailLogic(id);
 
-  if (isLoading) return <div className="page-container">Chargement...</div>;
+  if (isLoading) return (
+    <div className="page-container">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <Skeleton className="h-8 w-32 mb-4" />
+          <Skeleton className="h-[60vh] w-full mb-6" />
+          <Skeleton className="h-12 w-full mb-4" />
+          <Skeleton className="h-24 w-full mb-4" />
+        </div>
+        <div className="lg:col-span-1">
+          <Skeleton className="h-6 w-full mb-4" />
+          <Skeleton className="h-32 w-full mb-4" />
+        </div>
+      </div>
+    </div>
+  );
+  
   if (!video) return <div className="page-container">Vidéo non trouvée</div>;
 
   return (
@@ -59,6 +77,7 @@ const VideoDetail: React.FC = () => {
           onAddComment={handleAddComment}
           onLikeComment={() => {}}
           loadingComments={loadingComments}
+          videoError={videoError}
         />
 
         <div className="lg:col-span-1">
