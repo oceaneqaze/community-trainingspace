@@ -1,4 +1,3 @@
-
 export { default as Logo } from './Logo';
 export { default as SpotlightNav } from './SpotlightNav';
 export { default as UserMenu } from './UserMenu';

@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import Navbar from './navbar'; // Updated to use the correct import path
 import { cn } from '@/lib/utils';
 import VerticalNavbar from './sidebar/VerticalNavbar';
 import { SidebarProvider } from './ui/sidebar';
@@ -19,8 +18,6 @@ const Layout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <SidebarProvider>
         <div className="flex w-full">
           {!hideNav && <VerticalNavbar />}
