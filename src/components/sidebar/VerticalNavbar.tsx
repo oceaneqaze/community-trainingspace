@@ -1,67 +1,107 @@
 
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  HomeIcon,
+  CameraIcon,
+  UsersIcon,
+  BookOpen,
+  MessageSquare,
+  Bell,
+  User,
+  Award,
+  Clock,
+} from "lucide-react";
 import { useAuth } from '@/context/AuthContext';
-import { useIsMobile } from '@/hooks/use-mobile';
-import DesktopSidebar from './DesktopSidebar';
-import MobileHeader from './MobileHeader';
-import MobileMenu from './MobileMenu';
 
 const VerticalNavbar = () => {
-  const [expanded, setExpanded] = React.useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-  const { isAuthenticated, logout, profile, isAdmin } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useIsMobile();
+  const currentPath = location.pathname;
+  const { isAdmin } = useAuth();
 
-  // Auto-collapse sidebar on mobile
-  React.useEffect(() => {
-    if (isMobile) {
-      setExpanded(false);
-    }
-  }, [isMobile]);
-
-  // Close mobile menu on navigation
-  React.useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname]);
-
-  const toggleSidebar = () => {
-    setExpanded(!expanded);
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
-  };
+  const navItems = [
+    {
+      name: 'Tableau de bord',
+      path: '/dashboard',
+      icon: <HomeIcon className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/dashboard',
+    },
+    {
+      name: 'Vidéos',
+      path: '/videos',
+      icon: <CameraIcon className="h-5 w-5 mr-2" />,
+      isActive: currentPath.startsWith('/videos'),
+    },
+    {
+      name: 'Historique',
+      path: '/history',
+      icon: <Clock className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/history',
+    },
+    {
+      name: 'Membres',
+      path: '/members',
+      icon: <UsersIcon className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/members',
+      adminOnly: true,
+    },
+    {
+      name: 'Bibliothèque',
+      path: '/library',
+      icon: <BookOpen className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/library',
+      adminOnly: true,
+    },
+    {
+      name: 'Discussion',
+      path: '/chat',
+      icon: <MessageSquare className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/chat',
+    },
+    {
+      name: 'Annonces',
+      path: '/announcements',
+      icon: <Bell className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/announcements',
+    },
+    {
+      name: 'Profil',
+      path: '/profile',
+      icon: <User className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/profile',
+    },
+    {
+      name: 'Invitations',
+      path: '/invitations',
+      icon: <Award className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/invitations',
+    },
+  ];
 
   return (
-    <>
-      <DesktopSidebar
-        expanded={expanded}
-        toggleSidebar={toggleSidebar}
-        isAuthenticated={isAuthenticated}
-        isAdmin={isAdmin}
-        profile={profile}
-        handleLogout={handleLogout}
-        navigate={navigate}
-      />
-      <MobileHeader toggleMobileMenu={toggleMobileMenu} />
-      <MobileMenu
-        isOpen={mobileMenuOpen}
-        onOpenChange={setMobileMenuOpen}
-        isAuthenticated={isAuthenticated}
-        isAdmin={isAdmin}
-        profile={profile}
-        handleLogout={handleLogout}
-        navigate={navigate}
-      />
-    </>
+    <div className="flex flex-col w-full h-full">
+      <div className="space-y-1">
+        {navItems.map((item) => {
+          if (item.adminOnly && !isAdmin) return null;
+          
+          return (
+            <Link to={item.path} key={item.path}>
+              <Button
+                variant={item.isActive ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start",
+                  item.isActive && "bg-secondary text-secondary-foreground"
+                )}
+              >
+                {item.icon}
+                {item.name}
+              </Button>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 
