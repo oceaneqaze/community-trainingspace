@@ -16,7 +16,64 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
   const internalRef = useRef<HTMLVideoElement>(null);
   const resolvedRef = ref || internalRef;
   const [error, setError] = useState<string | null>(null);
-  
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [screenRecDetails, setScreenRecDetails] = useState<{
+    videoUrl?: string;
+    posterUrl?: string;
+  }>({});
+
+  // Méthode pour extraire l'ID de la vidéo ScreenRec
+  const extractScreenRecDetails = (url: string) => {
+    const regex = /(?:share\/|videos\/f_|embed\/)([A-Za-z0-9_-]+)/;
+    const match = url.match(regex);
+    const videoId = match ? match[1] : null;
+
+    if (videoId) {
+      return {
+        videoUrl: `https://upww.screenrec.com/videos/f_${videoId}.mp4/index.m3u8`,
+        posterUrl: `https://upww.screenrec.com/images/f_${videoId}.gif`
+      };
+    }
+    return {};
+  };
+
+  // Gestion des messages pour l'iframe ScreenRec
+  useEffect(() => {
+    if (videoUrl.includes('screenrec.com')) {
+      const screenRecConfig = extractScreenRecDetails(videoUrl);
+      setScreenRecDetails(screenRecConfig);
+
+      const handleMessage = (event: MessageEvent) => {
+        if (event.source !== iframeRef.current?.contentWindow) return;
+
+        const details = event.data;
+        const message = details.message;
+
+        if (message === 'init') {
+          iframeRef.current?.contentWindow?.postMessage({
+            message: 'init',
+            data: {
+              customUrl: screenRecConfig.videoUrl || videoUrl,
+              customPoster: poster || screenRecConfig.posterUrl,
+              colorBase: '#250864',
+              colorText: '#ffffff',
+              colorHover: '#7f54f8',
+              threeColorsMode: true,
+              playButton: true,
+              playButtonStyle: 'pulsing'
+            }
+          }, '*');
+        }
+      };
+
+      window.addEventListener('message', handleMessage, false);
+      
+      return () => {
+        window.removeEventListener('message', handleMessage);
+      };
+    }
+  }, [videoUrl, poster]);
+
   useEffect(() => {
     if (initialTime > 0 && typeof resolvedRef !== 'function' && resolvedRef.current) {
       resolvedRef.current.currentTime = initialTime;
@@ -60,25 +117,25 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     setError(userMessage);
   };
 
-  if (videoUrl && videoUrl.includes('screenrec.com')) {
-    const regex = /(?:share\/|videos\/f_|embed\/)([A-Za-z0-9_-]+)/;
-    const match = videoUrl.match(regex);
-    const videoId = match ? match[1] : null;
-    
-    if (videoId) {
-      return (
-        <div className={`relative w-full ${className}`} style={{ paddingBottom: '56.25%' }}>
-          <iframe 
-            src="https://play.webvideocore.net/html5.html"
-            className="absolute top-0 left-0 w-full h-full"
-            frameBorder="0"
-            allowFullScreen 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            title="ScreenRec video player"
-          />
-        </div>
-      );
-    }
+  if (videoUrl.includes('screenrec.com')) {
+    return (
+      <div className={`relative w-full ${className}`} style={{ paddingBottom: '56.25%' }}>
+        <iframe 
+          ref={iframeRef}
+          src="https://play.webvideocore.net/html5.html"
+          className="absolute top-0 left-0 w-full h-full"
+          frameBorder="0"
+          allowFullScreen 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          title="ScreenRec video player"
+        />
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
+            <p>{error}</p>
+          </div>
+        )}
+      </div>
+    );
   }
 
   if (videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com')) {
