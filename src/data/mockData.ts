@@ -13,8 +13,8 @@ export const mockVideos: VideoProps[] = [
     duration: '12:34',
     category: 'Débutant',
     date: '10 Juin 2023',
-    viewed: true,
     progress: 100,
+    completed: true, // Remplacer viewed par completed
     likes: 24,
     comments: 5,
   },

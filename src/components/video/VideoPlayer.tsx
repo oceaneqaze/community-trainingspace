@@ -7,10 +7,11 @@ interface VideoPlayerProps {
   onEnded?: () => void;
   initialTime?: number;
   className?: string;
+  poster?: string; // Ajout de la propriété poster
 }
 
 const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> = (
-  { videoUrl, onTimeUpdate, onEnded, initialTime = 0, className = "" },
+  { videoUrl, onTimeUpdate, onEnded, initialTime = 0, className = "", poster },
   ref
 ) => {
   const internalRef = useRef<HTMLVideoElement>(null);
@@ -50,6 +51,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
       className={`aspect-video w-full bg-black ${className}`}
       onTimeUpdate={onTimeUpdate}
       onEnded={onEnded}
+      poster={poster} // Utilisation de la propriété poster
     >
       <source src={videoUrl} type="video/mp4" />
       Votre navigateur ne prend pas en charge la lecture vidéo.

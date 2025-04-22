@@ -7,7 +7,7 @@ interface VideoThumbnailProps {
   thumbnail: string;
   title: string;
   duration: string;
-  viewed?: boolean;
+  completed?: boolean; // Changé de viewed à completed
   onClick?: () => void;
 }
 
@@ -15,7 +15,7 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
   thumbnail,
   title,
   duration,
-  viewed,
+  completed,
   onClick
 }) => {
   return (
@@ -36,10 +36,10 @@ const VideoThumbnail: React.FC<VideoThumbnailProps> = ({
         </span>
       </div>
       
-      {viewed && (
+      {completed && (
         <div className="absolute top-3 right-3">
           <span className="rounded-full bg-green-500/90 px-2 py-0.5 text-xs text-white">
-            Vu
+            Terminé
           </span>
         </div>
       )}
