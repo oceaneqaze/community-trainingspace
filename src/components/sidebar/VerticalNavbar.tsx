@@ -24,8 +24,13 @@ import {
 const VerticalNavbar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isAdmin } = useAuth();
+  const { user, profile } = useAuth();
   const { open } = useSidebar();
+
+  // Function to check if user is admin
+  const checkIsAdmin = () => {
+    return profile?.role === 'admin';
+  };
 
   const navItems = [
     {
@@ -110,7 +115,7 @@ const VerticalNavbar = () => {
         <div className="space-y-1 px-3">
           {navItems.map((item) => {
             // Skip admin-only items if user is not admin
-            if (item.adminOnly && !isAdmin()) return null;
+            if (item.adminOnly && !checkIsAdmin()) return null;
             
             return (
               <Link to={item.path} key={item.path}>
