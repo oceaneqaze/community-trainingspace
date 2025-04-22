@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Bell,
   Users,
+  FileText,
 } from "lucide-react";
 import { useAuth } from '@/context/AuthContext';
 import { 
@@ -70,6 +71,12 @@ const VerticalNavbar = () => {
       isActive: currentPath === '/announcements',
     },
     {
+      name: 'Blog',
+      path: '/blog',
+      icon: <FileText className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/blog' || currentPath.startsWith('/blog/'),
+    },
+    {
       name: 'Dashboard',
       path: '/dashboard',
       icon: <User className="h-5 w-5 mr-2" />,
@@ -81,6 +88,13 @@ const VerticalNavbar = () => {
       path: '/invitations',
       icon: <Users className="h-5 w-5 mr-2" />,
       isActive: currentPath === '/invitations',
+      adminOnly: true,
+    },
+    {
+      name: 'Gérer le Blog',
+      path: '/blog/manage',
+      icon: <FileText className="h-5 w-5 mr-2" />,
+      isActive: currentPath === '/blog/manage',
       adminOnly: true,
     },
   ];
