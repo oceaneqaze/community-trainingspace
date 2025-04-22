@@ -7,7 +7,7 @@ import VideosHeader from '@/components/video/VideosHeader';
 import VideoFilterSection from '@/components/video/VideoFilterSection';
 import VideoFiltersDisplay from '@/components/video/VideoFiltersDisplay';
 import VideoContent from '@/components/video/VideoContent';
-import { useVideos } from '@/hooks/useVideos';
+import { useVideos, VideoViewType } from '@/hooks/useVideos';
 
 const Videos: React.FC = () => {
   const {
