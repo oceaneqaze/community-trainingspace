@@ -70,7 +70,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     const videoId = match ? match[1] : null;
     
     if (videoId) {
-      // Use the embed URL format for ScreenRec videos
+      // Use the embed URL format for ScreenRec videos - ALWAYS with HTTPS
       const embedUrl = `https://screenrec.com/embed/${videoId}`;
       
       return (
@@ -94,10 +94,13 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
   
   // For external non-ScreenRec videos
   if (videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com')) {
+    // Ensure the URL is using HTTPS
+    const secureUrl = videoUrl.replace('http://', 'https://');
+    
     return (
       <div className={`relative aspect-video w-full bg-black ${className}`}>
         <iframe 
-          src={videoUrl} 
+          src={secureUrl}
           title="Video player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
           allowFullScreen
