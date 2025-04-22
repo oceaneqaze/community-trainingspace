@@ -1,3 +1,4 @@
+
 import { useLocation, Link } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -85,8 +86,8 @@ const VerticalNavbar = () => {
   ];
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="space-y-1">
+    <div className="fixed top-16 left-0 h-[calc(100vh-64px)] w-64 overflow-y-auto border-r bg-background">
+      <div className="space-y-1 p-4">
         {navItems.map((item) => {
           if (item.adminOnly && !isAdmin) return null;
           
