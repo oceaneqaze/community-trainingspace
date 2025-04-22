@@ -34,11 +34,13 @@ const formSchema = z.object({
   }, "Seuls les fichiers PDF sont acceptés")
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 const EbookUploader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { uploadEbook } = useEbooks();
   
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
@@ -47,9 +49,25 @@ const EbookUploader = () => {
     }
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     try {
-      await uploadEbook(values);
+      // Explicitly ensure file is defined (it will be because of zod validation)
+      if (!values.file) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez sélectionner un fichier PDF.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      await uploadEbook({
+        title: values.title,
+        description: values.description,
+        category: values.category,
+        file: values.file
+      });
+      
       setIsOpen(false);
       form.reset();
       toast({
