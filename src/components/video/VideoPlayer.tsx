@@ -16,7 +16,6 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
   const internalRef = useRef<HTMLVideoElement>(null);
   const resolvedRef = ref || internalRef;
   const [error, setError] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   useEffect(() => {
     if (initialTime > 0 && typeof resolvedRef !== 'function' && resolvedRef.current) {
@@ -67,56 +66,16 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     const videoId = match ? match[1] : null;
     
     if (videoId) {
-      const embedUrl = `https://screenrec.com/embed/${videoId}`;
-      
-      useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-          if (event.source !== iframeRef.current?.contentWindow) {
-            return;
-          }
-
-          const details = event.data;
-          const message = details.message;
-
-          if (message === 'init') {
-            iframeRef.current?.contentWindow?.postMessage({
-              message: 'init',
-              data: {
-                customUrl: videoUrl,
-                customPoster: poster,
-                colorBase: '#250864',
-                colorText: '#ffffff',
-                colorHover: '#7f54f8',
-                threeColorsMode: true,
-                playButton: true,
-                playButtonStyle: 'pulsing'
-              }
-            }, '*');
-          }
-        };
-
-        window.addEventListener('message', handleMessage, false);
-        
-        return () => {
-          window.removeEventListener('message', handleMessage);
-        };
-      }, [videoUrl, poster]);
-
       return (
-        <div className={`relative aspect-video w-full bg-black ${className}`}>
+        <div className={`relative w-full ${className}`} style={{ paddingBottom: '56.25%' }}>
           <iframe 
-            ref={iframeRef}
-            src={embedUrl}
+            src="https://play.webvideocore.net/html5.html"
+            className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
+            allowFullScreen 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             title="ScreenRec video player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowFullScreen
-            className="w-full h-full"
           />
-          {error && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
-              <p>{error}</p>
-            </div>
-          )}
         </div>
       );
     }
