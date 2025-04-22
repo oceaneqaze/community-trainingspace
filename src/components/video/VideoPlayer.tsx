@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, forwardRef, ForwardRefRenderFunction, useState } from 'react';
 
 interface VideoPlayerProps {
@@ -17,6 +16,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
   const internalRef = useRef<HTMLVideoElement>(null);
   const resolvedRef = ref || internalRef;
   const [error, setError] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   
   // Set initial time if provided
   useEffect(() => {
@@ -73,9 +73,46 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
       // Use the embed URL format for ScreenRec videos - ALWAYS with HTTPS
       const embedUrl = `https://screenrec.com/embed/${videoId}`;
       
+      // Set up message handler for player initialization
+      useEffect(() => {
+        const handleMessage = (event: MessageEvent) => {
+          if (event.source !== iframeRef.current?.contentWindow) {
+            return;
+          }
+
+          const details = event.data;
+          const message = details.message;
+
+          if (message === 'init') {
+            // Initialize player with custom settings
+            iframeRef.current?.contentWindow?.postMessage({
+              message: 'init',
+              data: {
+                customUrl: videoUrl,
+                customPoster: poster,
+                colorBase: '#250864',
+                colorText: '#ffffff',
+                colorHover: '#7f54f8',
+                threeColorsMode: true,
+                playButton: true,
+                playButtonStyle: 'pulsing'
+              }
+            }, '*');
+          }
+        };
+
+        window.addEventListener('message', handleMessage, false);
+        
+        // Cleanup
+        return () => {
+          window.removeEventListener('message', handleMessage);
+        };
+      }, [videoUrl, poster]);
+
       return (
         <div className={`relative aspect-video w-full bg-black ${className}`}>
           <iframe 
+            ref={iframeRef}
             src={embedUrl}
             title="ScreenRec video player"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
