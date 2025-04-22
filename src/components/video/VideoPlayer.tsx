@@ -30,7 +30,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     return () => {
       console.log("VideoPlayer unmounted");
     };
-  }, []);
+  }, [videoUrl]); // Add videoUrl as dependency
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     console.error("Erreur de lecture vidéo:", e);
@@ -62,22 +62,66 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     setError(userMessage);
   };
 
-  const isExternalVideo = videoUrl?.includes('screenrec.com') || 
-                          (videoUrl?.startsWith('http') && 
-                          !videoUrl?.includes('storage.googleapis.com'));
+  // Amélioration de la détection des vidéos externes
+  const isExternalVideo = React.useMemo(() => {
+    if (!videoUrl) return false;
+    
+    // Vérifier si c'est une URL ScreenRec
+    if (videoUrl.includes('screenrec.com')) {
+      // S'assurer que les URL ScreenRec utilisent embed plutôt que index.m3u8
+      return true;
+    }
+    
+    // Autres vidéos externes (non hébergées sur notre service)
+    return videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com');
+  }, [videoUrl]);
+
+  // Traitement spécial pour les URL ScreenRec
+  const processedVideoUrl = React.useMemo(() => {
+    if (!videoUrl) return '';
+    
+    if (videoUrl.includes('screenrec.com') && videoUrl.includes('index.m3u8')) {
+      // Transformer les URL index.m3u8 en URL d'embed pour une meilleure compatibilité
+      return videoUrl.replace('/index.m3u8', '');
+    }
+    
+    return videoUrl;
+  }, [videoUrl]);
 
   // Logging pour diagnostic
   useEffect(() => {
-    console.log("URL vidéo chargée:", videoUrl);
+    console.log("URL vidéo traitée:", processedVideoUrl);
     console.log("Est une vidéo externe:", isExternalVideo);
-  }, [videoUrl, isExternalVideo]);
+  }, [processedVideoUrl, isExternalVideo]);
 
   // Render iframe for external videos
   if (isExternalVideo) {
+    // Pour les vidéos ScreenRec, utiliser leur lecteur intégré
+    if (processedVideoUrl.includes('screenrec.com')) {
+      return (
+        <div className={`relative aspect-video w-full bg-black ${className}`}>
+          <iframe 
+            src={`https://screenrec.com/embed/${processedVideoUrl.split('/').pop()?.split('.')[0]}`} 
+            title="Video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowFullScreen
+            className="w-full h-full"
+            onError={() => setError("Impossible de charger la vidéo externe")}
+          />
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
+              <p>{error}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Pour les autres vidéos externes
     return (
       <div className={`aspect-video w-full bg-black ${className}`}>
         <iframe 
-          src={videoUrl} 
+          src={processedVideoUrl} 
           title="Video player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
           allowFullScreen
@@ -105,7 +149,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
         onError={handleError}
         poster={poster}
       >
-        <source src={videoUrl} type="video/mp4" />
+        <source src={processedVideoUrl} type="video/mp4" />
         Votre navigateur ne prend pas en charge la lecture vidéo.
       </video>
       {error && (
