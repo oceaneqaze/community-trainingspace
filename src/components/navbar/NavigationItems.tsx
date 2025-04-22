@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HomeIcon, Clock, BookOpen, MessageSquare, Bell, Users, FileText } from 'lucide-react';
 import NavLink from './NavLink';
@@ -41,6 +42,12 @@ export const getNavigationItems = (): NavigationItem[] => [
     adminOnly: false
   },
   {
+    path: '/blog',
+    label: 'Blog',
+    icon: <FileText className="h-4 w-4" />,
+    adminOnly: false
+  },
+  {
     path: '/invitations',
     label: 'Invitations',
     icon: <Users className="h-4 w-4" />,
@@ -48,7 +55,7 @@ export const getNavigationItems = (): NavigationItem[] => [
   },
   {
     path: '/blog/manage',
-    label: 'Blog',
+    label: 'Gérer le Blog',
     icon: <FileText className="h-4 w-4" />,
     adminOnly: true
   }
