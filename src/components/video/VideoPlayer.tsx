@@ -30,7 +30,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     return () => {
       console.log("VideoPlayer unmounted");
     };
-  }, [videoUrl]); // Add videoUrl as dependency
+  }, [videoUrl]);
 
   const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     console.error("Erreur de lecture vidéo:", e);
@@ -62,49 +62,16 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     setError(userMessage);
   };
 
-  // Amélioration de la détection et du traitement des vidéos ScreenRec
-  const extractScreenRecId = (url: string) => {
-    // Format: https://upww.screenrec.com/videos/f_JwRfuHyGo4ziAWpUChcOTnEDY5N0QVrI.mp4/index.m3u8
-    const regex = /\/f_([A-Za-z0-9]+)/;
-    const match = url.match(regex);
-    return match ? match[1] : null;
-  };
-
-  const isExternalVideo = React.useMemo(() => {
-    if (!videoUrl) return false;
-    return videoUrl.includes('screenrec.com') || 
-           (videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com'));
-  }, [videoUrl]);
-
-  const processedVideoUrl = React.useMemo(() => {
-    if (!videoUrl) return '';
+  // For ScreenRec videos, use their embed player
+  if (videoUrl && videoUrl.includes('screenrec.com')) {
+    // Try to extract the video ID from various ScreenRec URL formats
+    const regex = /(?:share\/|videos\/f_|embed\/)([A-Za-z0-9_-]+)/;
+    const match = videoUrl.match(regex);
+    const videoId = match ? match[1] : null;
     
-    if (videoUrl.includes('screenrec.com')) {
-      const screenRecId = extractScreenRecId(videoUrl);
-      if (screenRecId) {
-        console.log("ID ScreenRec extrait:", screenRecId);
-        return screenRecId;
-      }
-    }
-    
-    return videoUrl;
-  }, [videoUrl]);
-
-  // Logging pour diagnostic
-  useEffect(() => {
-    console.log("URL vidéo originale:", videoUrl);
-    console.log("URL vidéo traitée:", processedVideoUrl);
-    console.log("Est une vidéo externe:", isExternalVideo);
-  }, [videoUrl, processedVideoUrl, isExternalVideo]);
-
-  // Render iframe for external videos
-  if (isExternalVideo) {
-    // Pour les vidéos ScreenRec spécifiquement
-    if (videoUrl.includes('screenrec.com')) {
-      const screenRecId = processedVideoUrl;
-      const embedUrl = `https://screenrec.com/embed/${screenRecId}`;
-      
-      console.log("URL d'embed ScreenRec générée:", embedUrl);
+    if (videoId) {
+      // Use the embed URL format for ScreenRec videos
+      const embedUrl = `https://screenrec.com/embed/${videoId}`;
       
       return (
         <div className={`relative aspect-video w-full bg-black ${className}`}>
@@ -114,7 +81,6 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowFullScreen
             className="w-full h-full"
-            onError={() => setError("Impossible de charger la vidéo ScreenRec")}
           />
           {error && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
@@ -124,17 +90,18 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
         </div>
       );
     }
-    
-    // Pour les autres vidéos externes
+  }
+  
+  // For external non-ScreenRec videos
+  if (videoUrl && videoUrl.startsWith('http') && !videoUrl.includes('storage.googleapis.com')) {
     return (
-      <div className={`aspect-video w-full bg-black ${className}`}>
+      <div className={`relative aspect-video w-full bg-black ${className}`}>
         <iframe 
           src={videoUrl} 
           title="Video player"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
           allowFullScreen
           className="w-full h-full"
-          onError={() => setError("Impossible de charger la vidéo externe")}
         />
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-70 text-white p-4">
@@ -145,7 +112,7 @@ const VideoPlayer: ForwardRefRenderFunction<HTMLVideoElement, VideoPlayerProps> 
     );
   }
 
-  // Render native video player for uploaded videos
+  // Default video player for uploaded videos
   return (
     <div className="relative">
       <video
