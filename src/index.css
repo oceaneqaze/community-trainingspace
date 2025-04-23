@@ -36,63 +36,84 @@
 
     --radius: 0.5rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
   
   html {
-    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape */
+    -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
   
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
   }
   
+  /* Optimized heading styles for mobile */
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium tracking-tight font-poppins;
   }
   
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
+    @apply text-3xl md:text-4xl lg:text-5xl;
+    line-height: 1.2;
   }
   
   h2 {
-    @apply text-3xl md:text-4xl;
+    @apply text-2xl md:text-3xl lg:text-4xl;
+    line-height: 1.3;
   }
   
   h3 {
-    @apply text-2xl md:text-3xl;
+    @apply text-xl md:text-2xl lg:text-3xl;
+    line-height: 1.4;
   }
   
   h4 {
-    @apply text-xl md:text-2xl;
+    @apply text-lg md:text-xl;
+    line-height: 1.4;
   }
   
-  a {
-    @apply transition-colors;
+  p {
+    @apply text-base md:text-lg;
+    line-height: 1.6;
   }
 
-  /* Better tap targets for mobile */
-  button, a, input, select, textarea {
-    @apply md:touch-auto;
+  /* Optimized link tap targets for mobile */
+  a, button {
+    @apply min-h-[44px] py-2 px-3;
   }
 
-  .glass-panel {
-    @apply bg-black/50 backdrop-blur-xl border border-white/10 shadow-xl;
+  /* Base text classes */
+  .text-base {
+    @apply text-[16px] leading-[1.6];
   }
-  
-  .page-container {
-    @apply max-w-screen-2xl mx-auto px-4 sm:px-6 py-8 animate-fade-in;
+
+  .text-sm {
+    @apply text-[14px] leading-[1.5];
   }
-  
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-1;
+
+  /* Mobile-specific optimizations */
+  @media (max-width: 640px) {
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    input, select, textarea {
+      @apply text-base; /* Prevents zoom on iOS */
+      @apply p-3; /* Larger touch targets */
+    }
+
+    .mobile-text-adjust {
+      @apply text-left text-[16px] leading-[1.4];
+    }
+
+    .mobile-spacing {
+      @apply space-y-4;
+    }
   }
 }
 
