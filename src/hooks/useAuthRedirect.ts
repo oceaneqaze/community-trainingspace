@@ -11,8 +11,6 @@ export const useAuthRedirect = () => {
     if (!isAuthenticated) {
       navigate('/login');
     }
-    // Suppression de la redirection des admins vers /admin/dashboard
-    // car cette route n'existe pas dans l'application
   }, [isAuthenticated, navigate]);
 
   return { isAuthenticated, isAdmin };

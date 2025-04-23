@@ -1,7 +1,7 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/context/AuthContext';
+import { createAuthProvider } from '@/context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Layouts
@@ -32,40 +32,50 @@ import BlogPost from '@/pages/BlogPost';
 // Create a client
 const queryClient = new QueryClient();
 
+// AppContent component to access hooks inside the Router
+const AppContent = () => {
+  const navigate = useNavigate();
+  const AuthProvider = createAuthProvider(navigate);
+  
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Index />} />
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="videos" element={<Videos />} />
+          <Route path="videos/:id" element={<VideoDetail />} />
+          <Route path="library" element={<LibraryManager />} />
+          <Route path="preview" element={<ScreenRecPreview />} />
+          <Route path="members" element={<Members />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="invitation/:code" element={<Invitation />} />
+          <Route path="invitations" element={<InvitationManager />} />
+          <Route path="chat" element={<Chat />} />
+          <Route path="announcements" element={<Announcements />} />
+          <Route path="history" element={<WatchHistory />} />
+          <Route path="ebooks" element={<Ebooks />} />
+          <Route path="blog/manage" element={<BlogManager />} />
+          <Route path="blog" element={<Blog />} />
+          <Route path="blog/:slug" element={<BlogPost />} />
+          <Route path="404" element={<NotFound />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Route>
+        <Route path="/videos" element={<Navigate to="/videos" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </AuthProvider>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Index />} />
-              <Route path="login" element={<Login />} />
-              <Route path="signup" element={<Signup />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="videos" element={<Videos />} />
-              <Route path="videos/:id" element={<VideoDetail />} />
-              <Route path="library" element={<LibraryManager />} />
-              <Route path="preview" element={<ScreenRecPreview />} />
-              <Route path="members" element={<Members />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="invitation/:code" element={<Invitation />} />
-              <Route path="invitations" element={<InvitationManager />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="announcements" element={<Announcements />} />
-              <Route path="history" element={<WatchHistory />} />
-              <Route path="ebooks" element={<Ebooks />} />
-              <Route path="blog/manage" element={<BlogManager />} />
-              <Route path="blog" element={<Blog />} />
-              <Route path="blog/:slug" element={<BlogPost />} />
-              <Route path="404" element={<NotFound />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Route>
-            <Route path="/videos" element={<Navigate to="/videos" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Toaster />
-        </AuthProvider>
+        <AppContent />
+        <Toaster />
       </BrowserRouter>
     </QueryClientProvider>
   );
