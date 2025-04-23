@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Rocket, Star, MessageSquare } from 'lucide-react';
 
@@ -21,12 +20,12 @@ const FeatureCard = ({ icon, title, description }: FeatureCardProps) => (
 const FeaturesSection = () => {
   return (
     <section className="py-16 bg-muted/50">
-      <div className="container px-4 md:px-6">
+      <div className="px-2 sm:container sm:px-4 md:px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-bold tracking-tight mb-8">
             Une communauté privée pour créer du contenu viral avec l'intelligence artificielle
           </h2>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             <FeatureCard
               icon={<Rocket />}
               title="Automatisation IA"

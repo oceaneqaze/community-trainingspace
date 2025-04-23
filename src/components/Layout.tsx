@@ -25,9 +25,15 @@ const Layout: React.FC = () => {
           
           <main className={cn(
             "flex-1",
-            !hideNav ? "md:ml-0" : "w-full"
+            !hideNav ? "md:ml-0" : "w-full",
+            "sm:px-4 md:px-6 lg:px-8",
+            "px-0" // Supprime les marges sur mobile
           )}>
-            <div className="container mx-auto p-4">
+            <div className={cn(
+              "mx-auto",
+              "sm:container",
+              "px-0 sm:px-4" // Supprime les marges sur mobile, garde les marges sur desktop
+            )}>
               <Outlet />
             </div>
           </main>

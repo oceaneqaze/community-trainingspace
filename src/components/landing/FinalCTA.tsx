@@ -9,7 +9,7 @@ const FinalCTA = () => {
 
   return (
     <section className="py-16 bg-primary/5">
-      <div className="container px-4 md:px-6">
+      <div className="px-2 sm:container sm:px-4 md:px-6">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h2 className="text-3xl font-bold tracking-tight mb-6">
             Tu veux automatiser ton contenu ou galérer encore 6 mois ?

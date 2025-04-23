@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const FAQ = () => {
@@ -27,11 +26,11 @@ const FAQ = () => {
 
   return (
     <section className="py-16 bg-muted/50">
-      <div className="container px-4 md:px-6">
+      <div className="px-2 sm:container sm:px-4 md:px-6">
         <h2 className="text-3xl font-bold tracking-tight text-center mb-8">
           FAQ – Tu te poses sûrement ces questions :
         </h2>
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
           {faqs.map((faq, index) => (
             <div key={index} className="bg-card p-6 rounded-lg">
               <h3 className="text-lg font-semibold mb-2">→ {faq.question}</h3>
