@@ -1,6 +1,7 @@
 
 import React from 'react';
 import HeroSection from '@/components/landing/HeroSection';
+import CommunityPreview from '@/components/landing/CommunityPreview';
 import ProblemSection from '@/components/landing/ProblemSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import BenefitsSection from '@/components/landing/BenefitsSection';
@@ -12,6 +13,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
       <HeroSection />
+      <CommunityPreview />
       <ProblemSection />
       <FeaturesSection />
       <BenefitsSection />
