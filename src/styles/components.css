@@ -1,0 +1,75 @@
+
+@layer components {
+  /* Tech components */
+  .tech-border {
+    @apply border border-primary/50 shadow-[0_0_20px_rgba(var(--primary)/0.3)];
+  }
+
+  .tech-glow {
+    @apply relative;
+  }
+
+  .tech-glow::after {
+    content: '';
+    @apply absolute inset-0 rounded-md bg-primary/10 opacity-0 transition-opacity;
+    box-shadow: 0 0 25px 4px rgba(var(--primary)/0.5);
+  }
+
+  .tech-glow:hover::after {
+    @apply opacity-100;
+  }
+
+  .tech-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold;
+  }
+
+  .tech-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-primary to-accent 
+    text-white font-medium py-2.5 px-6 rounded-md transition-all duration-300
+    hover:shadow-[0_0_20px_rgba(var(--primary)/0.5)] focus:outline-none focus:ring-2 
+    focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background border border-white/10;
+  }
+
+  .tech-button-outline {
+    @apply relative overflow-hidden bg-transparent border border-primary/50
+    text-primary font-medium py-2.5 px-6 rounded-md transition-all duration-300
+    hover:border-primary hover:bg-primary/10 
+    hover:shadow-[0_0_20px_rgba(var(--primary)/0.3)] focus:outline-none;
+  }
+
+  /* Professional card */
+  .pro-card {
+    @apply bg-gradient-to-br from-card/95 to-card/80 border-t border-white/10 border-l border-white/5 border-r border-black/20 border-b border-black/20 shadow-xl;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  }
+
+  .pro-button {
+    @apply bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary 
+    text-white font-medium py-3 px-6 rounded-md shadow-lg transition-all duration-300 
+    hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] border border-white/10;
+  }
+
+  /* Image loading effect */
+  .image-loading {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .image-loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.2),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 1.5s infinite;
+  }
+}
+

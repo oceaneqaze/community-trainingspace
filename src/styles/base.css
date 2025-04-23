@@ -1,0 +1,45 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 260 20% 10%;
+    --foreground: 280 10% 90%;
+    --card: 260 15% 15%;
+    --card-foreground: 280 10% 90%;
+    --popover: 260 15% 15%;
+    --popover-foreground: 280 10% 90%;
+    --primary: 300 80% 60%;
+    --primary-foreground: 280 10% 95%;
+    --secondary: 260 30% 20%;
+    --secondary-foreground: 280 10% 90%;
+    --muted: 260 15% 20%;
+    --muted-foreground: 280 5% 65%;
+    --accent: 280 70% 60%;
+    --accent-foreground: 280 10% 95%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 280 10% 95%;
+    --border: 260 15% 25%;
+    --input: 260 15% 25%;
+    --ring: 280 70% 60%;
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
