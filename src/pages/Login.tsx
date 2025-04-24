@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -17,13 +17,19 @@ const Login: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get returnUrl from query parameters
+  const searchParams = new URLSearchParams(location.search);
+  const returnUrl = searchParams.get('returnUrl') || '/videos';
 
-  // Redirect to videos page if already authenticated
+  // Redirect to return URL if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/videos');
+      const decodedReturnUrl = decodeURIComponent(returnUrl);
+      navigate(decodedReturnUrl);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,12 +38,12 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      // Note: Redirection is now handled in AuthContext
+      // Note: Redirection is now handled in the useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       
       // Afficher un message d'erreur plus précis selon la cause
-      if (error.message.includes('Invalid login credentials')) {
+      if (error.message && error.message.includes('Invalid login credentials')) {
         setError("Email ou mot de passe incorrect");
       } else {
         setError(error.message || "Une erreur est survenue lors de la connexion");

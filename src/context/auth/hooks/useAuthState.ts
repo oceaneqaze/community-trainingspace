@@ -28,7 +28,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
         
         if (session) {
           try {
-            // Use setTimeout to prevent potential deadlock
+            // First update the basic auth state synchronously
             setAuthState(prev => ({
               ...prev,
               user: session.user,
