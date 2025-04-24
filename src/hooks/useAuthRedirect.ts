@@ -13,7 +13,15 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     // Don't redirect while authentication is still loading
     if (isLoading) return;
 
-    if (!isAuthenticated) {
+    // Si l'utilisateur est sur la page de login et est déjà authentifié, on le redirige vers videos
+    if (isAuthenticated && location.pathname === '/login') {
+      navigate('/videos');
+      return;
+    }
+
+    // Si la page requiert une authentification et que l'utilisateur n'est pas authentifié
+    if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup' 
+        && location.pathname !== '/' && !location.pathname.includes('/invitation/')) {
       // Store the intended destination to redirect back after login
       const returnUrl = encodeURIComponent(location.pathname + location.search);
       navigate(`/login?returnUrl=${returnUrl}`);
@@ -24,7 +32,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    if (isBanned && isBanned()) {
+    // Vérification du bannissement seulement si l'utilisateur est authentifié
+    if (isAuthenticated && typeof isBanned === 'function' && isBanned()) {
       navigate('/');
       toast({
         title: "Accès refusé",
@@ -34,7 +43,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    if (requiresAdmin && !isAdmin()) {
+    // Vérification des droits admin seulement si spécifié et si l'utilisateur est authentifié
+    if (isAuthenticated && requiresAdmin && typeof isAdmin === 'function' && !isAdmin()) {
       navigate('/videos');
       toast({
         title: "Accès refusé",
@@ -45,5 +55,9 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     }
   }, [isAuthenticated, isAdmin, isBanned, isLoading, location, navigate, requiresAdmin]);
 
-  return { isAuthenticated, isAdmin: isAdmin ? isAdmin() : false, isLoading };
+  return { 
+    isAuthenticated, 
+    isAdmin: typeof isAdmin === 'function' ? isAdmin() : isAdmin, 
+    isLoading 
+  };
 };

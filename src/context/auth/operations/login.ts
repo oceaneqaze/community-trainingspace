@@ -11,12 +11,8 @@ export const login = async (email: string, password: string) => {
 
     if (error) throw error;
 
-    // Auth state change will handle session and navigation
-    // We just show a success toast here
-    toast({
-      title: "Connexion réussie",
-      description: `Bienvenue sur DOPE CONTENT, ${email}`,
-    });
+    // Pas de toast ici, cela sera géré par la page de login
+    return data;
   } catch (error: any) {
     console.error('Login error:', error.message);
     toast({

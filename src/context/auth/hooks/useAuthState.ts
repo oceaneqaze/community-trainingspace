@@ -42,7 +42,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
               const profile = await fetchUserProfile(session.user.id);
               
               // Handle banned users
-              if (await checkUserBanned(profile, async () => {
+              if (profile && await checkUserBanned(profile, async () => {
                 const { error } = await supabase.auth.signOut();
                 if (error) console.error('Error signing out:', error);
               })) {
@@ -60,10 +60,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
               }));
             }, 0);
 
-            // Navigate to videos page after successful login
-            if (event === 'SIGNED_IN') {
-              navigate('/videos');
-            }
+            // Ne pas naviguer automatiquement, laisser useAuthRedirect s'en charger
           } catch (error) {
             console.error('Error handling auth state change:', error);
             setAuthState({
@@ -98,7 +95,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
           const profile = await fetchUserProfile(session.user.id);
           
           // Handle banned users
-          if (await checkUserBanned(profile, async () => {
+          if (profile && await checkUserBanned(profile, async () => {
             const { error } = await supabase.auth.signOut();
             if (error) console.error('Error signing out:', error);
           })) {

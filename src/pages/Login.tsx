@@ -15,7 +15,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -25,11 +25,11 @@ const Login: React.FC = () => {
 
   // Redirect to return URL if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       const decodedReturnUrl = decodeURIComponent(returnUrl);
       navigate(decodedReturnUrl);
     }
-  }, [isAuthenticated, navigate, returnUrl]);
+  }, [isAuthenticated, authLoading, navigate, returnUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +38,7 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      // Note: Redirection is now handled in the useEffect above
+      // Note: Redirection is handled in the useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       
