@@ -24,13 +24,13 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     });
 
     // Pages publiques qui ne nécessitent pas d'authentification
-    const publicPaths = ['/login', '/signup', '/', '/invitation'];
+    const publicPaths = ['/signin', '/signup', '/', '/invitation'];
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
-    // Si l'utilisateur est sur la page de login et est déjà authentifié, on le redirige vers videos
-    if (isAuthenticated && location.pathname === '/login') {
-      console.log("User is authenticated and on login page, redirecting to /videos");
+    // Si l'utilisateur est sur la page de connexion et est déjà authentifié, on le redirige vers videos
+    if (isAuthenticated && location.pathname === '/signin') {
+      console.log("User is authenticated and on signin page, redirecting to /videos");
       navigate('/videos');
       return;
     }
@@ -39,8 +39,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     if (!isAuthenticated && !isPublicPath) {
       // Store the intended destination to redirect back after login
       const returnUrl = encodeURIComponent(location.pathname + location.search);
-      console.log(`User not authenticated, redirecting to login with returnUrl: ${returnUrl}`);
-      navigate(`/login?returnUrl=${returnUrl}`);
+      console.log(`User not authenticated, redirecting to signin with returnUrl: ${returnUrl}`);
+      navigate(`/signin?returnUrl=${returnUrl}`);
       toast({
         title: "Accès refusé",
         description: "Veuillez vous connecter pour accéder à cette page.",
@@ -79,3 +79,4 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     isLoading 
   };
 };
+

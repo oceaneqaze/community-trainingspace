@@ -8,7 +8,7 @@ const AuthButtons = () => {
   
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" onClick={() => navigate('/login')}>
+      <Button variant="outline" onClick={() => navigate('/signin')}>
         Connexion
       </Button>
       <Button onClick={() => navigate('/invitation')}>
@@ -19,3 +19,4 @@ const AuthButtons = () => {
 };
 
 export default AuthButtons;
+

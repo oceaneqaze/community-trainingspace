@@ -1,4 +1,4 @@
-
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { createAuthProvider } from '@/context/AuthContext';
@@ -9,7 +9,7 @@ import Layout from '@/components/Layout';
 
 // Pages
 import Index from '@/pages/Index';
-import Login from '@/pages/Login';
+import Signin from '@/pages/Signin';
 import Signup from '@/pages/Signup';
 import Dashboard from '@/pages/Dashboard';
 import Videos from '@/pages/Videos';
@@ -42,7 +42,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Index />} />
-          <Route path="login" element={<Login />} />
+          <Route path="signin" element={<Signin />} />
           <Route path="signup" element={<Signup />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="videos" element={<Videos />} />
