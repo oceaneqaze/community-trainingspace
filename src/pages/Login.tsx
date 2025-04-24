@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -25,9 +24,16 @@ const Login: React.FC = () => {
 
   // Redirect to return URL if already authenticated
   useEffect(() => {
+    console.log("Login page effect running:", { isAuthenticated, authLoading, returnUrl });
+    
     if (isAuthenticated && !authLoading) {
       const decodedReturnUrl = decodeURIComponent(returnUrl);
-      navigate(decodedReturnUrl);
+      console.log(`Redirecting authenticated user to: ${decodedReturnUrl}`);
+      
+      // Use setTimeout to avoid potential redirection race conditions
+      setTimeout(() => {
+        navigate(decodedReturnUrl);
+      }, 0);
     }
   }, [isAuthenticated, authLoading, navigate, returnUrl]);
 
@@ -37,8 +43,15 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
+      console.log("Attempting login for:", email);
       await login(email, password);
-      // Note: Redirection is handled in the useEffect above
+      
+      toast({
+        title: "Connexion réussie",
+        description: `Bienvenue sur DOPE CONTENT`,
+      });
+      
+      // La redirection sera gérée par le useEffect ci-dessus
     } catch (error: any) {
       console.error('Login error:', error);
       

@@ -10,20 +10,36 @@ export const useAuthRedirect = (requiresAdmin = false) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Don't redirect while authentication is still loading
-    if (isLoading) return;
+    // Ne pas rediriger pendant le chargement de l'authentification
+    if (isLoading) {
+      console.log("Auth loading, skipping redirect checks");
+      return;
+    }
+
+    console.log("useAuthRedirect running with:", { 
+      isAuthenticated, 
+      path: location.pathname, 
+      isLoading, 
+      requiresAdmin 
+    });
+
+    // Pages publiques qui ne nécessitent pas d'authentification
+    const publicPaths = ['/login', '/signup', '/', '/invitation'];
+    const isPublicPath = publicPaths.some(path => location.pathname === path) || 
+                         location.pathname.includes('/invitation/');
 
     // Si l'utilisateur est sur la page de login et est déjà authentifié, on le redirige vers videos
     if (isAuthenticated && location.pathname === '/login') {
+      console.log("User is authenticated and on login page, redirecting to /videos");
       navigate('/videos');
       return;
     }
 
     // Si la page requiert une authentification et que l'utilisateur n'est pas authentifié
-    if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/signup' 
-        && location.pathname !== '/' && !location.pathname.includes('/invitation/')) {
+    if (!isAuthenticated && !isPublicPath) {
       // Store the intended destination to redirect back after login
       const returnUrl = encodeURIComponent(location.pathname + location.search);
+      console.log(`User not authenticated, redirecting to login with returnUrl: ${returnUrl}`);
       navigate(`/login?returnUrl=${returnUrl}`);
       toast({
         title: "Accès refusé",
@@ -34,6 +50,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
 
     // Vérification du bannissement seulement si l'utilisateur est authentifié
     if (isAuthenticated && typeof isBanned === 'function' && isBanned()) {
+      console.log("User is banned, redirecting to home");
       navigate('/');
       toast({
         title: "Accès refusé",
@@ -45,6 +62,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
 
     // Vérification des droits admin seulement si spécifié et si l'utilisateur est authentifié
     if (isAuthenticated && requiresAdmin && typeof isAdmin === 'function' && !isAdmin()) {
+      console.log("User is not admin but page requires admin, redirecting to videos");
       navigate('/videos');
       toast({
         title: "Accès refusé",
@@ -53,7 +71,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       });
       return;
     }
-  }, [isAuthenticated, isAdmin, isBanned, isLoading, location, navigate, requiresAdmin]);
+  }, [isAuthenticated, isAdmin, isBanned, isLoading, location.pathname, navigate, requiresAdmin]);
 
   return { 
     isAuthenticated, 
