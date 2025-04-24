@@ -8,7 +8,7 @@ import { signup as signupOp } from './auth/operations/signup';
 import { logout as logoutOp } from './auth/operations/logout';
 import { refreshProfile as refreshProfileOp } from './auth/operations/refreshProfile';
 import { updateUserStatus as updateUserStatusOp } from './auth/operations/updateUserStatus';
-import { useAuthState, initialState } from './auth/hooks/useAuthState';
+import { useAuthState } from './auth/hooks/useAuthState';
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -137,7 +137,7 @@ export const createAuthProvider = (navigate: (to: string) => void) => {
 
 // Export a wrapper component that will be used in App.tsx
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // This is a placeholder to maintain the interface
+  // This is a placeholder component that maintains the interface
   // The actual provider will be created in App.tsx with the navigate function
   return <>{children}</>;
 };
