@@ -16,7 +16,7 @@ type DBVideo = {
   created_at: string;
 };
 
-export const useDashboardData = (isAuthenticated: boolean, isAdmin: () => boolean) => {
+export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => {
   const [videos, setVideos] = useState<VideoProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userCount, setUserCount] = useState(0);
@@ -83,7 +83,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: () => boolea
       }
     };
     
-    if (isAuthenticated && isAdmin()) {
+    if (isAuthenticated && isAdmin) {
       fetchData();
     }
   }, [isAuthenticated, isAdmin]);

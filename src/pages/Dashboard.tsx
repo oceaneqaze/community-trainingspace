@@ -8,7 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import VideoManagement from '@/components/dashboard/VideoManagement';
 
 const Dashboard: React.FC = () => {
-  const { isAuthenticated, isAdmin } = useAuthRedirect();
+  // Pass true to require admin access to the page
+  const { isAuthenticated, isAdmin } = useAuthRedirect(true);
   const { userCount, videos, viewCount, isLoading, handleVideoAdded, handleVideoUpdated, handleVideoDeleted } = useDashboardData(isAuthenticated, isAdmin);
   const { profile } = useAuth();
 
@@ -18,7 +19,7 @@ const Dashboard: React.FC = () => {
         <h1 className="text-4xl font-bold">Mon Tableau de Bord</h1>
       </div>
       
-      {isAdmin() ? (
+      {isAdmin ? (
         <div className="space-y-8">
           <DashboardOverview 
             userCount={userCount} 
