@@ -223,7 +223,7 @@ const Signup: React.FC = () => {
 
             <div className="text-sm text-center">
               <span className="text-muted-foreground">Vous avez déjà un compte?</span>{' '}
-              <Link to="/login" className="font-medium text-primary hover:text-accent">
+              <Link to="/signin" className="font-medium text-primary hover:text-accent">
                 Connectez-vous
               </Link>
             </div>
