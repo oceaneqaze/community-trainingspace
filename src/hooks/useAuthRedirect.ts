@@ -24,7 +24,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     });
 
     // Pages publiques qui ne nécessitent pas d'authentification
-    const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; // Ajout de /login comme chemin public
+    const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; 
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
