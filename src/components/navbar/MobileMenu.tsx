@@ -40,7 +40,7 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
           </>
         ) : (
           <>
-            <NavLink to="/signin" onClick={onClose} mobile>Connexion</NavLink>
+            <NavLink to="/login" onClick={onClose} mobile>Connexion</NavLink>
             <NavLink to="/signup" onClick={onClose} mobile>Inscription</NavLink>
           </>
         )}
