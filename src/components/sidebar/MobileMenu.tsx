@@ -92,7 +92,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   className="w-full justify-start text-base" 
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/login');
+                    navigate('/signin');
                   }}
                 >
                   <span>Connexion</span>
@@ -101,7 +101,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   className="w-full justify-start text-base" 
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/invitation');
+                    navigate('/signup');
                   }}
                 >
                   <span>S'inscrire</span>
