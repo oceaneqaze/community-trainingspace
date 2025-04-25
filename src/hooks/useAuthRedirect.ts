@@ -24,13 +24,13 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     });
 
     // Pages publiques qui ne nécessitent pas d'authentification
-    const publicPaths = ['/signin', '/signup', '/', '/invitation'];
+    const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; // Ajout de /login comme chemin public
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
     // Si l'utilisateur est sur la page de connexion et est déjà authentifié, on le redirige vers videos
-    if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
-      console.log("User is authenticated and on signin/signup page, redirecting to /videos");
+    if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/login')) {
+      console.log("User is authenticated and on signin/signup/login page, redirecting to /videos");
       navigate('/videos');
       return;
     }

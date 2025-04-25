@@ -63,7 +63,9 @@ const AppContent = () => {
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="404" element={<NotFound />} />
-          <Route path="*" element={<NotFound />} /> {/* Changed from Navigate to direct component */}
+          {/* Ajout d'une redirection explicite de /login vers /signin */}
+          <Route path="login" element={<Navigate to="/signin" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </AuthProvider>
