@@ -29,8 +29,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
                          location.pathname.includes('/invitation/');
 
     // Si l'utilisateur est sur la page de connexion et est déjà authentifié, on le redirige vers videos
-    if (isAuthenticated && location.pathname === '/signin') {
-      console.log("User is authenticated and on signin page, redirecting to /videos");
+    if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
+      console.log("User is authenticated and on signin/signup page, redirecting to /videos");
       navigate('/videos');
       return;
     }
@@ -71,7 +71,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       });
       return;
     }
-  }, [isAuthenticated, isAdmin, isBanned, isLoading, location.pathname, navigate, requiresAdmin]);
+  }, [isAuthenticated, isAdmin, isBanned, isLoading, location.pathname, location.search, navigate, requiresAdmin]);
 
   return { 
     isAuthenticated, 
@@ -79,4 +79,3 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     isLoading 
   };
 };
-

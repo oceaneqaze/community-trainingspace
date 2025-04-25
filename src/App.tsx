@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
@@ -52,6 +53,7 @@ const AppContent = () => {
           <Route path="members" element={<Members />} />
           <Route path="profile" element={<Profile />} />
           <Route path="invitation/:code" element={<Invitation />} />
+          <Route path="invitation" element={<Invitation />} />
           <Route path="invitations" element={<InvitationManager />} />
           <Route path="chat" element={<Chat />} />
           <Route path="announcements" element={<Announcements />} />
