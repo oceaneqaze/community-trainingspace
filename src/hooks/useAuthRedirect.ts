@@ -26,17 +26,21 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     // Récupérer l'URL de retour si elle existe dans les paramètres
     const params = new URLSearchParams(location.search);
     const returnUrl = params.get('returnUrl');
-
+    
     // Pages publiques qui ne nécessitent pas d'authentification
     const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; 
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
-    // Si l'utilisateur est sur la page de connexion et est déjà authentifié, on le redirige vers videos
-    // ou vers l'URL de retour si elle existe
+    // Si l'utilisateur est authentifié et sur une page d'authentification, le rediriger
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/login')) {
-      console.log("User is authenticated and on signin/signup/login page, redirecting to returnUrl or /videos");
-      navigate(returnUrl || '/videos');
+      const decodedReturnUrl = returnUrl ? decodeURIComponent(returnUrl) : '/videos';
+      console.log(`User is authenticated and on auth page, redirecting to: ${decodedReturnUrl}`);
+      
+      // Delay to avoid potential issues with React state updates
+      setTimeout(() => {
+        navigate(decodedReturnUrl);
+      }, 0);
       return;
     }
 
@@ -45,11 +49,14 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       // Store the intended destination to redirect back after login
       const returnUrl = encodeURIComponent(location.pathname + location.search);
       console.log(`User not authenticated, redirecting to signin with returnUrl: ${returnUrl}`);
-      navigate(`/signin?returnUrl=${returnUrl}`);
-      toast({
-        title: "Accès refusé",
-        description: "Veuillez vous connecter pour accéder à cette page.",
-      });
+      
+      setTimeout(() => {
+        navigate(`/signin?returnUrl=${returnUrl}`);
+        toast({
+          title: "Accès refusé",
+          description: "Veuillez vous connecter pour accéder à cette page.",
+        });
+      }, 0);
       return;
     }
 

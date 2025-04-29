@@ -28,6 +28,15 @@ export const useAuthState = (navigate: (path: string) => void) => {
         
         if (!mounted) return;
         
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+          return;
+        }
+        
         if (session) {
           try {
             // First update the basic auth state synchronously

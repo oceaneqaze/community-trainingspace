@@ -24,16 +24,10 @@ const Signin: React.FC = () => {
 
   // Redirect to return URL if already authenticated
   useEffect(() => {
-    console.log("Signin page effect running:", { isAuthenticated, authLoading, returnUrl });
-    
     if (isAuthenticated && !authLoading) {
       const decodedReturnUrl = decodeURIComponent(returnUrl);
-      console.log(`Redirecting authenticated user to: ${decodedReturnUrl}`);
-      
-      // Use setTimeout to avoid potential redirection race conditions
-      setTimeout(() => {
-        navigate(decodedReturnUrl);
-      }, 0);
+      console.log(`Signin page - Redirecting authenticated user to: ${decodedReturnUrl}`);
+      navigate(decodedReturnUrl);
     }
   }, [isAuthenticated, authLoading, navigate, returnUrl]);
 
@@ -51,7 +45,7 @@ const Signin: React.FC = () => {
         description: `Bienvenue sur DOPE CONTENT`,
       });
       
-      // La redirection sera gérée par le useEffect ci-dessus
+      // Redirection handled by useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       
