@@ -63,7 +63,7 @@ const AppContent = () => {
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="404" element={<NotFound />} />
-          {/* Ajout d'une redirection explicite de /login vers /signin */}
+          {/* Redirection explicite de /login vers /signin */}
           <Route path="login" element={<Navigate to="/signin" replace />} />
           <Route path="*" element={<NotFound />} />
         </Route>

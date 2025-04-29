@@ -23,15 +23,20 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       requiresAdmin 
     });
 
+    // Récupérer l'URL de retour si elle existe dans les paramètres
+    const params = new URLSearchParams(location.search);
+    const returnUrl = params.get('returnUrl');
+
     // Pages publiques qui ne nécessitent pas d'authentification
     const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; 
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
     // Si l'utilisateur est sur la page de connexion et est déjà authentifié, on le redirige vers videos
+    // ou vers l'URL de retour si elle existe
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/login')) {
-      console.log("User is authenticated and on signin/signup/login page, redirecting to /videos");
-      navigate('/videos');
+      console.log("User is authenticated and on signin/signup/login page, redirecting to returnUrl or /videos");
+      navigate(returnUrl || '/videos');
       return;
     }
 
@@ -49,7 +54,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     }
 
     // Vérification du bannissement seulement si l'utilisateur est authentifié
-    if (isAuthenticated && typeof isBanned === 'function' && isBanned()) {
+    if (isAuthenticated && isBanned && isBanned()) {
       console.log("User is banned, redirecting to home");
       navigate('/');
       toast({
@@ -61,7 +66,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     }
 
     // Vérification des droits admin seulement si spécifié et si l'utilisateur est authentifié
-    if (isAuthenticated && requiresAdmin && typeof isAdmin === 'function' && !isAdmin()) {
+    if (isAuthenticated && requiresAdmin && isAdmin && !isAdmin()) {
       console.log("User is not admin but page requires admin, redirecting to videos");
       navigate('/videos');
       toast({

@@ -24,7 +24,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event);
+        console.log('Auth state changed:', event, session?.user?.id);
         
         if (!mounted) return;
         
@@ -76,8 +76,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
                 }));
               }
             }, 0);
-
-            // Ne pas naviguer automatiquement, laisser useAuthRedirect s'en charger
           } catch (error) {
             console.error('Error handling auth state change:', error);
             setAuthState({

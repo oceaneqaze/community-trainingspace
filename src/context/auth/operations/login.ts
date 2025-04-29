@@ -18,7 +18,7 @@ export const login = async (email: string, password: string) => {
 
     console.log("Login successful:", data.user?.id);
     
-    // Pas de toast ici, cela sera géré par la page de login
+    // Toast est géré par la page de connexion
     return data;
   } catch (error: any) {
     console.error('Login error:', error.message);
