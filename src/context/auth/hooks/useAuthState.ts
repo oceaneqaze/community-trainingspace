@@ -21,87 +21,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
     
     console.log("Setting up auth state listeners");
     
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (!mounted) return;
-        
-        if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-          setAuthState({
-            ...initialState,
-            isLoading: false,
-          });
-          return;
-        }
-        
-        if (session) {
-          try {
-            // First update the basic auth state synchronously
-            setAuthState(prev => ({
-              ...prev,
-              user: session.user,
-              session,
-              isAuthenticated: true,
-            }));
-            
-            // Fetch profile separately to avoid deadlock
-            setTimeout(async () => {
-              if (!mounted) return;
-              
-              try {
-                const profile = await fetchUserProfile(session.user.id);
-                
-                // Handle banned users
-                if (profile && await checkUserBanned(profile, async () => {
-                  const { error } = await supabase.auth.signOut();
-                  if (error) console.error('Error signing out:', error);
-                })) {
-                  setAuthState({
-                    ...initialState,
-                    isLoading: false,
-                  });
-                  return;
-                }
-                
-                setAuthState(prev => ({
-                  ...prev,
-                  profile,
-                  isLoading: false,
-                }));
-                
-                console.log("Auth state updated with profile:", { 
-                  userId: session.user.id, 
-                  hasProfile: !!profile,
-                  isLoading: false
-                });
-              } catch (error) {
-                console.error("Error fetching profile:", error);
-                setAuthState(prev => ({
-                  ...prev,
-                  isLoading: false,
-                }));
-              }
-            }, 0);
-          } catch (error) {
-            console.error('Error handling auth state change:', error);
-            setAuthState({
-              ...initialState,
-              isLoading: false,
-            });
-          }
-        } else {
-          console.log("Session is null, user is logged out");
-          setAuthState({
-            ...initialState,
-            isLoading: false,
-          });
-        }
-      }
-    );
-
     // Initial auth check
     const initializeAuth = async () => {
       try {
@@ -112,6 +31,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
         
         if (session) {
           console.log("Found existing session:", session.user.id);
+          
+          // First update the basic auth state
           setAuthState(prev => ({
             ...prev,
             user: session.user,
@@ -168,6 +89,79 @@ export const useAuthState = (navigate: (path: string) => void) => {
         }
       }
     };
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (!mounted) return;
+        
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+          return;
+        }
+        
+        if (session) {
+          // First update the basic auth state synchronously
+          setAuthState(prev => ({
+            ...prev,
+            user: session.user,
+            session,
+            isAuthenticated: true,
+          }));
+          
+          // Fetch profile separately
+          setTimeout(async () => {
+            if (!mounted) return;
+            
+            try {
+              const profile = await fetchUserProfile(session.user.id);
+              
+              // Handle banned users
+              if (profile && await checkUserBanned(profile, async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Error signing out:', error);
+              })) {
+                setAuthState({
+                  ...initialState,
+                  isLoading: false,
+                });
+                return;
+              }
+              
+              setAuthState(prev => ({
+                ...prev,
+                profile,
+                isLoading: false,
+              }));
+              
+              console.log("Auth state updated with profile:", { 
+                userId: session.user.id, 
+                hasProfile: !!profile,
+                isLoading: false
+              });
+            } catch (error) {
+              console.error("Error fetching profile:", error);
+              setAuthState(prev => ({
+                ...prev,
+                isLoading: false,
+              }));
+            }
+          }, 0);
+        } else {
+          console.log("Session is null, user is logged out");
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+        }
+      }
+    );
 
     initializeAuth();
 

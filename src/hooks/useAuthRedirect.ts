@@ -10,7 +10,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Ne pas rediriger pendant le chargement de l'authentification
+    // Skip redirect checks while authentication is loading
     if (isLoading) {
       console.log("Auth loading, skipping redirect checks");
       return;
@@ -23,47 +23,42 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       requiresAdmin 
     });
 
-    // Récupérer l'URL de retour si elle existe dans les paramètres
+    // Get return URL from parameters if it exists
     const params = new URLSearchParams(location.search);
     const returnUrl = params.get('returnUrl');
     
-    // Pages publiques qui ne nécessitent pas d'authentification
+    // Public pages that don't require authentication
     const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; 
     const isPublicPath = publicPaths.some(path => location.pathname === path) || 
                          location.pathname.includes('/invitation/');
 
-    // Si l'utilisateur est authentifié et sur une page d'authentification, le rediriger
+    // If user is authenticated and on an auth page, redirect them
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/login')) {
       const decodedReturnUrl = returnUrl ? decodeURIComponent(returnUrl) : '/videos';
       console.log(`User is authenticated and on auth page, redirecting to: ${decodedReturnUrl}`);
       
-      // Delay to avoid potential issues with React state updates
-      setTimeout(() => {
-        navigate(decodedReturnUrl);
-      }, 0);
+      navigate(decodedReturnUrl, { replace: true });
       return;
     }
 
-    // Si la page requiert une authentification et que l'utilisateur n'est pas authentifié
+    // If page requires authentication and user is not authenticated
     if (!isAuthenticated && !isPublicPath) {
       // Store the intended destination to redirect back after login
       const returnUrl = encodeURIComponent(location.pathname + location.search);
       console.log(`User not authenticated, redirecting to signin with returnUrl: ${returnUrl}`);
       
-      setTimeout(() => {
-        navigate(`/signin?returnUrl=${returnUrl}`);
-        toast({
-          title: "Accès refusé",
-          description: "Veuillez vous connecter pour accéder à cette page.",
-        });
-      }, 0);
+      navigate(`/signin?returnUrl=${returnUrl}`, { replace: true });
+      toast({
+        title: "Accès refusé",
+        description: "Veuillez vous connecter pour accéder à cette page.",
+      });
       return;
     }
 
-    // Vérification du bannissement seulement si l'utilisateur est authentifié
+    // Ban check only if user is authenticated
     if (isAuthenticated && isBanned && isBanned()) {
       console.log("User is banned, redirecting to home");
-      navigate('/');
+      navigate('/', { replace: true });
       toast({
         title: "Accès refusé",
         description: "Votre compte a été suspendu.",
@@ -72,10 +67,10 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    // Vérification des droits admin seulement si spécifié et si l'utilisateur est authentifié
+    // Admin rights check only if specified and user is authenticated
     if (isAuthenticated && requiresAdmin && isAdmin && !isAdmin()) {
       console.log("User is not admin but page requires admin, redirecting to videos");
-      navigate('/videos');
+      navigate('/videos', { replace: true });
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'administrateur pour accéder à cette page.",

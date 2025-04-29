@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -27,7 +28,7 @@ const Signin: React.FC = () => {
     if (isAuthenticated && !authLoading) {
       const decodedReturnUrl = decodeURIComponent(returnUrl);
       console.log(`Signin page - Redirecting authenticated user to: ${decodedReturnUrl}`);
-      navigate(decodedReturnUrl);
+      navigate(decodedReturnUrl, { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate, returnUrl]);
 
@@ -49,7 +50,7 @@ const Signin: React.FC = () => {
     } catch (error: any) {
       console.error('Login error:', error);
       
-      // Afficher un message d'erreur plus précis selon la cause
+      // Show more specific error message based on the cause
       if (error.message && error.message.includes('Invalid login credentials')) {
         setError("Email ou mot de passe incorrect");
       } else {
