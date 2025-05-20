@@ -10,21 +10,29 @@ export const useAuthRedirect = (requiresAdmin = false) => {
   const location = useLocation();
 
   useEffect(() => {
-    // Skip redirect checks while authentication is loading
+    // Ne pas effectuer de redirection pendant le chargement de l'authentification
     if (isLoading) {
-      console.log("Auth is loading, skipping redirect check");
+      console.log("Auth est en cours de chargement, redirection différée");
       return;
     }
 
-    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated, "Admin:", isAdmin());
-    
-    // Public pages that don't require authentication
+    // Pages publiques qui ne nécessitent pas d'authentification
     const publicPaths = ['/signin', '/signup', '/'];
     const isPublicPath = publicPaths.includes(location.pathname);
     
-    // Check banned status first if authenticated
+    // Pour déboguer
+    console.log(`Vérification de redirection - Chemin: ${location.pathname}, Auth: ${isAuthenticated}, Admin: ${isAdmin && isAdmin()}, Public: ${isPublicPath}`);
+    
+    // Éviter les redirections en boucle pour les utilisateurs déjà sur la bonne page
+    if (location.pathname === '/login') {
+      console.log("Redirection de /login vers /signin");
+      navigate('/signin', { replace: true });
+      return;
+    }
+
+    // Vérifier le statut de ban d'abord si authentifié
     if (isAuthenticated && isBanned && isBanned()) {
-      console.log("User is banned, redirecting to home");
+      console.log("Utilisateur banni, redirection vers l'accueil");
       toast({
         title: "Accès refusé",
         description: "Votre compte a été suspendu.",
@@ -34,23 +42,23 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    // If user is authenticated and on an auth page, redirect them
+    // Si l'utilisateur est authentifié et sur une page d'auth, le rediriger
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
-      console.log("Authenticated user on auth page, redirecting");
+      console.log("Utilisateur authentifié sur une page d'auth, redirection vers /videos");
       navigate('/videos', { replace: true });
       return;
     }
 
-    // If page requires authentication and user is not authenticated
+    // Si la page nécessite une authentification et que l'utilisateur n'est pas authentifié
     if (!isAuthenticated && !isPublicPath) {
-      console.log("Unauthenticated user on protected page, redirecting to /signin");
+      console.log("Utilisateur non authentifié sur une page protégée, redirection vers /signin");
       navigate('/signin', { replace: true });
       return;
     }
 
-    // Admin rights check only if specified and user is authenticated
-    if (isAuthenticated && requiresAdmin && !isAdmin()) {
-      console.log("Non-admin user on admin page, redirecting to /videos");
+    // Vérification des droits d'administrateur uniquement si spécifié et si l'utilisateur est authentifié
+    if (isAuthenticated && requiresAdmin && isAdmin && !isAdmin()) {
+      console.log("Utilisateur non-administrateur sur une page admin, redirection vers /videos");
       toast({
         title: "Accès refusé",
         description: "Vous n'avez pas les droits d'administrateur pour accéder à cette page.",
@@ -63,7 +71,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
 
   return { 
     isAuthenticated, 
-    isAdmin: isAdmin(), 
+    isAdmin: isAdmin && isAdmin(), 
     isLoading 
   };
 };

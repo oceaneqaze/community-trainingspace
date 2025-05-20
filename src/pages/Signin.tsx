@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -19,18 +18,14 @@ const Signin: React.FC = () => {
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   
-  // Clean up auth state on component mount
+  // Nettoyer l'état d'authentification au montage du composant
   useEffect(() => {
+    console.log("Page de connexion montée - nettoyage de l'état d'authentification");
     cleanupAuthState();
   }, []);
   
-  // Redirect to videos if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !authLoading) {
-      console.log("User already authenticated, redirecting");
-      navigate('/videos', { replace: true });
-    }
-  }, [isAuthenticated, authLoading, navigate]);
+  // Nous laissons la redirection à useAuthRedirect dans AuthContext
+  // Au lieu de mettre une redirection ici
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,10 +33,7 @@ const Signin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Clean up any existing auth state
-      cleanupAuthState();
-      
-      console.log("Attempting login for:", email);
+      console.log("Tentative de connexion pour:", email);
       await login(email, password);
       
       toast({
@@ -49,11 +41,11 @@ const Signin: React.FC = () => {
         description: `Bienvenue sur DOPE CONTENT`,
       });
       
-      // Navigate will be handled by the useEffect above
+      // La redirection sera gérée par useAuthRedirect
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('Erreur de connexion:', error);
       
-      // Show more specific error message based on the cause
+      // Afficher un message d'erreur plus spécifique en fonction de la cause
       if (error.message && error.message.includes('Invalid login credentials')) {
         setError("Email ou mot de passe incorrect");
       } else {

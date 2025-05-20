@@ -5,34 +5,36 @@ import { toast } from '@/components/ui/use-toast';
 
 export const login = async (email: string, password: string) => {
   try {
-    console.log("Login operation started for:", email);
+    console.log("Opération de connexion démarrée pour:", email);
     
-    // Clean up existing auth state to prevent conflicts
+    // Nettoyer l'état d'authentification existant pour éviter les conflits
     cleanupAuthState();
     
-    // Attempt sign out to ensure a clean state
+    // Tenter de se déconnecter pour garantir un état propre
     try {
       await supabase.auth.signOut({ scope: 'global' });
     } catch (e) {
-      // Continue even if this fails
-      console.log("Pre-login signout attempt failed, continuing anyway");
+      // Continuer même si cela échoue
+      console.log("La tentative de déconnexion préalable à la connexion a échoué, continuation");
     }
     
-    // Now attempt to sign in with clean state
+    // Maintenant tenter de se connecter avec un état propre
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      console.error("Supabase auth error:", error);
+      console.error("Erreur d'authentification Supabase:", error);
       throw error;
     }
 
-    console.log("Login successful:", data.user?.id);
+    console.log("Connexion réussie:", data.user?.id);
+    
+    // Ne pas faire de redirection ici, la gestion de redirection est dans useAuthRedirect
     return data;
   } catch (error: any) {
-    console.error('Login error:', error.message);
+    console.error('Erreur de connexion:', error.message);
     toast({
       title: "Échec de connexion",
       description: error.message || "Une erreur est survenue",
