@@ -20,8 +20,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     const currentPath = location.pathname;
 
     // Pages publiques qui ne nécessitent pas d'authentification
-    const publicPaths = ['/signin', '/signup', '/'];
-    const isPublicPath = publicPaths.includes(currentPath);
+    const publicPaths = ['/signin', '/signup', '/login', '/'];
+    const isPublicPath = publicPaths.some(path => currentPath === path || currentPath.startsWith(path + '/'));
     
     // Pour déboguer
     console.log(`Vérification de redirection - Chemin: ${currentPath}, Auth: ${isAuthenticated}, Admin: ${isAdmin && isAdmin()}, Public: ${isPublicPath}`);
@@ -45,8 +45,8 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    // Si l'utilisateur est authentifié et sur une page d'auth, le rediriger
-    if (isAuthenticated && (currentPath === '/signin' || currentPath === '/signup')) {
+    // Si l'utilisateur est authentifié et sur une page d'auth, le rediriger vers /videos
+    if (isAuthenticated && (currentPath === '/signin' || currentPath === '/signup' || currentPath === '/login')) {
       console.log("Utilisateur authentifié sur une page d'auth, redirection vers /videos");
       navigate('/videos', { replace: true });
       return;

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Thoroughly clean up auth state to prevent limbo states
+ * Note: Only runs in development to prevent disrupting production sessions
  */
 export const cleanupAuthState = () => {
   console.log("Cleaning up auth state");

@@ -9,7 +9,8 @@ const Layout: React.FC = () => {
   const location = useLocation();
   console.log('Rendu du Layout, chemin actuel:', location.pathname);
   
-  const isLoginPage = location.pathname.includes('/login');
+  // Add 'signin' to the list of paths that should hide the navigation
+  const isLoginPage = location.pathname.includes('/login') || location.pathname.includes('/signin');
   const isSignupPage = location.pathname.includes('/signup');
   const isInvitationPage = location.pathname.includes('/invitation/');
   const is404Page = location.pathname.includes('/404');
