@@ -1,10 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 export const logout = async (onLogoutSuccess: () => void) => {
   try {
-    const { error } = await supabase.auth.signOut();
+    console.log('Logout operation started');
+    
+    // Clean up existing auth state first
+    cleanupAuthState();
+    
+    // Then perform global sign out
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
+    
     if (error) {
       console.error('Logout error:', error.message);
       toast({
@@ -20,7 +28,16 @@ export const logout = async (onLogoutSuccess: () => void) => {
       description: "Vous avez été déconnecté avec succès.",
     });
     
+    // Additional cleanup to ensure clean state
+    cleanupAuthState();
+    
+    // Callback after successful logout
     onLogoutSuccess();
+    
+    // Force page refresh to ensure clean slate
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 100);
   } catch (error: any) {
     console.error('Logout error:', error.message);
     toast({

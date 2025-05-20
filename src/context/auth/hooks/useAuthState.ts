@@ -21,7 +21,80 @@ export const useAuthState = (navigate: (path: string) => void) => {
     
     console.log("Setting up auth state listeners");
     
-    // Initial auth check
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
+        if (!mounted) return;
+        
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+          return;
+        }
+        
+        if (session) {
+          // First update the basic auth state synchronously
+          setAuthState(prev => ({
+            ...prev,
+            user: session.user,
+            session,
+            isAuthenticated: true,
+          }));
+          
+          // Fetch profile separately using setTimeout to prevent potential deadlocks
+          setTimeout(async () => {
+            if (!mounted) return;
+            
+            try {
+              const profile = await fetchUserProfile(session.user.id);
+              
+              // Handle banned users
+              if (profile && await checkUserBanned(profile, async () => {
+                const { error } = await supabase.auth.signOut();
+                if (error) console.error('Error signing out:', error);
+              })) {
+                setAuthState({
+                  ...initialState,
+                  isLoading: false,
+                });
+                return;
+              }
+              
+              setAuthState(prev => ({
+                ...prev,
+                profile,
+                isLoading: false,
+              }));
+              
+              console.log("Auth state updated with profile:", { 
+                userId: session.user.id, 
+                hasProfile: !!profile,
+                isLoading: false
+              });
+            } catch (error) {
+              console.error("Error fetching profile:", error);
+              setAuthState(prev => ({
+                ...prev,
+                isLoading: false,
+              }));
+            }
+          }, 0);
+        } else {
+          console.log("Session is null, user is logged out");
+          setAuthState({
+            ...initialState,
+            isLoading: false,
+          });
+        }
+      }
+    );
+
+    // THEN check for existing session
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state");
@@ -89,79 +162,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
         }
       }
     };
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (!mounted) return;
-        
-        if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-          setAuthState({
-            ...initialState,
-            isLoading: false,
-          });
-          return;
-        }
-        
-        if (session) {
-          // First update the basic auth state synchronously
-          setAuthState(prev => ({
-            ...prev,
-            user: session.user,
-            session,
-            isAuthenticated: true,
-          }));
-          
-          // Fetch profile separately
-          setTimeout(async () => {
-            if (!mounted) return;
-            
-            try {
-              const profile = await fetchUserProfile(session.user.id);
-              
-              // Handle banned users
-              if (profile && await checkUserBanned(profile, async () => {
-                const { error } = await supabase.auth.signOut();
-                if (error) console.error('Error signing out:', error);
-              })) {
-                setAuthState({
-                  ...initialState,
-                  isLoading: false,
-                });
-                return;
-              }
-              
-              setAuthState(prev => ({
-                ...prev,
-                profile,
-                isLoading: false,
-              }));
-              
-              console.log("Auth state updated with profile:", { 
-                userId: session.user.id, 
-                hasProfile: !!profile,
-                isLoading: false
-              });
-            } catch (error) {
-              console.error("Error fetching profile:", error);
-              setAuthState(prev => ({
-                ...prev,
-                isLoading: false,
-              }));
-            }
-          }, 0);
-        } else {
-          console.log("Session is null, user is logged out");
-          setAuthState({
-            ...initialState,
-            isLoading: false,
-          });
-        }
-      }
-    );
 
     initializeAuth();
 

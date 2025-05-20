@@ -28,15 +28,15 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     const returnUrl = params.get('returnUrl');
     
     // Public pages that don't require authentication
-    const publicPaths = ['/signin', '/signup', '/', '/invitation', '/login']; 
-    const isPublicPath = publicPaths.some(path => location.pathname === path) || 
-                         location.pathname.includes('/invitation/');
+    const publicPaths = ['/signin', '/signup', '/']; 
+    const isPublicPath = publicPaths.includes(location.pathname);
 
     // If user is authenticated and on an auth page, redirect them
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup' || location.pathname === '/login')) {
       const decodedReturnUrl = returnUrl ? decodeURIComponent(returnUrl) : '/videos';
       console.log(`User is authenticated and on auth page, redirecting to: ${decodedReturnUrl}`);
       
+      // Use replace to avoid adding to history stack
       navigate(decodedReturnUrl, { replace: true });
       return;
     }
@@ -47,6 +47,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       const returnUrl = encodeURIComponent(location.pathname + location.search);
       console.log(`User not authenticated, redirecting to signin with returnUrl: ${returnUrl}`);
       
+      // Use replace to avoid adding to history stack
       navigate(`/signin?returnUrl=${returnUrl}`, { replace: true });
       toast({
         title: "Accès refusé",

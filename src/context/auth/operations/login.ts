@@ -1,11 +1,23 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 export const login = async (email: string, password: string) => {
   try {
     console.log("Login operation started for:", email);
     
+    // Clean up existing auth state to prevent conflicts
+    cleanupAuthState();
+    
+    // Attempt global sign out first to ensure clean state
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      // Continue even if this fails
+      console.log("Ignoring global sign out error during login preparation");
+    }
+    
+    // Now attempt to sign in with clean state
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,

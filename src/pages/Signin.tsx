@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 const Signin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -38,6 +39,9 @@ const Signin: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Clean up any existing auth state
+      cleanupAuthState();
+      
       console.log("Attempting login for:", email);
       await login(email, password);
       
