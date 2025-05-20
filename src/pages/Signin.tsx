@@ -19,10 +19,15 @@ const Signin: React.FC = () => {
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   
+  // Clean up auth state on component mount
+  useEffect(() => {
+    cleanupAuthState();
+  }, []);
+  
   // Redirect to videos if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      console.log("User already authenticated, redirecting to /videos");
+      console.log("User already authenticated, redirecting");
       navigate('/videos', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);

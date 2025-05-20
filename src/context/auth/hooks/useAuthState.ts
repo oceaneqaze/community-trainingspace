@@ -22,6 +22,9 @@ export const useAuthState = (navigate: (path: string) => void) => {
     
     console.log("Setting up auth state listeners");
     
+    // Clean up existing auth state to prevent conflicts
+    cleanupAuthState();
+    
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -92,9 +95,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state");
-        
-        // Clean existing auth state to prevent conflicts
-        cleanupAuthState();
         
         const { data: { session }, error } = await supabase.auth.getSession();
         

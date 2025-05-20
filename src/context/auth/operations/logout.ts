@@ -27,7 +27,7 @@ export const logout = async (onLogoutSuccess: () => void) => {
     onLogoutSuccess();
     
     // Force page refresh to ensure clean slate
-    window.location.href = '/';
+    window.location.href = '/signin';
   } catch (error: any) {
     console.error('Logout error:', error.message);
     toast({
@@ -35,6 +35,11 @@ export const logout = async (onLogoutSuccess: () => void) => {
       description: error.message || "Une erreur est survenue",
       variant: "destructive",
     });
+    
+    // Still try to clean up auth state and redirect, even if there was an error
+    cleanupAuthState();
+    window.location.href = '/signin';
+    
     throw error;
   }
 };

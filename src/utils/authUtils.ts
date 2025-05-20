@@ -4,7 +4,6 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { SUPABASE_URL } from '@/integrations/supabase/client';
 
 /**
  * Thoroughly clean up auth state to prevent limbo states
@@ -14,10 +13,7 @@ export const cleanupAuthState = () => {
   
   // Clear all storage to ensure clean state
   try {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
+    // Clear localStorage
     Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
         console.log(`Removing from localStorage: ${key}`);
@@ -25,7 +21,7 @@ export const cleanupAuthState = () => {
       }
     });
     
-    // Remove from sessionStorage if in use
+    // Clear sessionStorage
     Object.keys(sessionStorage || {}).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
         console.log(`Removing from sessionStorage: ${key}`);
