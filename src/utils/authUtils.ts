@@ -11,6 +11,12 @@ import { supabase } from '@/integrations/supabase/client';
 export const cleanupAuthState = () => {
   console.log("Cleaning up auth state");
   
+  // Skip cleaning auth state on production to avoid redirect loops
+  if (window.location.hostname !== 'localhost') {
+    console.log("Skipping auth cleanup on production domain");
+    return;
+  }
+
   // Clear all storage to ensure clean state
   try {
     // Clear localStorage
@@ -26,14 +32,6 @@ export const cleanupAuthState = () => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
         console.log(`Removing from sessionStorage: ${key}`);
         sessionStorage.removeItem(key);
-      }
-    });
-    
-    // Clear any cookies related to authentication
-    document.cookie.split(';').forEach(cookie => {
-      const name = cookie.trim().split('=')[0];
-      if (name.includes('sb-') || name.includes('supabase')) {
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
       }
     });
   } catch (e) {

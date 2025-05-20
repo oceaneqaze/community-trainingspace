@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { cleanupAuthState } from '@/utils/authUtils';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 const Signin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,17 +16,11 @@ const Signin: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth();
   
-  // Nettoyer l'état d'authentification au montage du composant
-  useEffect(() => {
-    console.log("Page de connexion montée - nettoyage de l'état d'authentification");
-    cleanupAuthState();
-  }, []);
-  
-  // Nous laissons la redirection à useAuthRedirect dans AuthContext
-  // Au lieu de mettre une redirection ici
+  // Utiliser useAuthRedirect pour gérer les redirections automatiquement
+  // Cela évite d'avoir à gérer manuellement les redirections dans le composant
+  useAuthRedirect();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

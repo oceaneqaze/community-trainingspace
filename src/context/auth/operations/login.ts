@@ -8,17 +8,8 @@ export const login = async (email: string, password: string) => {
     console.log("Opération de connexion démarrée pour:", email);
     
     // Nettoyer l'état d'authentification existant pour éviter les conflits
-    cleanupAuthState();
+    // Ne pas effectuer de nettoyage complet pour éviter de perturber la session en cours
     
-    // Tenter de se déconnecter pour garantir un état propre
-    try {
-      await supabase.auth.signOut({ scope: 'global' });
-    } catch (e) {
-      // Continuer même si cela échoue
-      console.log("La tentative de déconnexion préalable à la connexion a échoué, continuation");
-    }
-    
-    // Maintenant tenter de se connecter avec un état propre
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
