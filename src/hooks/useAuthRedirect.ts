@@ -16,16 +16,20 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated);
+    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated, "Admin:", isAdmin ? isAdmin() : false);
     
     // Public pages that don't require authentication
     const publicPaths = ['/signin', '/signup', '/'];
     const isPublicPath = publicPaths.includes(location.pathname);
 
-    // If user is authenticated and on an auth page, redirect them to videos
+    // If user is authenticated and on an auth page, redirect them to dashboard or videos
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
-      console.log("Authenticated user on auth page, redirecting to /videos");
-      navigate('/videos', { replace: true });
+      console.log("Authenticated user on auth page, redirecting to /dashboard");
+      if (isAdmin && isAdmin()) {
+        navigate('/dashboard', { replace: true });
+      } else {
+        navigate('/videos', { replace: true });
+      }
       return;
     }
 

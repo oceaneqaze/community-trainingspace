@@ -12,32 +12,37 @@ import { SUPABASE_URL } from '@/integrations/supabase/client';
 export const cleanupAuthState = () => {
   console.log("Cleaning up auth state");
   
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      console.log(`Removing from localStorage: ${key}`);
-      localStorage.removeItem(key);
-    }
-  });
-  
-  // Remove from sessionStorage if in use
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      console.log(`Removing from sessionStorage: ${key}`);
-      sessionStorage.removeItem(key);
-    }
-  });
-  
-  // Clear any cookies related to authentication
-  document.cookie.split(';').forEach(cookie => {
-    const name = cookie.trim().split('=')[0];
-    if (name.includes('sb-') || name.includes('supabase')) {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-    }
-  });
+  // Clear all storage to ensure clean state
+  try {
+    // Remove standard auth tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Remove all Supabase auth keys from localStorage
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        console.log(`Removing from localStorage: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Remove from sessionStorage if in use
+    Object.keys(sessionStorage || {}).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        console.log(`Removing from sessionStorage: ${key}`);
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Clear any cookies related to authentication
+    document.cookie.split(';').forEach(cookie => {
+      const name = cookie.trim().split('=')[0];
+      if (name.includes('sb-') || name.includes('supabase')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+      }
+    });
+  } catch (e) {
+    console.error("Error during cleanup:", e);
+  }
 };
 
 /**

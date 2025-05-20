@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { AuthState } from '../types';
 import { supabase } from '@/integrations/supabase/client';
-import { fetchUserProfile, checkUserBanned } from '../helpers';
+import { fetchUserProfile } from '../helpers';
 import { cleanupAuthState } from '@/utils/authUtils';
 
 // Initial state
@@ -21,9 +21,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
     let mounted = true;
     
     console.log("Setting up auth state listeners");
-    
-    // Clean up any existing auth state before initializing
-    cleanupAuthState();
     
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -67,6 +64,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
                 console.log("Auth state updated with profile:", { 
                   userId: session.user.id, 
                   hasProfile: !!profile,
+                  role: profile?.role,
                   isLoading: false
                 });
               }
@@ -94,6 +92,10 @@ export const useAuthState = (navigate: (path: string) => void) => {
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state");
+        
+        // Clean existing auth state to prevent conflicts
+        cleanupAuthState();
+        
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -136,7 +138,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
                 
                 console.log("Auth initialized with profile:", { 
                   userId: session.user.id, 
-                  hasProfile: !!profile 
+                  hasProfile: !!profile,
+                  role: profile?.role
                 });
               }
             } catch (error) {

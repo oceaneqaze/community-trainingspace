@@ -10,14 +10,6 @@ export const login = async (email: string, password: string) => {
     // Clean up existing auth state to prevent conflicts
     cleanupAuthState();
     
-    // Try a global sign out first in case there's an existing session
-    try {
-      await supabase.auth.signOut({ scope: 'global' });
-    } catch (err) {
-      console.log("Error during preventive signout:", err);
-      // Continue even if this fails
-    }
-    
     // Now attempt to sign in with clean state
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

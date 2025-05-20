@@ -15,11 +15,6 @@ export const logout = async (onLogoutSuccess: () => void) => {
     
     if (error) {
       console.error('Logout error:', error.message);
-      toast({
-        title: "Échec de la déconnexion",
-        description: error.message || "Une erreur est survenue",
-        variant: "destructive",
-      });
       throw error;
     }
     
@@ -27,9 +22,6 @@ export const logout = async (onLogoutSuccess: () => void) => {
       title: "Déconnexion réussie",
       description: "Vous avez été déconnecté avec succès.",
     });
-    
-    // Additional cleanup to ensure clean state
-    cleanupAuthState();
     
     // Callback after successful logout
     onLogoutSuccess();

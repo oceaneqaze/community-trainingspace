@@ -13,10 +13,12 @@ const Dashboard: React.FC = () => {
   const { userCount, videos, viewCount, isLoading, handleVideoAdded, handleVideoUpdated, handleVideoDeleted } = useDashboardData(isAuthenticated, isAdmin);
   const { profile } = useAuth();
 
+  console.log("Dashboard rendering - Is Admin:", isAdmin, "Profile role:", profile?.role);
+
   return (
     <div className="page-container">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold">Mon Tableau de Bord</h1>
+        <h1 className="text-4xl font-bold">Tableau de Bord Administrateur</h1>
       </div>
       
       {isAdmin ? (
@@ -32,6 +34,15 @@ const Dashboard: React.FC = () => {
             onVideoAdded={handleVideoAdded}
             onVideoUpdated={handleVideoUpdated}
             onVideoDeleted={handleVideoDeleted}
+          />
+        </div>
+      ) : profile?.role === 'admin' ? (
+        <div className="space-y-8">
+          <p className="text-lg">Chargement du tableau de bord administrateur...</p>
+          <DashboardOverview 
+            userCount={userCount} 
+            videoCount={videos.length} 
+            viewCount={viewCount} 
           />
         </div>
       ) : (
