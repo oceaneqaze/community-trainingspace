@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { createAuthProvider } from '@/context/AuthContext';
+import { AuthProvider } from '@/context/AuthContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Layouts
@@ -33,51 +33,41 @@ import BlogPost from '@/pages/BlogPost';
 // Create a client
 const queryClient = new QueryClient();
 
-// AppContent component to access hooks inside the Router
-const AppContent = () => {
-  const navigate = useNavigate();
-  const AuthProvider = createAuthProvider(navigate);
-  
-  return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Index />} />
-          <Route path="signin" element={<Signin />} />
-          <Route path="signup" element={<Signup />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="videos" element={<Videos />} />
-          <Route path="videos/:id" element={<VideoDetail />} />
-          <Route path="library" element={<LibraryManager />} />
-          <Route path="preview" element={<ScreenRecPreview />} />
-          <Route path="members" element={<Members />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="invitation/:code" element={<Invitation />} />
-          <Route path="invitation" element={<Invitation />} />
-          <Route path="invitations" element={<InvitationManager />} />
-          <Route path="chat" element={<Chat />} />
-          <Route path="announcements" element={<Announcements />} />
-          <Route path="history" element={<WatchHistory />} />
-          <Route path="ebooks" element={<Ebooks />} />
-          <Route path="blog/manage" element={<BlogManager />} />
-          <Route path="blog" element={<Blog />} />
-          <Route path="blog/:slug" element={<BlogPost />} />
-          <Route path="404" element={<NotFound />} />
-          {/* Redirection explicite de /login vers /signin */}
-          <Route path="login" element={<Navigate to="/signin" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </AuthProvider>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppContent />
-        <Toaster />
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Index />} />
+              <Route path="signin" element={<Signin />} />
+              <Route path="signup" element={<Signup />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="videos" element={<Videos />} />
+              <Route path="videos/:id" element={<VideoDetail />} />
+              <Route path="library" element={<LibraryManager />} />
+              <Route path="preview" element={<ScreenRecPreview />} />
+              <Route path="members" element={<Members />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="invitation/:code" element={<Invitation />} />
+              <Route path="invitation" element={<Invitation />} />
+              <Route path="invitations" element={<InvitationManager />} />
+              <Route path="chat" element={<Chat />} />
+              <Route path="announcements" element={<Announcements />} />
+              <Route path="history" element={<WatchHistory />} />
+              <Route path="ebooks" element={<Ebooks />} />
+              <Route path="blog/manage" element={<BlogManager />} />
+              <Route path="blog" element={<Blog />} />
+              <Route path="blog/:slug" element={<BlogPost />} />
+              <Route path="404" element={<NotFound />} />
+              {/* Redirection explicite de /login vers /signin */}
+              <Route path="login" element={<Navigate to="/signin" replace />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );

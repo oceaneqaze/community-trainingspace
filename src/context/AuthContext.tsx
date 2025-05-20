@@ -1,14 +1,15 @@
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContextType, AuthState } from './auth/types';
+import { AuthContextType } from './auth/types';
 import { isAdmin as checkIsAdmin, isBanned as checkIsBanned, isLimited as checkIsLimited } from './auth/utils/authUtils';
 import { login as loginOp } from './auth/operations/login';
 import { signup as signupOp } from './auth/operations/signup';
 import { logout as logoutOp } from './auth/operations/logout';
 import { refreshProfile as refreshProfileOp } from './auth/operations/refreshProfile';
 import { updateUserStatus as updateUserStatusOp } from './auth/operations/updateUserStatus';
-import { useAuthState } from './auth/hooks/useAuthState';
+import { supabase } from '@/integrations/supabase/client';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 // Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,122 +23,260 @@ export const useAuth = () => {
   return context;
 };
 
-// Function to create the auth provider
-// This is separated from the component to avoid React hook rules issues
-export const createAuthProvider = (navigate: (to: string) => void) => {
-  // Provider component
-  const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const { authState, setAuthState } = useAuthState(navigate);
+// Provider component
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Auth operations
-    const handleLogin = async (email: string, password: string) => {
+  // Initialize auth state
+  useEffect(() => {
+    let mounted = true;
+    
+    console.log("Setting up auth state listeners");
+    
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.id);
+        
+        if (!mounted) return;
+        
+        if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+        
+        if (newSession) {
+          // Update the basic auth state synchronously
+          setUser(newSession.user);
+          setSession(newSession);
+          setIsAuthenticated(true);
+          
+          // Fetch profile separately using setTimeout
+          setTimeout(async () => {
+            if (!mounted) return;
+            
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', newSession.user.id)
+                .single();
+              
+              if (mounted) {
+                setProfile(profileData);
+                setIsLoading(false);
+                
+                console.log("Auth state updated with profile:", { 
+                  userId: newSession.user.id, 
+                  hasProfile: !!profileData,
+                  role: profileData?.role,
+                  isLoading: false
+                });
+              }
+            } catch (error) {
+              console.error("Error fetching profile:", error);
+              if (mounted) {
+                setIsLoading(false);
+              }
+            }
+          }, 0);
+        } else {
+          console.log("Session is null, user is logged out");
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+          setIsAuthenticated(false);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    const initializeAuth = async () => {
       try {
-        setAuthState(prev => ({ ...prev, isLoading: true }));
-        await loginOp(email, password);
-        // Auth state change event will handle the rest
-      } catch (error) {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        throw error;
-      }
-    };
-
-    const handleSignup = async (email: string, password: string, name: string) => {
-      try {
-        setAuthState(prev => ({ ...prev, isLoading: true }));
-        await signupOp(email, password, name, (user, session, profile) => {
-          setAuthState({
-            user,
-            profile,
-            session,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-          navigate('/videos');
-        });
-      } catch (error) {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        throw error;
-      }
-    };
-
-    const handleLogout = async () => {
-      await logoutOp(() => {
-        setAuthState({
-          user: null,
-          profile: null,
-          session: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
-        navigate('/');
-      });
-    };
-
-    const refreshProfile = async () => {
-      if (!authState.user?.id) return;
-      
-      const profile = await refreshProfileOp(authState.user.id);
-      if (profile) {
-        setAuthState(prev => ({
-          ...prev,
-          profile
-        }));
-      }
-    };
-
-    const handleUpdateUserStatus = async (
-      userId: string, 
-      status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' }
-    ) => {
-      await updateUserStatusOp(
-        userId, 
-        status, 
-        isAdmin(), 
-        async () => {
-          if (userId === authState.user?.id) {
-            await refreshProfile();
+        console.log("Initializing auth state");
+        
+        const { data: { session: existingSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          if (mounted) {
+            setIsLoading(false);
+          }
+          return;
+        }
+        
+        if (!mounted) return;
+        
+        if (existingSession) {
+          console.log("Found existing session:", existingSession.user.id);
+          
+          // Update the basic auth state
+          setUser(existingSession.user);
+          setSession(existingSession);
+          setIsAuthenticated(true);
+          
+          // Fetch profile separately
+          setTimeout(async () => {
+            if (!mounted) return;
+            
+            try {
+              const { data: profileData } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', existingSession.user.id)
+                .single();
+              
+              if (mounted) {
+                setProfile(profileData);
+                setIsLoading(false);
+                
+                console.log("Auth initialized with profile:", { 
+                  userId: existingSession.user.id, 
+                  hasProfile: !!profileData,
+                  role: profileData?.role
+                });
+              }
+            } catch (error) {
+              console.error("Error fetching profile during initialization:", error);
+              if (mounted) {
+                setIsLoading(false);
+              }
+            }
+          }, 0);
+        } else {
+          console.log("No session found during initialization");
+          if (mounted) {
+            setIsLoading(false);
           }
         }
-      );
-    };
-
-    const isAdmin = () => {
-      return checkIsAdmin(authState.profile);
-    };
-    
-    const isBanned = () => {
-      return checkIsBanned(authState.profile);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
     };
     
-    const isLimited = () => {
-      return checkIsLimited(authState.profile);
-    };
+    initializeAuth();
 
-    const contextValue = {
-      ...authState,
-      login: handleLogin,
-      signup: handleSignup,
-      logout: handleLogout,
-      isAdmin,
-      refreshProfile,
-      isBanned,
-      isLimited,
-      updateUserStatus: handleUpdateUserStatus
+    return () => {
+      console.log("Cleaning up auth state listeners");
+      mounted = false;
+      subscription.unsubscribe();
     };
+  }, []);
 
-    return (
-      <AuthContext.Provider value={contextValue}>
-        {children}
-      </AuthContext.Provider>
+  // Auth operations
+  const handleLogin = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      await loginOp(email, password);
+      // Auth state change event will handle the rest
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const handleSignup = async (email: string, password: string, name: string) => {
+    try {
+      setIsLoading(true);
+      await signupOp(email, password, name, (user, session, profile) => {
+        setUser(user);
+        setProfile(profile);
+        setSession(session);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        navigate('/videos');
+      });
+    } catch (error) {
+      setIsLoading(false);
+      throw error;
+    }
+  };
+
+  const handleLogout = async () => {
+    await logoutOp(() => {
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      setIsAuthenticated(false);
+      setIsLoading(false);
+      navigate('/');
+    });
+  };
+
+  const refreshProfile = async () => {
+    if (!user?.id) return;
+    
+    const profile = await refreshProfileOp(user.id);
+    if (profile) {
+      setProfile(profile);
+    }
+  };
+
+  const handleUpdateUserStatus = async (
+    userId: string, 
+    status: { banned?: boolean, limited?: boolean, role?: 'admin' | 'member' }
+  ) => {
+    await updateUserStatusOp(
+      userId, 
+      status, 
+      isAdmin(), 
+      async () => {
+        if (userId === user?.id) {
+          await refreshProfile();
+        }
+      }
     );
   };
-  
-  return AuthProvider;
-};
 
-// Export a wrapper component that will be used in App.tsx
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // This is a placeholder component that maintains the interface
-  // The actual provider will be created in App.tsx with the navigate function
-  return <>{children}</>;
+  const isAdmin = () => {
+    return checkIsAdmin(profile);
+  };
+  
+  const isBanned = () => {
+    return checkIsBanned(profile);
+  };
+  
+  const isLimited = () => {
+    return checkIsLimited(profile);
+  };
+
+  const authState = {
+    user,
+    profile,
+    session,
+    isAuthenticated,
+    isLoading
+  };
+
+  const contextValue = {
+    ...authState,
+    login: handleLogin,
+    signup: handleSignup,
+    logout: handleLogout,
+    isAdmin,
+    refreshProfile,
+    isBanned,
+    isLimited,
+    updateUserStatus: handleUpdateUserStatus
+  };
+
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
 };

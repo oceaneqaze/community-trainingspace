@@ -46,15 +46,6 @@ const Dashboard: React.FC = () => {
             onVideoDeleted={handleVideoDeleted}
           />
         </div>
-      ) : profile?.role === 'admin' ? (
-        <div className="space-y-8">
-          <p className="text-lg">Chargement du tableau de bord administrateur...</p>
-          <DashboardOverview 
-            userCount={userCount} 
-            videoCount={videos.length} 
-            viewCount={viewCount} 
-          />
-        </div>
       ) : (
         <DashboardTabs />
       )}

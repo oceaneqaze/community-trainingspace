@@ -16,7 +16,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
       return;
     }
 
-    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated, "Admin:", isAdmin ? isAdmin() : false);
+    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated, "Admin:", isAdmin());
     
     // Public pages that don't require authentication
     const publicPaths = ['/signin', '/signup', '/'];
@@ -37,11 +37,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     // If user is authenticated and on an auth page, redirect them
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
       console.log("Authenticated user on auth page, redirecting");
-      if (isAdmin && isAdmin()) {
-        navigate('/dashboard', { replace: true });
-      } else {
-        navigate('/videos', { replace: true });
-      }
+      navigate('/videos', { replace: true });
       return;
     }
 
@@ -53,7 +49,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
     }
 
     // Admin rights check only if specified and user is authenticated
-    if (isAuthenticated && requiresAdmin && isAdmin && !isAdmin()) {
+    if (isAuthenticated && requiresAdmin && !isAdmin()) {
       console.log("Non-admin user on admin page, redirecting to /videos");
       toast({
         title: "Accès refusé",
@@ -67,7 +63,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
 
   return { 
     isAuthenticated, 
-    isAdmin: typeof isAdmin === 'function' ? isAdmin() : isAdmin, 
+    isAdmin: isAdmin(), 
     isLoading 
   };
 };
