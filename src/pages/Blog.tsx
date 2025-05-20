@@ -6,19 +6,40 @@ import { Article } from '@/hooks/useArticles';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDistance } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { Eye, Heart, MessageSquare } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+interface ArticleWithCounts extends Article {
+  view_count: number;
+  like_count: number;
+  comment_count: number;
+}
 
 const Blog = () => {
   const { data: articles, isLoading } = useQuery({
-    queryKey: ['published-articles'],
+    queryKey: ['published-articles-with-counts'],
     queryFn: async () => {
+      // Récupérer les articles publiés avec leurs compteurs
       const { data, error } = await supabase
         .from('articles')
-        .select('*')
+        .select(`
+          *,
+          view_count:article_views(count),
+          like_count:article_likes(count),
+          comment_count:article_comments(count)
+        `)
         .eq('published', true)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as Article[];
+
+      // Transformer les données pour extraire les compteurs
+      return data.map(article => ({
+        ...article,
+        view_count: article.view_count?.length ? article.view_count[0].count : 0,
+        like_count: article.like_count?.length ? article.like_count[0].count : 0,
+        comment_count: article.comment_count?.length ? article.comment_count[0].count : 0,
+      })) as ArticleWithCounts[];
     }
   });
 
@@ -31,7 +52,7 @@ const Blog = () => {
       <h1 className="text-4xl font-bold mb-8">Blog</h1>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {articles?.map((article) => (
-          <Card key={article.id} className="overflow-hidden">
+          <Card key={article.id} className="overflow-hidden flex flex-col">
             {article.featured_image && (
               <div className="aspect-video overflow-hidden">
                 <img 
@@ -50,16 +71,34 @@ const Blog = () => {
                 })}
               </p>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground line-clamp-3">
+            <CardContent className="flex-grow flex flex-col">
+              <p className="text-muted-foreground line-clamp-3 mb-4">
                 {article.excerpt || article.content.substring(0, 150) + '...'}
               </p>
-              <a 
-                href={`/blog/${article.slug}`} 
-                className="inline-block mt-4 text-primary hover:underline"
-              >
-                Lire la suite →
-              </a>
+              
+              <div className="mt-auto flex items-center justify-between pt-4">
+                <div className="flex gap-4 text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Eye size={16} />
+                    <span className="text-sm">{article.view_count}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Heart size={16} />
+                    <span className="text-sm">{article.like_count}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <MessageSquare size={16} />
+                    <span className="text-sm">{article.comment_count}</span>
+                  </div>
+                </div>
+                
+                <Link 
+                  to={`/blog/${article.slug}`}
+                  className="text-primary hover:underline"
+                >
+                  Lire la suite →
+                </Link>
+              </div>
             </CardContent>
           </Card>
         ))}

@@ -7,6 +7,11 @@ import { Article } from '@/hooks/useArticles';
 import { formatDistance } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Helmet } from 'react-helmet';
+import { useArticleView } from '@/hooks/useArticleView';
+import { useArticleLike } from '@/hooks/useArticleLike';
+import { Heart, Eye, MessageSquare, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import ArticleComments from '@/components/blog/ArticleComments';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -29,6 +34,9 @@ const BlogPost = () => {
       return data as Article;
     }
   });
+
+  const { viewCount } = useArticleView(article?.id || '');
+  const { likesCount, isLiked, toggleLike, isAuthenticated } = useArticleLike(article?.id || '');
 
   if (isLoading) {
     return <div className="container mx-auto py-8">Chargement de l'article...</div>;
@@ -59,11 +67,31 @@ const BlogPost = () => {
         
         <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
         
-        <div className="mb-8 text-muted-foreground">
-          Publié {formatDistance(new Date(article.created_at), new Date(), {
-            addSuffix: true,
-            locale: fr
-          })}
+        <div className="flex items-center justify-between mb-6">
+          <div className="text-muted-foreground">
+            Publié {formatDistance(new Date(article.created_at), new Date(), {
+              addSuffix: true,
+              locale: fr
+            })}
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-1">
+              <Eye size={18} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{viewCount}</span>
+            </div>
+            
+            <Button
+              variant={isLiked ? "secondary" : "ghost"}
+              size="sm"
+              className="flex items-center gap-1"
+              onClick={toggleLike}
+              disabled={!isAuthenticated}
+            >
+              <Heart size={18} className={isLiked ? "fill-rose-500 text-rose-500" : ""} />
+              <span>{likesCount}</span>
+            </Button>
+          </div>
         </div>
 
         {article.excerpt && (
@@ -72,20 +100,24 @@ const BlogPost = () => {
           </p>
         )}
 
-        <div className="prose prose-lg max-w-none">
-          {article.content.split('\n').map((paragraph, index) => (
-            <p key={index}>{paragraph}</p>
-          ))}
+        <div className="prose prose-lg max-w-none mb-12">
+          {/* Rendu du contenu HTML */}
+          <div dangerouslySetInnerHTML={{ __html: article.content }} />
         </div>
 
-        <div className="mt-8">
-          <a 
-            href="/blog" 
-            className="text-primary hover:underline"
+        <div className="border-t py-8">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/blog')}
+            className="flex items-center gap-2"
           >
-            ← Retour aux articles
-          </a>
+            <ArrowLeft size={16} />
+            Retour aux articles
+          </Button>
         </div>
+        
+        {/* Section des commentaires */}
+        <ArticleComments articleId={article.id} />
       </article>
     </>
   );
