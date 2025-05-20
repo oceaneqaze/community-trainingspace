@@ -36,33 +36,40 @@ export const useArticleComments = (articleId: string) => {
     try {
       setIsLoading(true);
       
-      // Récupérer les commentaires avec les informations utilisateur
-      const { data, error } = await supabase
+      // Récupérer les commentaires
+      const { data: commentsData, error: commentsError } = await supabase
         .from('article_comments')
         .select(`
           id,
           content,
           created_at,
-          user_id,
-          profiles:user_id (
-            name,
-            avatar_url
-          )
+          user_id
         `)
         .eq('article_id', articleId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (commentsError) throw commentsError;
 
-      // Transformer les données pour inclure le nom et l'avatar
-      const transformedComments = data.map(comment => ({
-        id: comment.id,
-        content: comment.content,
-        created_at: comment.created_at,
-        user_id: comment.user_id,
-        username: comment.profiles?.name || 'Utilisateur anonyme',
-        avatar_url: comment.profiles?.avatar_url || ''
-      }));
+      // Pour chaque commentaire, récupérer les informations utilisateur séparément
+      const transformedComments = await Promise.all(
+        commentsData.map(async (comment) => {
+          // Récupérer les informations du profil pour chaque commentaire
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('name, avatar_url')
+            .eq('id', comment.user_id)
+            .single();
+
+          return {
+            id: comment.id,
+            content: comment.content,
+            created_at: comment.created_at,
+            user_id: comment.user_id,
+            username: profileData?.name || 'Utilisateur anonyme',
+            avatar_url: profileData?.avatar_url || ''
+          };
+        })
+      );
 
       setComments(transformedComments);
     } catch (error) {
