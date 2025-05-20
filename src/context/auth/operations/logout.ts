@@ -10,8 +10,8 @@ export const logout = async (onLogoutSuccess: () => void) => {
     // Clean up existing auth state first
     cleanupAuthState();
     
-    // Then perform global sign out
-    const { error } = await supabase.auth.signOut({ scope: 'global' });
+    // Then perform sign out
+    const { error } = await supabase.auth.signOut();
     
     if (error) {
       console.error('Logout error:', error.message);
@@ -35,9 +35,7 @@ export const logout = async (onLogoutSuccess: () => void) => {
     onLogoutSuccess();
     
     // Force page refresh to ensure clean slate
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 100);
+    window.location.href = '/';
   } catch (error: any) {
     console.error('Logout error:', error.message);
     toast({

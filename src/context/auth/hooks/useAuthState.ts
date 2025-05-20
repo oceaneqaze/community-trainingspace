@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { AuthState } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchUserProfile, checkUserBanned } from '../helpers';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 // Initial state
 export const initialState: AuthState = {
@@ -21,7 +22,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
     
     console.log("Setting up auth state listeners");
     
-    // Set up auth state listener FIRST
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
@@ -53,18 +54,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
             try {
               const profile = await fetchUserProfile(session.user.id);
               
-              // Handle banned users
-              if (profile && await checkUserBanned(profile, async () => {
-                const { error } = await supabase.auth.signOut();
-                if (error) console.error('Error signing out:', error);
-              })) {
-                setAuthState({
-                  ...initialState,
-                  isLoading: false,
-                });
-                return;
-              }
-              
               setAuthState(prev => ({
                 ...prev,
                 profile,
@@ -94,7 +83,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
       }
     );
 
-    // THEN check for existing session
+    // Check for existing session
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state");
@@ -115,18 +104,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
           
           try {
             const profile = await fetchUserProfile(session.user.id);
-            
-            // Handle banned users
-            if (profile && await checkUserBanned(profile, async () => {
-              const { error } = await supabase.auth.signOut();
-              if (error) console.error('Error signing out:', error);
-            })) {
-              setAuthState({
-                ...initialState,
-                isLoading: false,
-              });
-              return;
-            }
             
             setAuthState(prev => ({
               ...prev,
@@ -163,6 +140,9 @@ export const useAuthState = (navigate: (path: string) => void) => {
       }
     };
 
+    // Clean up any existing auth state before initializing
+    cleanupAuthState();
+    
     initializeAuth();
 
     return () => {

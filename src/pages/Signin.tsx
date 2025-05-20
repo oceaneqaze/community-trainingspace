@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -18,20 +18,13 @@ const Signin: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   
-  // Get returnUrl from query parameters
-  const searchParams = new URLSearchParams(location.search);
-  const returnUrl = searchParams.get('returnUrl') || '/videos';
-
-  // Redirect to return URL if already authenticated
+  // Redirect to videos if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      const decodedReturnUrl = decodeURIComponent(returnUrl);
-      console.log(`Signin page - Redirecting authenticated user to: ${decodedReturnUrl}`);
-      navigate(decodedReturnUrl, { replace: true });
+      navigate('/videos', { replace: true });
     }
-  }, [isAuthenticated, authLoading, navigate, returnUrl]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +43,7 @@ const Signin: React.FC = () => {
         description: `Bienvenue sur DOPE CONTENT`,
       });
       
-      // Redirection handled by useEffect above
+      // Navigate will be handled by the useEffect above
     } catch (error: any) {
       console.error('Login error:', error);
       
