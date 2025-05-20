@@ -12,28 +12,33 @@ export const useAuthRedirect = (requiresAdmin = false) => {
   useEffect(() => {
     // Skip redirect checks while authentication is loading
     if (isLoading) {
+      console.log("Auth is loading, skipping redirect check");
       return;
     }
 
+    console.log("Auth redirect check - Path:", location.pathname, "Auth:", isAuthenticated);
+    
     // Public pages that don't require authentication
     const publicPaths = ['/signin', '/signup', '/'];
     const isPublicPath = publicPaths.includes(location.pathname);
 
     // If user is authenticated and on an auth page, redirect them to videos
     if (isAuthenticated && (location.pathname === '/signin' || location.pathname === '/signup')) {
+      console.log("Authenticated user on auth page, redirecting to /videos");
       navigate('/videos', { replace: true });
       return;
     }
 
     // If page requires authentication and user is not authenticated
     if (!isAuthenticated && !isPublicPath) {
-      // Use replace to avoid adding to history stack
-      navigate(`/signin`, { replace: true });
+      console.log("Unauthenticated user on protected page, redirecting to /signin");
+      navigate('/signin', { replace: true });
       return;
     }
 
     // Ban check only if user is authenticated
     if (isAuthenticated && isBanned && isBanned()) {
+      console.log("User is banned, redirecting to home");
       navigate('/', { replace: true });
       toast({
         title: "Accès refusé",
@@ -45,6 +50,7 @@ export const useAuthRedirect = (requiresAdmin = false) => {
 
     // Admin rights check only if specified and user is authenticated
     if (isAuthenticated && requiresAdmin && isAdmin && !isAdmin()) {
+      console.log("Non-admin user on admin page, redirecting to /videos");
       navigate('/videos', { replace: true });
       toast({
         title: "Accès refusé",

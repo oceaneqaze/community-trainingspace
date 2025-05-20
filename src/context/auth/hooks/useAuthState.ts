@@ -22,7 +22,10 @@ export const useAuthState = (navigate: (path: string) => void) => {
     
     console.log("Setting up auth state listeners");
     
-    // Set up auth state listener
+    // Clean up any existing auth state before initializing
+    cleanupAuthState();
+    
+    // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
@@ -54,23 +57,27 @@ export const useAuthState = (navigate: (path: string) => void) => {
             try {
               const profile = await fetchUserProfile(session.user.id);
               
-              setAuthState(prev => ({
-                ...prev,
-                profile,
-                isLoading: false,
-              }));
-              
-              console.log("Auth state updated with profile:", { 
-                userId: session.user.id, 
-                hasProfile: !!profile,
-                isLoading: false
-              });
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  profile,
+                  isLoading: false,
+                }));
+                
+                console.log("Auth state updated with profile:", { 
+                  userId: session.user.id, 
+                  hasProfile: !!profile,
+                  isLoading: false
+                });
+              }
             } catch (error) {
               console.error("Error fetching profile:", error);
-              setAuthState(prev => ({
-                ...prev,
-                isLoading: false,
-              }));
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  isLoading: false,
+                }));
+              }
             }
           }, 0);
         } else {
@@ -87,7 +94,18 @@ export const useAuthState = (navigate: (path: string) => void) => {
     const initializeAuth = async () => {
       try {
         console.log("Initializing auth state");
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          if (mounted) {
+            setAuthState({
+              ...initialState,
+              isLoading: false,
+            });
+          }
+          return;
+        }
         
         if (!mounted) return;
         
@@ -102,26 +120,35 @@ export const useAuthState = (navigate: (path: string) => void) => {
             isAuthenticated: true,
           }));
           
-          try {
-            const profile = await fetchUserProfile(session.user.id);
+          // Fetch profile separately
+          setTimeout(async () => {
+            if (!mounted) return;
             
-            setAuthState(prev => ({
-              ...prev,
-              profile,
-              isLoading: false,
-            }));
-            
-            console.log("Auth initialized with profile:", { 
-              userId: session.user.id, 
-              hasProfile: !!profile 
-            });
-          } catch (error) {
-            console.error("Error fetching profile during initialization:", error);
-            setAuthState(prev => ({
-              ...prev,
-              isLoading: false,
-            }));
-          }
+            try {
+              const profile = await fetchUserProfile(session.user.id);
+              
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  profile,
+                  isLoading: false,
+                }));
+                
+                console.log("Auth initialized with profile:", { 
+                  userId: session.user.id, 
+                  hasProfile: !!profile 
+                });
+              }
+            } catch (error) {
+              console.error("Error fetching profile during initialization:", error);
+              if (mounted) {
+                setAuthState(prev => ({
+                  ...prev,
+                  isLoading: false,
+                }));
+              }
+            }
+          }, 0);
         } else {
           console.log("No session found during initialization");
           setAuthState({
@@ -139,9 +166,6 @@ export const useAuthState = (navigate: (path: string) => void) => {
         }
       }
     };
-
-    // Clean up any existing auth state before initializing
-    cleanupAuthState();
     
     initializeAuth();
 

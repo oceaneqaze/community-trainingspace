@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { cleanupAuthState } from '@/utils/authUtils';
+import { toast } from '@/components/ui/use-toast';
 
 export const login = async (email: string, password: string) => {
   try {
@@ -8,6 +9,14 @@ export const login = async (email: string, password: string) => {
     
     // Clean up existing auth state to prevent conflicts
     cleanupAuthState();
+    
+    // Try a global sign out first in case there's an existing session
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+    } catch (err) {
+      console.log("Error during preventive signout:", err);
+      // Continue even if this fails
+    }
     
     // Now attempt to sign in with clean state
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -24,6 +33,11 @@ export const login = async (email: string, password: string) => {
     return data;
   } catch (error: any) {
     console.error('Login error:', error.message);
+    toast({
+      title: "Échec de connexion",
+      description: error.message || "Une erreur est survenue",
+      variant: "destructive",
+    });
     throw error;
   }
 };

@@ -11,7 +11,7 @@ export const logout = async (onLogoutSuccess: () => void) => {
     cleanupAuthState();
     
     // Then perform sign out
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: 'global' });
     
     if (error) {
       console.error('Logout error:', error.message);

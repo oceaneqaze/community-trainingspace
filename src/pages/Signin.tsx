@@ -22,6 +22,7 @@ const Signin: React.FC = () => {
   // Redirect to videos if already authenticated
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
+      console.log("User already authenticated, redirecting to /videos");
       navigate('/videos', { replace: true });
     }
   }, [isAuthenticated, authLoading, navigate]);
