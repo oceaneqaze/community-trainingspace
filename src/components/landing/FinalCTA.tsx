@@ -27,9 +27,9 @@ const FinalCTA = () => {
             <p className="text-yellow-500">🕒 Les inscriptions sont limitées. Le code est unique.</p>
             <p className="text-primary">📩 Reçois ton code d'accès privé dès maintenant.</p>
           </div>
-          <Button onClick={() => navigate('/signup')} size="lg" className="mt-8">
+          <Button onClick={() => navigate('/payment')} size="lg" className="mt-8 group">
             🚀 Obtenir mon accès privé (15.000 FCFA)
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>
       </div>

@@ -29,6 +29,9 @@ import Ebooks from '@/pages/Ebooks';
 import BlogManager from '@/pages/BlogManager';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import Payment from '@/pages/Payment';
+import PaymentSuccess from '@/pages/PaymentSuccess';
+import PaymentFailure from '@/pages/PaymentFailure';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -60,6 +63,9 @@ function App() {
               <Route path="blog/manage" element={<BlogManager />} />
               <Route path="blog" element={<Blog />} />
               <Route path="blog/:slug" element={<BlogPost />} />
+              <Route path="payment" element={<Payment />} />
+              <Route path="payment/success" element={<PaymentSuccess />} />
+              <Route path="payment/failure" element={<PaymentFailure />} />
               <Route path="404" element={<NotFound />} />
               {/* Redirection explicite de /login vers /signin */}
               <Route path="login" element={<Navigate to="/signin" replace />} />

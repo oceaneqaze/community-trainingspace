@@ -10,7 +10,7 @@ const HowItWorks = () => {
   const steps = [
     "Clique sur le bouton ci-dessous",
     "Règle les 15.000 FCFA via Mobile Money ou carte",
-    "Reçois ton code d'activation unique par email",
+    "Reçois ton code d'activation unique immédiatement",
     "Crée ton compte sur notre espace privé",
     "Accède immédiatement aux formations + communauté"
   ];
@@ -34,9 +34,9 @@ const HowItWorks = () => {
             <p className="text-lg font-semibold">🟢 Ton accès est valable à vie.</p>
             <p className="text-yellow-500 font-semibold">❌ Aucun remboursement. Aucune version gratuite.</p>
             <p className="text-lg">👉 Tu prends ta place ou tu restes à la traîne.</p>
-            <Button onClick={() => navigate('/signup')} size="lg">
+            <Button onClick={() => navigate('/payment')} size="lg" className="group">
               💥 Rejoindre maintenant
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
         </div>

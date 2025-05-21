@@ -21,7 +21,7 @@ const HeroSection = () => {
             Accède à DOPE Content pour seulement 15.000 FCFA et reçois ton code d'activation unique pour créer ton compte privé.
           </p>
           <div className="flex flex-col gap-4 items-center">
-            <Button onClick={() => navigate('/signup')} size="lg" className="group">
+            <Button onClick={() => navigate('/payment')} size="lg" className="group">
               🎯 Obtenir mon accès maintenant
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
