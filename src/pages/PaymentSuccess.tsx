@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Copy, ArrowRight } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import PaymentHeader from '@/components/payment/PaymentHeader';
 
 interface PaymentDetails {
   id: string;
@@ -86,66 +87,87 @@ const PaymentSuccess = () => {
     }
   };
   
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        <p className="mt-4 text-xl">Confirmation du paiement en cours...</p>
-      </div>
-    );
-  }
-  
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-      <div className="bg-card shadow-lg rounded-lg overflow-hidden">
-        <div className="bg-green-500 text-white p-6 flex items-center justify-center">
-          <CheckCircle className="h-12 w-12 mr-4" />
-          <h1 className="text-3xl font-bold">Paiement réussi !</h1>
-        </div>
-        
-        <div className="p-6 space-y-6">
-          <p className="text-xl text-center">
-            Merci pour votre achat. Votre accès à DOPE Content est maintenant activé.
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-green-500/5 to-background">
+      <PaymentHeader />
+      
+      <div className="container max-w-3xl py-12 px-4">
+        <div className="bg-card shadow-lg rounded-xl border border-green-200 dark:border-green-900/50 overflow-hidden animate-fade-in">
+          <div className="bg-green-500 text-white p-8 flex flex-col items-center justify-center text-center">
+            <div className="rounded-full bg-white/20 p-4 mb-4">
+              <CheckCircle className="h-12 w-12" />
+            </div>
+            <h1 className="text-3xl font-bold">Paiement réussi !</h1>
+            <p className="mt-2 text-green-50">
+              Merci pour votre confiance. Votre accès à DOPE Content est maintenant activé.
+            </p>
+          </div>
           
-          {paymentDetails?.invitation_code ? (
-            <div className="bg-muted p-4 rounded-md">
-              <p className="font-medium mb-2">Votre code d'invitation:</p>
-              <div className="flex items-center">
-                <code className="flex-1 bg-muted-foreground/10 p-3 rounded">
-                  {paymentDetails.invitation_code}
-                </code>
-                <Button variant="ghost" size="icon" onClick={copyInvitationCode} className="ml-2">
-                  <Copy className="h-5 w-5" />
-                </Button>
+          <div className="p-8 space-y-6">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+                <p className="mt-4 text-xl">Confirmation du paiement en cours...</p>
               </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Conservez ce code précieusement. Vous en aurez besoin pour finaliser votre inscription.
-              </p>
-            </div>
-          ) : (
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                Génération de votre code d'invitation en cours... Veuillez patienter ou rafraîchir la page.
-              </p>
-            </div>
-          )}
-          
-          <div className="flex flex-col md:flex-row gap-4 pt-4">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={() => window.location.reload()}
-            >
-              Actualiser
-            </Button>
-            <Button 
-              className="flex-1"
-              onClick={() => navigate('/signup')}
-            >
-              S'inscrire maintenant
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            ) : (
+              <>
+                <div className="text-center">
+                  <p className="text-xl">
+                    Félicitations ! Vous avez maintenant accès à tous les contenus premium
+                  </p>
+                </div>
+                
+                {paymentDetails?.invitation_code ? (
+                  <div className="bg-muted p-6 rounded-lg border border-border">
+                    <p className="font-medium mb-3">Votre code d'invitation :</p>
+                    <div className="flex items-center">
+                      <code className="flex-1 bg-background p-4 rounded border border-border text-center font-mono text-lg">
+                        {paymentDetails.invitation_code}
+                      </code>
+                      <Button variant="outline" size="icon" onClick={copyInvitationCode} className="ml-2 h-10 w-10">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-3">
+                      Conservez ce code précieusement. Vous en aurez besoin pour finaliser votre inscription.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      Génération de votre code d'invitation en cours... Veuillez patienter ou rafraîchir la page.
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex flex-col md:flex-row gap-4 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => window.location.reload()}
+                  >
+                    Actualiser la page
+                  </Button>
+                  <Button 
+                    className="flex-1"
+                    onClick={() => navigate('/signup')}
+                  >
+                    S'inscrire maintenant
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="text-center text-muted-foreground text-sm pt-4">
+                  <p>Un e-mail de confirmation a été envoyé à votre adresse.</p>
+                  <p className="mt-2">
+                    Besoin d'aide ? Contactez-nous à{' '}
+                    <a href="mailto:support@dopecontent.co" className="text-primary hover:underline">
+                      support@dopecontent.co
+                    </a>
+                  </p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

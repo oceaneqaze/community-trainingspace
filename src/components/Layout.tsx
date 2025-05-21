@@ -9,14 +9,15 @@ const Layout: React.FC = () => {
   const location = useLocation();
   console.log('Rendu du Layout, chemin actuel:', location.pathname);
   
-  // Add 'signin' to the list of paths that should hide the navigation
+  // Add payment routes to hide navigation
   const isLoginPage = location.pathname.includes('/login') || location.pathname.includes('/signin');
   const isSignupPage = location.pathname.includes('/signup');
   const isInvitationPage = location.pathname.includes('/invitation/');
   const is404Page = location.pathname.includes('/404');
   const isLandingPage = location.pathname === '/';
+  const isPaymentPage = location.pathname.includes('/payment');
 
-  const hideNav = isLoginPage || isSignupPage || isInvitationPage || is404Page || isLandingPage;
+  const hideNav = isLoginPage || isSignupPage || isInvitationPage || is404Page || isLandingPage || isPaymentPage;
 
   return (
     <div className="min-h-screen bg-background">

@@ -1,141 +1,99 @@
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { v4 as uuidv4 } from "https://esm.sh/uuid@9.0.1";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-// CORS headers for the function
+// CORS headers for browser requests
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Base amount in FCFA
-const BASE_AMOUNT = 15000;
-const SHOP_NAME = "DOPE Content";
-const MESSAGE = "Accès à vie à DOPE Content - plateforme complète pour créer du contenu avec l'IA";
-
-// Function to determine currency and convert amount based on locale
-function getAmountForLocale(locale = "fr") {
-  // Default is XOF (FCFA)
-  let currency = "XOF";
-  let amount = BASE_AMOUNT;
-  
-  // You can add more currency conversions here
-  if (locale.startsWith("en")) {
-    // Convert to USD (approximate conversion: 1 USD = ~600 FCFA)
-    currency = "USD";
-    amount = Math.round(BASE_AMOUNT / 600);
-  } else if (locale.startsWith("fr-FR") || locale.startsWith("fr-BE") || locale.startsWith("fr-CH")) {
-    // Convert to EUR (approximate conversion: 1 EUR = ~655 FCFA)
-    currency = "EUR";
-    amount = Math.round(BASE_AMOUNT / 655);
-  }
-  
-  return { currency, amount };
-}
-
 serve(async (req) => {
-  // Handle CORS preflight requests
+  // Handle CORS preflight request
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      headers: corsHeaders,
+    });
   }
-  
+
   try {
-    // Get API key from environment variable
-    const LYGOS_API_KEY = Deno.env.get("LYGOS_API_KEY");
-    if (!LYGOS_API_KEY) {
+    // Get request body
+    const { email = "", locale = "fr", ipAddress = "0.0.0.0", paymentMethod = "mobile" } = await req.json();
+    
+    // Check if LYGOS_API_KEY is configured
+    const apiKey = Deno.env.get("LYGOS_API_KEY");
+    if (!apiKey) {
       throw new Error("LYGOS_API_KEY is not configured");
     }
-
-    // Parse request body
-    const { email, locale, ipAddress } = await req.json();
-    
-    // Get amount and currency based on locale
-    const { amount, currency } = getAmountForLocale(locale);
     
     // Generate a unique order ID
-    const orderId = uuidv4();
+    const orderId = `DOPE-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     
-    // Create client for Supabase
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Construct success and failure URLs
+    const origin = new URL(req.url).origin;
+    const successUrl = `${origin}/payment/success?order_id=${orderId}`;
+    const failureUrl = `${origin}/payment/failure?order_id=${orderId}`;
     
-    // Create Lygos payment
-    const lygosUrl = "https://api.lygosapp.com/v1/gateway";
-    const payload = {
-      amount: currency === "XOF" ? amount : amount * 100, // Convert to cents for non-XOF currencies
-      shop_name: SHOP_NAME,
-      message: MESSAGE,
-      success_url: `${req.headers.get("origin")}/payment/success?order_id=${orderId}`,
-      failure_url: `${req.headers.get("origin")}/payment/failure?order_id=${orderId}`,
-      order_id: orderId,
-      currency: currency
-    };
-    
-    const headers = {
-      "api-key": LYGOS_API_KEY,
-      "Content-Type": "application/json"
-    };
-    
-    console.log("Sending request to Lygos:", payload);
-    
-    // Call Lygos API
-    const lygosResponse = await fetch(lygosUrl, {
+    // Create a Lygos payment using their API format
+    const response = await fetch("https://api.lygosapp.com/v1/gateway", {
       method: "POST",
-      headers: headers,
-      body: JSON.stringify(payload)
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: 15000,
+        shop_name: "DOPE Content",
+        message: "Accès à vie DOPE Content",
+        success_url: successUrl,
+        failure_url: failureUrl,
+        order_id: orderId,
+        // Optional parameters
+        email: email || undefined,
+      }),
     });
+
+    const data = await response.json();
     
-    const lygosData = await lygosResponse.json();
-    
-    if (!lygosResponse.ok || !lygosData.link) {
-      console.error("Lygos API error:", lygosData);
-      throw new Error(`Lygos API error: ${JSON.stringify(lygosData)}`);
+    if (!response.ok) {
+      throw new Error(`Lygos API error: ${data.message || JSON.stringify(data)}`);
     }
     
     // Store payment information in the database
     const { data: paymentData, error: paymentError } = await supabase
-      .from('payments')
+      .from("payments")
       .insert({
-        amount: amount,
-        currency: currency,
+        email: email,
+        amount: 15000,
+        currency: "XOF",
         lygos_order_id: orderId,
-        lygos_payment_url: lygosData.link,
-        client_ip: ipAddress,
+        status: "pending",
+        payment_method: paymentMethod,
         locale: locale,
-        user_id: null // Will be updated if user is logged in or after registration
+        ip_address: ipAddress,
+        payment_provider: "lygos",
       })
       .select()
       .single();
-    
+      
     if (paymentError) {
       console.error("Error storing payment:", paymentError);
-      throw new Error(`Error storing payment: ${paymentError.message}`);
+      // Continue anyway, as this shouldn't stop the payment flow
     }
-    
-    return new Response(
-      JSON.stringify({ 
-        paymentUrl: lygosData.link,
-        orderId: orderId,
-        amount: amount,
-        currency: currency,
-        paymentId: paymentData.id
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+
+    // Return payment URL to client
+    return new Response(JSON.stringify({ 
+      paymentUrl: data.payment_url || data.url,
+      orderId: orderId
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
     console.error("Error creating payment:", error);
     
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+    });
   }
 });

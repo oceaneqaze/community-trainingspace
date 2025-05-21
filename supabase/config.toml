@@ -43,3 +43,6 @@ enabled = true
 [edge-functions]
 [edge-functions.serve]
 port = 54321
+
+[functions.webhook-lygos]
+verify_jwt = false
