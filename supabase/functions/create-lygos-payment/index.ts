@@ -18,7 +18,7 @@ serve(async (req) => {
 
   try {
     // Get request body
-    const { email = "", locale = "fr", ipAddress = "0.0.0.0", paymentMethod = "mobile" } = await req.json();
+    const { email = "", locale = "fr", ipAddress = "0.0.0.0" } = await req.json();
     
     // Check if LYGOS_API_KEY is configured
     const apiKey = Deno.env.get("LYGOS_API_KEY");
@@ -44,8 +44,8 @@ serve(async (req) => {
     const successUrl = `${origin}/payment/success?order_id=${orderId}`;
     const failureUrl = `${origin}/payment/failure?order_id=${orderId}`;
     
-    // Create a Lygos payment using their API format
-    const response = await fetch("https://api.lygosapp.com/v1/gateway", {
+    // STEP 1: Create a Lygos payment session
+    const createResponse = await fetch("https://api.lygosapp.com/v1/gateway", {
       method: "POST",
       headers: {
         "api-key": apiKey,
@@ -63,18 +63,34 @@ serve(async (req) => {
       }),
     });
 
-    const data = await response.json();
+    const createData = await createResponse.json();
     
-    if (!response.ok) {
-      console.error("Lygos API error response:", data);
-      throw new Error(`Lygos API error: ${data.message || JSON.stringify(data)}`);
+    if (!createResponse.ok) {
+      console.error("Lygos API error response:", createData);
+      throw new Error(`Lygos API error: ${createData.message || JSON.stringify(createData)}`);
     }
     
-    // Get the payment URL from the response
-    const paymentUrl = data.payment_url || data.url;
-    if (!paymentUrl) {
-      throw new Error("No payment URL received from Lygos");
+    const gatewayId = createData.id;
+    if (!gatewayId) {
+      throw new Error("No gateway ID received from Lygos");
     }
+    
+    // STEP 2: Get the payment URL using the gateway ID
+    const getResponse = await fetch(`https://api.lygosapp.com/v1/gateway/${gatewayId}`, {
+      method: "GET",
+      headers: {
+        "api-key": apiKey,
+      },
+    });
+    
+    const gatewayData = await getResponse.json();
+    
+    if (!getResponse.ok || !gatewayData.link) {
+      console.error("Error getting payment link:", gatewayData);
+      throw new Error("Failed to retrieve payment link");
+    }
+    
+    const paymentUrl = gatewayData.link;
     
     // Store payment information in the database
     const { data: paymentData, error: paymentError } = await supabase

@@ -57,33 +57,46 @@ serve(async (req) => {
         // Generate a random 8-character invitation code
         invitationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
         
-        // Make sure the invitation code is unique
-        const { count, error: countError } = await supabase
+        // Check if invitations table exists
+        const { error: tableCheckError } = await supabase
           .from("invitations")
-          .select("id", { count: "exact", head: true })
-          .eq("code", invitationCode);
+          .select("id")
+          .limit(1)
+          .maybeSingle();
           
-        if (countError) {
-          console.error("Error checking invitation code:", countError);
-        } else if (count && count > 0) {
-          // If code already exists, regenerate it
-          invitationCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString(36).substring(-4).toUpperCase()}`;
-        }
-        
-        // Create an invitation
-        const { data: invitation, error: invitationError } = await supabase
-          .from("invitations")
-          .insert({
-            code: invitationCode,
-            status: "unused",
-            created_by: "system",
-            payment_id: payment.id,
-          })
-          .select()
-          .single();
-          
-        if (invitationError) {
-          console.error("Error creating invitation:", invitationError);
+        // If invitations table exists, create an invitation
+        if (!tableCheckError) {
+          try {
+            // Make sure the invitation code is unique
+            const { count, error: countError } = await supabase
+              .from("invitations")
+              .select("id", { count: "exact", head: true })
+              .eq("code", invitationCode);
+              
+            if (countError) {
+              console.error("Error checking invitation code:", countError);
+            } else if (count && count > 0) {
+              // If code already exists, regenerate it
+              invitationCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString(36).substring(-4).toUpperCase()}`;
+            }
+            
+            // Create an invitation
+            const { error: invitationError } = await supabase
+              .from("invitations")
+              .insert({
+                code: invitationCode,
+                status: "unused",
+                created_by: "system",
+                payment_id: payment.id,
+              });
+              
+            if (invitationError) {
+              console.error("Error creating invitation:", invitationError);
+            }
+          } catch (err) {
+            // If there's any error with the invitations table, just continue
+            console.error("Issue with invitations table:", err);
+          }
         }
       }
       
