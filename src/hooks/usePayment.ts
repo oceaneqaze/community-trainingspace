@@ -32,12 +32,12 @@ export const usePayment = () => {
       
       if (error) {
         console.error('Payment invoke error:', error);
-        throw new Error(error.message);
+        throw new Error(error.message || "Failed to create payment");
       }
       
       if (!data?.paymentUrl) {
         console.error('Payment data:', data);
-        throw new Error('No payment URL received');
+        throw new Error('No payment URL received from the server');
       }
       
       // Redirect to payment page
