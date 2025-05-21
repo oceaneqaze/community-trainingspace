@@ -31,10 +31,12 @@ export const usePayment = () => {
       });
       
       if (error) {
+        console.error('Payment invoke error:', error);
         throw new Error(error.message);
       }
       
       if (!data?.paymentUrl) {
+        console.error('Payment data:', data);
         throw new Error('No payment URL received');
       }
       

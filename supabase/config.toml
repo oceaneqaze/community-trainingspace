@@ -44,5 +44,8 @@ enabled = true
 [edge-functions.serve]
 port = 54321
 
+[functions.create-lygos-payment]
+verify_jwt = false
+
 [functions.webhook-lygos]
 verify_jwt = false
