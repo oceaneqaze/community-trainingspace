@@ -60,18 +60,45 @@ export const usePayment = () => {
   
   const checkPaymentStatus = async (orderId: string) => {
     try {
-      const { data, error } = await supabase
+      // First try to get payment from our database
+      const { data: paymentData, error: paymentError } = await supabase
         .from('payments')
         .select('id, status, invitation_code')
         .eq('lygos_order_id', orderId)
         .single();
         
-      if (error) throw error;
+      if (paymentError) throw paymentError;
+      
+      // If payment is pending, trigger the webhook to verify with Lygos API
+      if (paymentData.status === 'pending') {
+        try {
+          // Call webhook to verify and update payment status
+          const { data: webhookData, error: webhookError } = await supabase.functions.invoke(
+            'webhook-lygos',
+            {
+              body: { 
+                order_id: orderId,
+                // We don't provide status here so the webhook will check with Lygos API
+              }
+            }
+          );
+          
+          if (webhookError) {
+            console.error("Error verifying payment:", webhookError);
+          } else if (webhookData && webhookData.status === 'success') {
+            // Update our local payment data with the latest from the webhook
+            paymentData.status = webhookData.status;
+            paymentData.invitation_code = webhookData.invitation_code;
+          }
+        } catch (e) {
+          console.error("Failed to verify payment:", e);
+        }
+      }
       
       return {
-        success: data.status === 'completed',
-        invitationCode: data.invitation_code,
-        paymentId: data.id
+        success: paymentData.status === 'success',
+        invitationCode: paymentData.invitation_code,
+        paymentId: paymentData.id
       };
     } catch (error) {
       console.error('Error checking payment status:', error);

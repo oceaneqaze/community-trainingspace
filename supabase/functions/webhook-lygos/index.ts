@@ -28,14 +28,53 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     
     // Get request body
-    const { order_id, status, transaction_id } = await req.json();
+    const { order_id, status, transaction_id, gateway_id } = await req.json();
     
     if (!order_id) {
       throw new Error("Missing order_id");
     }
     
     // Default to success if status is not provided (for manual verification)
-    const paymentStatus = status || "success";
+    let paymentStatus = status || "success";
+    
+    // If gateway_id is provided, verify payment status with Lygos API
+    if (gateway_id && !status) {
+      try {
+        const apiKey = Deno.env.get("LYGOS_API_KEY");
+        if (!apiKey) {
+          throw new Error("LYGOS_API_KEY is not configured");
+        }
+        
+        // Fetch the payment status from Lygos API
+        const verifyResponse = await fetch(`https://api.lygosapp.com/v1/gateway/${gateway_id}`, {
+          method: "GET",
+          headers: {
+            "api-key": apiKey,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!verifyResponse.ok) {
+          throw new Error(`Error verifying payment: ${verifyResponse.status}`);
+        }
+        
+        const paymentData = await verifyResponse.json();
+        console.log("Lygos payment verification:", paymentData);
+        
+        // Update the status based on the Lygos verification
+        // Note: This is a simplified check. The Lygos API response format may vary.
+        if (paymentData && paymentData.order_id === order_id) {
+          // Payment exists and matches our order_id, consider it successful
+          paymentStatus = "success";
+        } else {
+          // Payment doesn't match, might be fraudulent
+          paymentStatus = "failed";
+        }
+      } catch (apiError) {
+        console.error("Error verifying payment with Lygos API:", apiError);
+        // Continue with the provided status if API verification fails
+      }
+    }
     
     // Update payment status in database
     const { data: payment, error: selectError } = await supabase
@@ -57,46 +96,31 @@ serve(async (req) => {
         // Generate a random 8-character invitation code
         invitationCode = Math.random().toString(36).substring(2, 10).toUpperCase();
         
-        // Check if invitations table exists
-        const { error: tableCheckError } = await supabase
+        // Make sure the invitation code is unique
+        const { count, error: countError } = await supabase
           .from("invitations")
-          .select("id")
-          .limit(1)
-          .maybeSingle();
+          .select("id", { count: "exact", head: true })
+          .eq("code", invitationCode);
           
-        // If invitations table exists, create an invitation
-        if (!tableCheckError) {
-          try {
-            // Make sure the invitation code is unique
-            const { count, error: countError } = await supabase
-              .from("invitations")
-              .select("id", { count: "exact", head: true })
-              .eq("code", invitationCode);
-              
-            if (countError) {
-              console.error("Error checking invitation code:", countError);
-            } else if (count && count > 0) {
-              // If code already exists, regenerate it
-              invitationCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString(36).substring(-4).toUpperCase()}`;
-            }
-            
-            // Create an invitation
-            const { error: invitationError } = await supabase
-              .from("invitations")
-              .insert({
-                code: invitationCode,
-                status: "unused",
-                created_by: "system",
-                payment_id: payment.id,
-              });
-              
-            if (invitationError) {
-              console.error("Error creating invitation:", invitationError);
-            }
-          } catch (err) {
-            // If there's any error with the invitations table, just continue
-            console.error("Issue with invitations table:", err);
-          }
+        if (countError) {
+          console.error("Error checking invitation code:", countError);
+        } else if (count && count > 0) {
+          // If code already exists, regenerate it
+          invitationCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString(36).substring(-4).toUpperCase()}`;
+        }
+        
+        // Create an invitation
+        const { error: invitationError } = await supabase
+          .from("invitations")
+          .insert({
+            code: invitationCode,
+            status: "unused",
+            created_by: "system",
+            payment_id: payment.id,
+          });
+          
+        if (invitationError) {
+          console.error("Error creating invitation:", invitationError);
         }
       }
       

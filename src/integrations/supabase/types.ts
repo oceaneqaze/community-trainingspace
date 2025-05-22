@@ -275,12 +275,46 @@ export type Database = {
         }
         Relationships: []
       }
+      invitations: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          id: string
+          payment_id: string | null
+          status: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          payment_id?: string | null
+          status?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
           client_ip: string | null
           created_at: string
           currency: string
+          email: string | null
           id: string
           invitation_code: string | null
           locale: string | null
@@ -295,6 +329,7 @@ export type Database = {
           client_ip?: string | null
           created_at?: string
           currency?: string
+          email?: string | null
           id?: string
           invitation_code?: string | null
           locale?: string | null
@@ -309,6 +344,7 @@ export type Database = {
           client_ip?: string | null
           created_at?: string
           currency?: string
+          email?: string | null
           id?: string
           invitation_code?: string | null
           locale?: string | null

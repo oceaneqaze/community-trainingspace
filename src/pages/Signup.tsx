@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -22,17 +21,20 @@ const Signup: React.FC = () => {
 
   const validateInvitationCode = async (code: string): Promise<boolean> => {
     try {
+      // Check if the invitation code exists and is unused
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, invitation_used')
-        .eq('invitation_code', code)
+        .from('invitations')
+        .select('id, status')
+        .eq('code', code)
+        .eq('status', 'unused')
         .single();
 
       if (error || !data) {
+        console.error('Invitation validation error:', error);
         return false;
       }
       
-      return !data.invitation_used;
+      return true;
     } catch (error) {
       console.error('Error validating invitation code:', error);
       return false;
@@ -67,16 +69,38 @@ const Signup: React.FC = () => {
       }
       
       // Proceed with signup if code is valid
-      await signup(email, password, name);
+      const { data: userData, error: signupError } = await signup(email, password, name);
       
-      // Mark the invitation as used
-      await supabase
-        .from('profiles')
-        .update({ invitation_used: true })
-        .eq('invitation_code', invitationCode);
+      if (signupError) throw signupError;
+      
+      if (userData && userData.user) {
+        // Mark the invitation as used
+        const { error: invitationError } = await supabase
+          .from('invitations')
+          .update({ 
+            status: 'used',
+            used_at: new Date().toISOString(),
+            used_by: userData.user.id
+          })
+          .eq('code', invitationCode);
+          
+        if (invitationError) {
+          console.error('Error updating invitation:', invitationError);
+        }
         
-    } catch (error) {
+        toast({
+          title: "Inscription réussie",
+          description: "Votre compte a été créé avec succès.",
+        });
+      }
+        
+    } catch (error: any) {
       console.error('Signup error:', error);
+      toast({
+        title: "Échec de l'inscription",
+        description: error.message || "Une erreur est survenue lors de l'inscription",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

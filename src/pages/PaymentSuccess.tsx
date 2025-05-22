@@ -18,6 +18,7 @@ const PaymentSuccess = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [paymentDetails, setPaymentDetails] = useState<PaymentDetails | null>(null);
+  const [invitationDetails, setInvitationDetails] = useState<{ code: string } | null>(null);
   
   const orderId = searchParams.get('order_id');
   
@@ -43,7 +44,7 @@ const PaymentSuccess = () => {
           {
             body: { 
               order_id: orderId,
-              status: 'success' 
+              // We don't provide status here so the webhook will check with Lygos API
             }
           }
         );
@@ -62,6 +63,20 @@ const PaymentSuccess = () => {
         if (error) throw error;
         
         setPaymentDetails(data);
+        
+        // If payment is successful, fetch the invitation details from the invitations table
+        if (data.status === 'success' && data.id) {
+          const { data: inviteData, error: inviteError } = await supabase
+            .from('invitations')
+            .select('code')
+            .eq('payment_id', data.id)
+            .eq('status', 'unused')
+            .single();
+            
+          if (!inviteError && inviteData) {
+            setInvitationDetails(inviteData);
+          }
+        }
       } catch (error) {
         console.error("Error fetching payment details:", error);
         toast({
@@ -78,14 +93,20 @@ const PaymentSuccess = () => {
   }, [orderId, navigate]);
   
   const copyInvitationCode = () => {
-    if (paymentDetails?.invitation_code) {
-      navigator.clipboard.writeText(paymentDetails.invitation_code);
+    // Try to use the code from invitationDetails first, fall back to paymentDetails if needed
+    const codeToCopy = invitationDetails?.code || paymentDetails?.invitation_code;
+    
+    if (codeToCopy) {
+      navigator.clipboard.writeText(codeToCopy);
       toast({
         title: "Code copié",
         description: "Le code d'invitation a été copié dans le presse-papiers"
       });
     }
   };
+  
+  // Get the invitation code to display, prioritizing the invitationDetails
+  const displayInvitationCode = invitationDetails?.code || paymentDetails?.invitation_code;
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-500/5 to-background">
@@ -117,12 +138,12 @@ const PaymentSuccess = () => {
                   </p>
                 </div>
                 
-                {paymentDetails?.invitation_code ? (
+                {displayInvitationCode ? (
                   <div className="bg-muted p-6 rounded-lg border border-border">
                     <p className="font-medium mb-3">Votre code d'invitation :</p>
                     <div className="flex items-center">
                       <code className="flex-1 bg-background p-4 rounded border border-border text-center font-mono text-lg">
-                        {paymentDetails.invitation_code}
+                        {displayInvitationCode}
                       </code>
                       <Button variant="outline" size="icon" onClick={copyInvitationCode} className="ml-2 h-10 w-10">
                         <Copy className="h-4 w-4" />

@@ -7,7 +7,7 @@ export const signup = async (
   email: string, 
   password: string, 
   name: string,
-  onSuccess: (user: any, session: any, profile: any) => void
+  onSuccess?: (user: any, session: any, profile: any) => void
 ) => {
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -20,20 +20,27 @@ export const signup = async (
 
     if (error) throw error;
 
-    toast({
-      title: "Inscription réussie",
-      description: "Votre compte a été créé avec succès.",
-    });
-    
     // If email confirmation is disabled, we can log the user in immediately
     if (data.session) {
       const profile = await fetchUserProfile(data.user.id);
-      onSuccess(data.user, data.session, profile);
+      
+      if (onSuccess) {
+        onSuccess(data.user, data.session, profile);
+      } else {
+        toast({
+          title: "Inscription réussie",
+          description: "Votre compte a été créé avec succès.",
+        });
+      }
+      
+      return { data, error: null };
     } else {
       toast({
         title: "Vérification requise",
         description: "Veuillez vérifier votre email pour confirmer votre compte.",
       });
+      
+      return { data, error: null };
     }
   } catch (error: any) {
     console.error('Signup error:', error.message);
