@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Book, Download, Trash } from 'lucide-react';
+import { Download, Trash, BookOpen, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useEbooks } from '@/hooks/useEbooks';
 import { formatBytes } from '@/utils/fileUtils';
@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
 
 interface EbookCardProps {
   ebook: {
@@ -34,58 +35,69 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook }) => {
   const { isAdmin } = useAuth();
   const { deleteEbook } = useEbooks();
 
-  // Fonction pour générer une couleur basée sur le titre
-  const generateColor = (title: string) => {
-    const colors = [
-      'from-blue-500 to-cyan-500',
-      'from-purple-500 to-pink-500',
-      'from-amber-500 to-red-500',
-      'from-green-500 to-emerald-500',
-      'from-indigo-500 to-purple-500'
-    ];
-    const index = title.length % colors.length;
-    return colors[index];
+  // Génère une couleur en fonction de la catégorie
+  const getCategoryColor = (category?: string) => {
+    if (!category) return 'bg-zinc-100 dark:bg-zinc-900';
+    
+    const categoryColors: Record<string, string> = {
+      "Guide": "bg-blue-50 dark:bg-blue-950",
+      "Tutorial": "bg-green-50 dark:bg-green-950",
+      "Reference": "bg-amber-50 dark:bg-amber-950",
+      "Manual": "bg-purple-50 dark:bg-purple-950",
+      "Report": "bg-rose-50 dark:bg-rose-950"
+    };
+    
+    return categoryColors[category] || 'bg-zinc-100 dark:bg-zinc-900';
+  };
+
+  // Fonction pour obtenir l'icône appropriée en fonction du type de fichier
+  const getFileIcon = () => {
+    const fileExt = ebook.file_url.split('.').pop()?.toLowerCase();
+    
+    switch(fileExt) {
+      case 'pdf':
+        return <FileText className="h-10 w-10 text-zinc-700" />;
+      default:
+        return <BookOpen className="h-10 w-10 text-zinc-700" />;
+    }
   };
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="pb-4">
-        <div className="mb-4">
-          <AspectRatio ratio={3/4}>
-            <div className={`w-full h-full rounded-lg bg-gradient-to-br ${generateColor(ebook.title)} relative shadow-lg`}>
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-white">
-                <Book className="h-12 w-12 mb-4 opacity-90" />
-                <h3 className="font-bold text-center text-sm line-clamp-3">
-                  {ebook.title}
-                </h3>
-              </div>
-            </div>
-          </AspectRatio>
+    <Card className={cn(
+      "overflow-hidden transition-all duration-300 border-0 rounded-xl shadow-md hover:shadow-xl",
+      getCategoryColor(ebook.category)
+    )}>
+      <AspectRatio ratio={4/3} className="bg-white dark:bg-zinc-800">
+        <div className="w-full h-full flex flex-col items-center justify-center p-8">
+          {getFileIcon()}
+          <h3 className="text-xl font-medium mt-4 text-center line-clamp-2">
+            {ebook.title}
+          </h3>
+          {ebook.category && (
+            <span className="mt-2 px-2 py-1 text-xs rounded-full bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200">
+              {ebook.category}
+            </span>
+          )}
         </div>
-      </CardHeader>
+      </AspectRatio>
       
-      <CardContent className="flex-grow">
+      <CardContent className="p-4">
         {ebook.description && (
-          <p className="text-sm text-muted-foreground mb-2">
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
             {ebook.description}
           </p>
         )}
-        {ebook.category && (
-          <p className="text-sm">
-            Catégorie: {ebook.category}
-          </p>
-        )}
         {ebook.file_size && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Taille: {formatBytes(ebook.file_size)}
           </p>
         )}
       </CardContent>
 
-      <CardFooter className="flex justify-between gap-2">
+      <CardFooter className="flex justify-between p-4 pt-0 gap-2">
         <Button 
-          variant="secondary" 
-          className="flex-1"
+          variant="outline" 
+          className="flex-1 rounded-full font-medium"
           onClick={() => window.open(ebook.file_url, '_blank')}
         >
           <Download className="h-4 w-4 mr-2" />
@@ -95,11 +107,11 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook }) => {
         {isAdmin() && (
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="icon">
+              <Button variant="destructive" size="icon" className="rounded-full">
                 <Trash className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="bg-white dark:bg-zinc-900 border-0 shadow-xl rounded-2xl">
               <AlertDialogHeader>
                 <AlertDialogTitle>Supprimer ce document ?</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -107,9 +119,9 @@ const EbookCard: React.FC<EbookCardProps> = ({ ebook }) => {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                <AlertDialogCancel className="rounded-full">Annuler</AlertDialogCancel>
                 <AlertDialogAction
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  className="bg-red-500 hover:bg-red-600 text-white rounded-full"
                   onClick={() => deleteEbook(ebook.id)}
                 >
                   Supprimer
