@@ -15,6 +15,12 @@ interface ArticleWithCounts extends Article {
   comment_count: number;
 }
 
+// Fonction pour nettoyer le HTML et extraire le texte brut
+const stripHtml = (html: string): string => {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+};
+
 const Blog = () => {
   const { data: articles, isLoading } = useQuery({
     queryKey: ['published-articles-with-counts'],
@@ -42,6 +48,16 @@ const Blog = () => {
       })) as ArticleWithCounts[];
     }
   });
+
+  // Préparer l'extrait du contenu en supprimant le HTML
+  const prepareExcerpt = (article: ArticleWithCounts): string => {
+    if (article.excerpt) {
+      return stripHtml(article.excerpt);
+    } else {
+      const cleanContent = stripHtml(article.content);
+      return cleanContent.length > 150 ? cleanContent.substring(0, 150) + '...' : cleanContent;
+    }
+  };
 
   if (isLoading) {
     return <div className="container mx-auto py-8">Chargement des articles...</div>;
@@ -73,7 +89,7 @@ const Blog = () => {
             </CardHeader>
             <CardContent className="flex-grow flex flex-col">
               <p className="text-muted-foreground line-clamp-3 mb-4">
-                {article.excerpt || article.content.substring(0, 150) + '...'}
+                {prepareExcerpt(article)}
               </p>
               
               <div className="mt-auto flex items-center justify-between pt-4">

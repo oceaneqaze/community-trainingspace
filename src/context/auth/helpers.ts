@@ -15,7 +15,7 @@ export async function fetchUserProfile(userId: string): Promise<UserProfile | nu
       return null;
     }
     
-    return data;
+    return data as UserProfile;
   } catch (error) {
     console.error('Error in fetchUserProfile:', error);
     return null;
