@@ -12,6 +12,8 @@ export const initialState: AuthState = {
   session: null,
   isAuthenticated: false,
   isLoading: true,
+  loading: true,  // Added this property
+  error: null     // Added this property
 };
 
 export const useAuthState = (navigate: (path: string) => void) => {
@@ -37,6 +39,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
           setAuthState({
             ...initialState,
             isLoading: false,
+            loading: false, // Update loading state
           });
           return;
         }
@@ -62,6 +65,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
                   ...prev,
                   profile,
                   isLoading: false,
+                  loading: false, // Update loading state
                 }));
                 
                 console.log("Auth state updated with profile:", { 
@@ -77,6 +81,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
                 setAuthState(prev => ({
                   ...prev,
                   isLoading: false,
+                  loading: false, // Update loading state
+                  error: error instanceof Error ? error.message : 'Unknown error fetching profile' // Update error state
                 }));
               }
             }
@@ -86,6 +92,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
           setAuthState({
             ...initialState,
             isLoading: false,
+            loading: false, // Update loading state
           });
         }
       }
@@ -104,6 +111,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
             setAuthState({
               ...initialState,
               isLoading: false,
+              loading: false, // Update loading state
+              error: error.message // Update error state
             });
           }
           return;
@@ -134,6 +143,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
                   ...prev,
                   profile,
                   isLoading: false,
+                  loading: false, // Update loading state
                 }));
                 
                 console.log("Auth initialized with profile:", { 
@@ -148,6 +158,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
                 setAuthState(prev => ({
                   ...prev,
                   isLoading: false,
+                  loading: false, // Update loading state
+                  error: error instanceof Error ? error.message : 'Unknown error fetching profile' // Update error state
                 }));
               }
             }
@@ -157,6 +169,7 @@ export const useAuthState = (navigate: (path: string) => void) => {
           setAuthState({
             ...initialState,
             isLoading: false,
+            loading: false, // Update loading state
           });
         }
       } catch (error) {
@@ -165,6 +178,8 @@ export const useAuthState = (navigate: (path: string) => void) => {
           setAuthState({
             ...initialState,
             isLoading: false,
+            loading: false, // Update loading state
+            error: error instanceof Error ? error.message : 'Unknown error checking authentication' // Update error state
           });
         }
       }
