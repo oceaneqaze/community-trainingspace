@@ -24,6 +24,7 @@ import * as z from "zod";
 import { useEbooks } from '@/hooks/useEbooks';
 import { toast } from '@/components/ui/use-toast';
 import { Upload } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const formSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
@@ -86,12 +87,14 @@ const EbookUploader = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Upload className="h-4 w-4 mr-2" />
-          Ajouter un document
-        </Button>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button className="rounded-full bg-zinc-900 dark:bg-white dark:text-zinc-900 text-white hover:bg-zinc-800 dark:hover:bg-zinc-100">
+            <Upload className="h-4 w-4 mr-2" />
+            Ajouter un document
+          </Button>
+        </motion.div>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border-0 rounded-2xl shadow-xl">
         <DialogHeader>
           <DialogTitle>Ajouter un document</DialogTitle>
         </DialogHeader>
@@ -104,7 +107,11 @@ const EbookUploader = () => {
                 <FormItem>
                   <FormLabel>Titre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom du document" {...field} />
+                    <Input 
+                      placeholder="Nom du document" 
+                      className="rounded-xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm" 
+                      {...field} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,6 +127,7 @@ const EbookUploader = () => {
                   <FormControl>
                     <Textarea 
                       placeholder="Description du document (optionnel)"
+                      className="rounded-xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm"
                       {...field}
                     />
                   </FormControl>
@@ -137,6 +145,7 @@ const EbookUploader = () => {
                   <FormControl>
                     <Input 
                       placeholder="Catégorie (optionnel)"
+                      className="rounded-xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm"
                       {...field}
                     />
                   </FormControl>
@@ -155,6 +164,7 @@ const EbookUploader = () => {
                     <Input
                       type="file"
                       accept=".pdf"
+                      className="rounded-xl bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -170,10 +180,18 @@ const EbookUploader = () => {
             />
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsOpen(false)}
+                className="rounded-full"
+              >
                 Annuler
               </Button>
-              <Button type="submit">
+              <Button 
+                type="submit"
+                className="rounded-full bg-zinc-900 dark:bg-white dark:text-zinc-900 text-white hover:bg-zinc-800 dark:hover:bg-zinc-100"
+              >
                 Ajouter
               </Button>
             </div>

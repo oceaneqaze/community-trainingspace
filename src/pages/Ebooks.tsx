@@ -30,11 +30,16 @@ const Ebooks = () => {
         </p>
       </motion.div>
 
-      <Card className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur border-0 rounded-2xl shadow-lg overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden border border-zinc-200/50 dark:border-zinc-800/50"
+      >
         <CardContent className="p-6">
           <EbookList />
         </CardContent>
-      </Card>
+      </motion.div>
     </div>
   );
 };

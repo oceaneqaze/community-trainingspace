@@ -39,18 +39,18 @@ const EbookList = () => {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            className="pl-10 rounded-full border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+            className="pl-10 rounded-full border-zinc-200 dark:border-zinc-700 bg-white/70 dark:bg-zinc-800/70 backdrop-blur-sm"
             placeholder="Rechercher un document..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         
-        <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+        <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
           <button
             className={`px-4 py-2 text-sm rounded-full transition-colors whitespace-nowrap ${
               selectedCategory === null 
-                ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' 
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' 
                 : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700'
             }`}
             onClick={() => setSelectedCategory(null)}
@@ -63,7 +63,7 @@ const EbookList = () => {
               key={category}
               className={`px-4 py-2 text-sm rounded-full transition-colors whitespace-nowrap ${
                 selectedCategory === category 
-                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' 
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900' 
                   : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700'
               }`}
               onClick={() => setSelectedCategory(category)}
@@ -81,19 +81,19 @@ const EbookList = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {filteredEbooks.map((ebook) => (
+          {filteredEbooks.map((ebook, index) => (
             <motion.div
               key={ebook.id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
             >
               <EbookCard ebook={ebook} />
             </motion.div>
           ))}
         </motion.div>
       ) : (
-        <Alert className="bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 rounded-xl">
+        <Alert className="bg-zinc-50/70 dark:bg-zinc-900/70 backdrop-blur-sm border-zinc-200 dark:border-zinc-800 rounded-xl">
           <BookOpen className="h-5 w-5 text-muted-foreground" />
           <AlertDescription>
             Aucun document ne correspond à votre recherche.
