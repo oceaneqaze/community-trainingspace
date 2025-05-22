@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContextType } from './auth/types';
@@ -192,7 +191,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const handleSignup = async (email: string, password: string, name: string) => {
     try {
       setIsLoading(true);
-      await signupOp(email, password, name, (user, session, profile) => {
+      const result = await signupOp(email, password, name, (user, session, profile) => {
         setUser(user);
         setProfile(profile);
         setSession(session);
@@ -200,6 +199,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsLoading(false);
         navigate('/videos');
       });
+      
+      // Return the result so that Signup.tsx can access data and error properties
+      return result;
     } catch (error) {
       setIsLoading(false);
       throw error;
