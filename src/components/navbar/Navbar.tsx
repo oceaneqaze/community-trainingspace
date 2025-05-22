@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { MenuIcon, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 // Import all the components we've created
 import Logo from './Logo';
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, logout, profile, isAdmin } = useAuth();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -22,6 +24,16 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsOpen(false);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await logout();
+      if (error) throw error;
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   return (
@@ -39,7 +51,7 @@ const Navbar = () => {
               <UserMenu 
                 profile={profile}
                 isAdmin={isAdmin}
-                onLogout={logout}
+                onLogout={handleLogout}
               />
             ) : (
               <AuthButtons />
@@ -70,7 +82,7 @@ const Navbar = () => {
         isAuthenticated={isAuthenticated}
         isAdmin={isAdmin}
         onClose={closeMenu}
-        onLogout={logout}
+        onLogout={handleLogout}
       />
     </nav>
   );

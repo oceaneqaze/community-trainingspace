@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
@@ -13,23 +13,25 @@ import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 const Signin: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
   
   // Utiliser useAuthRedirect pour gérer les redirections automatiquement
-  // Cela évite d'avoir à gérer manuellement les redirections dans le composant
   useAuthRedirect();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
 
     try {
       console.log("Tentative de connexion pour:", email);
-      await login(email, password);
+      const { error } = await login(email, password);
+      
+      if (error) {
+        throw error;
+      }
       
       toast({
         title: "Connexion réussie",
@@ -46,8 +48,6 @@ const Signin: React.FC = () => {
       } else {
         setError(error.message || "Une erreur est survenue lors de la connexion");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 

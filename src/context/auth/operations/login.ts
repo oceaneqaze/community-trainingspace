@@ -1,13 +1,16 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { cleanupAuthState } from '@/utils/authUtils';
 
 export const login = async (email: string, password: string) => {
   try {
     console.log("Opération de connexion démarrée pour:", email);
     
-    // La fonction cleanupAuthState a été retirée pour éviter les perturbations
-    // dans l'état de connexion sur les environnements de production
+    // Clean up auth state only in development environment
+    if (window.location.hostname === 'localhost') {
+      cleanupAuthState();
+    }
     
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
