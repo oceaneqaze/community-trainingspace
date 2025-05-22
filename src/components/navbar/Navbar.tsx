@@ -28,6 +28,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
+      // Updated to match the logout return type
       const { error } = await logout();
       if (error) throw error;
       navigate('/signin');

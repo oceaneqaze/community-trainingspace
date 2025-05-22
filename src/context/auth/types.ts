@@ -25,9 +25,9 @@ export interface AuthState {
 export interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<{data: any, error: any}>;
   signup: (email: string, password: string, name?: string) => Promise<{data: any, error: any}>;
-  logout: () => Promise<void>;
+  logout: () => Promise<{error: any | null}>;  // Updated return type
   isAdmin: () => boolean;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;  // Updated return type
   isBanned: () => boolean;
   isLimited: () => boolean;
   updateUserStatus: (

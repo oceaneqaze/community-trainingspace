@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthState, AuthContextType, UserProfile } from './types';
@@ -274,7 +273,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<{error: any | null}> => {
     setAuthState({ ...authState, isLoading: true, loading: true });
     
     try {
@@ -306,7 +305,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = async (): Promise<UserProfile | null> => {
     if (!authState.user?.id) return null;
     
     setAuthState({ ...authState, isLoading: true, loading: true });

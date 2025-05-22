@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { cleanupAuthState } from '@/utils/authUtils';
 
-export const logout = async (onLogoutSuccess: () => void) => {
+export const logout = async (onLogoutSuccess: () => void): Promise<{error: any | null}> => {
   try {
     console.log('Logout operation started');
     
@@ -27,6 +27,8 @@ export const logout = async (onLogoutSuccess: () => void) => {
     
     // Callback after successful logout
     onLogoutSuccess();
+    
+    return { error: null };
   } catch (error: any) {
     console.error('Logout error:', error.message);
     toast({
@@ -35,6 +37,6 @@ export const logout = async (onLogoutSuccess: () => void) => {
       variant: "destructive",
     });
     
-    throw error;
+    return { error };
   }
 };
