@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { UserProfile } from '@/types/auth.types';
+import { UserProfile } from '@/context/auth/types';
 import SidebarLogo from './components/SidebarLogo';
 import SidebarToggle from './components/SidebarToggle';
 import SidebarNavigation from './components/SidebarNavigation';

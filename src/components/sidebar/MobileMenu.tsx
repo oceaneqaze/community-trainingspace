@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { UserProfile } from '@/context/auth/types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { X, LogOut } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { getNavigationItems } from '@/components/navbar/NavigationItems';
-import { UserProfile } from '@/types/auth.types';
 
 interface MobileMenuProps {
   isOpen: boolean;
