@@ -49,6 +49,8 @@ export const signup = async (
       description: error.message || "Une erreur est survenue",
       variant: "destructive",
     });
-    throw error;
+    
+    // Return an object with error property instead of throwing
+    return { data: null, error };
   }
 };

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -69,18 +70,18 @@ const Signup: React.FC = () => {
       }
       
       // Proceed with signup if code is valid
-      const { data: userData, error: signupError } = await signup(email, password, name);
+      const signupResult = await signup(email, password, name);
       
-      if (signupError) throw signupError;
+      if (signupResult.error) throw signupResult.error;
       
-      if (userData && userData.user) {
+      if (signupResult.data && signupResult.data.user) {
         // Mark the invitation as used
         const { error: invitationError } = await supabase
           .from('invitations')
           .update({ 
             status: 'used',
             used_at: new Date().toISOString(),
-            used_by: userData.user.id
+            used_by: signupResult.data.user.id
           })
           .eq('code', invitationCode);
           
