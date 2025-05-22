@@ -17,6 +17,9 @@ export interface AuthState {
   profile: UserProfile | null;
   loading: boolean;
   error: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  session: any;
 }
 
 export interface AuthContextType extends AuthState {
