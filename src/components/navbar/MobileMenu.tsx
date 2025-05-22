@@ -16,9 +16,13 @@ const MobileMenu = ({ isOpen, isAuthenticated, isAdmin, onClose, onLogout }: Mob
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await onLogout();
-    navigate('/');
-    onClose();
+    try {
+      await onLogout();
+      navigate('/');
+      onClose();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   if (!isOpen) return null;

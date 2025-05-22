@@ -24,6 +24,17 @@ const Navbar = () => {
     setIsOpen(false);
   };
 
+  // Update handleLogout to handle the new return type
+  const handleLogout = async () => {
+    try {
+      const { error } = await logout();
+      if (error) throw error;
+      navigate('/signin');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  };
+
   return (
     <nav className="bg-background border-b border-border shadow-sm sticky top-0 z-50 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +49,7 @@ const Navbar = () => {
               <UserMenu 
                 profile={profile}
                 isAdmin={isAdmin}
-                onLogout={logout}
+                onLogout={handleLogout}
               />
             ) : (
               <AuthButtons />
@@ -69,7 +80,7 @@ const Navbar = () => {
         isAuthenticated={isAuthenticated}
         isAdmin={isAdmin}
         onClose={closeMenu}
-        onLogout={logout}
+        onLogout={handleLogout}
       />
     </nav>
   );
