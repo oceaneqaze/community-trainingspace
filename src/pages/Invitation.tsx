@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, Check, AlertTriangle, UserPlus } from 'lucide-react';
+import { Loader2, Check, AlertTriangle, UserPlus, Eye, EyeOff } from 'lucide-react';
 
 const Invitation = () => {
   const { code } = useParams<{ code: string }>();
@@ -16,9 +16,13 @@ const Invitation = () => {
   const [isValid, setIsValid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [inviterName, setInviterName] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    password: '',
+    confirmPassword: '',
   });
   const navigate = useNavigate();
 
@@ -65,10 +69,28 @@ const Invitation = () => {
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!code || !formData.name.trim() || !formData.email.trim()) {
+    if (!code || !formData.name.trim() || !formData.email.trim() || !formData.password.trim()) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      toast({
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 6 caractères.",
         variant: "destructive",
       });
       return;
@@ -79,13 +101,10 @@ const Invitation = () => {
 
       console.log("Creating account with invitation code:", code);
       
-      // Generate a temporary password (user won't need to know it)
-      const tempPassword = crypto.randomUUID() + Math.random().toString(36);
-      
-      // Create the user account
+      // Create the user account with the provided password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
-        password: tempPassword,
+        password: formData.password,
         options: {
           data: { 
             name: formData.name,
@@ -252,6 +271,56 @@ const Invitation = () => {
                   required
                   className="mt-1"
                 />
+              </div>
+              <div className="text-left">
+                <Label htmlFor="password">Mot de passe</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={formData.password}
+                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Votre mot de passe"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="text-left">
+                <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+                <div className="relative mt-1">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    placeholder="Confirmer votre mot de passe"
+                    required
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                </div>
               </div>
               <Button 
                 type="submit"
