@@ -1,344 +1,197 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Plus, Download } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { Member } from '@/types/member.types';
+import { toast } from '@/components/ui/use-toast';
 import MemberTable from '@/components/members/MemberTable';
-import MemberSearch from '@/components/members/MemberSearch';
-import MemberActionDialog from '@/components/members/MemberActionDialog';
 import MemberStats from '@/components/members/MemberStats';
+import MemberSearch from '@/components/members/MemberSearch';
+import AddMemberDialog from '@/components/members/AddMemberDialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Users, UserPlus } from 'lucide-react';
 
 const Members: React.FC = () => {
-  const [members, setMembers] = useState<Member[]>([]);
+  const { isAuthenticated, isAdmin } = useAuthRedirect(true);
+  const { updateUserStatus } = useAuth();
+  const queryClient = useQueryClient();
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [showBanDialog, setShowBanDialog] = useState(false);
-  const [showLimitDialog, setShowLimitDialog] = useState(false);
-  const [showAdminDialog, setShowAdminDialog] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [activeFilters, setActiveFilters] = useState({
+  const [filters, setFilters] = useState({
     roles: ['admin', 'member'],
     status: ['active', 'inactive']
   });
-  const { isAuthenticated, isAdmin, updateUserStatus } = useAuth();
-  const navigate = useNavigate();
 
-  // Filter members based on search and filters
-  const filteredMembers = useMemo(() => {
-    return members.filter(
-      member =>
-        // Text search
-        (member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
-        // Role filter
-        activeFilters.roles.includes(member.role) &&
-        // Status filter (active/inactive)
-        activeFilters.status.includes(member.banned ? 'inactive' : 'active')
-    );
-  }, [members, searchTerm, activeFilters]);
-
-  // Fetch actual members from Supabase
-  const fetchMembers = async () => {
-    try {
-      setIsLoading(true);
+  // Fetch members data
+  const { data: members = [], isLoading } = useQuery({
+    queryKey: ['members'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*');
-
+        .select('*')
+        .order('created_at', { ascending: false });
+      
       if (error) throw error;
-
-      const formattedMembers: Member[] = (data || []).map((profile: any) => ({
+      
+      return data.map(profile => ({
         id: profile.id,
-        name: profile.name || 'Utilisateur inconnu',
-        email: profile.email || '',
-        role: profile.role || 'member',
-        status: profile.banned ? 'inactive' : 'active',
+        name: profile.name || profile.email,
+        email: profile.email,
+        role: profile.role,
+        banned: profile.banned || false,
+        limited: profile.limited || false,
         joinDate: new Date(profile.created_at).toLocaleDateString('fr-FR'),
         avatar: profile.avatar_url,
-        banned: profile.banned,
-        limited: profile.limited,
         invitation_code: profile.invitation_code,
         invitation_used: profile.invitation_used
-      }));
+      })) as Member[];
+    },
+    enabled: isAuthenticated && isAdmin,
+  });
 
-      setMembers(formattedMembers);
-    } catch (error) {
-      console.error('Erreur lors de la récupération des membres:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les membres.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Initial fetch
-  useEffect(() => {
-    if (isAuthenticated && isAdmin()) {
-      fetchMembers();
-    }
-  }, [isAuthenticated, isAdmin]);
-
-  // Redirect if not admin
-  useEffect(() => {
-    if (!isAuthenticated || !isAdmin()) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, isAdmin, navigate]);
-
-  // Handle ban/unban member
-  const handleBanMember = async () => {
-    if (!selectedMember) return;
-    
-    try {
-      await updateUserStatus(selectedMember.id, { banned: !selectedMember.banned });
-      await fetchMembers();
-      setShowBanDialog(false);
-      setSelectedMember(null);
+  // Filter members based on search term and filters
+  const filteredMembers = useMemo(() => {
+    return members.filter(member => {
+      const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           member.email.toLowerCase().includes(searchTerm.toLowerCase());
       
-      toast({
-        title: selectedMember.banned ? "Membre réactivé" : "Membre banni",
-        description: selectedMember.banned 
-          ? `${selectedMember.name} a été réactivé avec succès.` 
-          : `${selectedMember.name} a été banni avec succès.`,
-      });
-    } catch (error) {
-      console.error('Error updating member status:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du statut.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle limit/unlimit member
-  const handleLimitMember = async () => {
-    if (!selectedMember) return;
-    
-    try {
-      await updateUserStatus(selectedMember.id, { limited: !selectedMember.limited });
-      await fetchMembers();
-      setShowLimitDialog(false);
-      setSelectedMember(null);
+      const matchesRole = filters.roles.includes(member.role);
+      const matchesStatus = filters.status.includes(member.banned ? 'inactive' : 'active');
       
+      return matchesSearch && matchesRole && matchesStatus;
+    });
+  }, [members, searchTerm, filters]);
+
+  const handleMemberAdded = () => {
+    queryClient.invalidateQueries({ queryKey: ['members'] });
+    toast({
+      title: "Membre ajouté",
+      description: "Le nouveau membre a été ajouté avec succès.",
+    });
+  };
+
+  const handleStatusChange = async (member: Member) => {
+    const success = await updateUserStatus(member.id, { banned: !member.banned });
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
       toast({
-        title: selectedMember.limited ? "Limitations retirées" : "Membre limité",
-        description: selectedMember.limited 
-          ? `Les limitations ont été retirées pour ${selectedMember.name}.` 
-          : `${selectedMember.name} a été limité avec succès.`,
-      });
-    } catch (error) {
-      console.error('Error updating member limit status:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour des limitations.",
-        variant: "destructive",
+        title: member.banned ? "Membre réactivé" : "Membre banni",
+        description: `${member.name} a été ${member.banned ? 'réactivé' : 'banni'}.`,
       });
     }
   };
 
-  // Handle admin toggle
-  const handleAdminToggle = async () => {
-    if (!selectedMember) return;
-    
-    const newRole = selectedMember.role === 'admin' ? 'member' : 'admin';
-    
+  const handleLimitToggle = async (member: Member) => {
+    const success = await updateUserStatus(member.id, { limited: !member.limited });
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      toast({
+        title: member.limited ? "Limitations supprimées" : "Membre limité",
+        description: `${member.name} ${member.limited ? 'n\'a plus de limitations' : 'a été limité'}.`,
+      });
+    }
+  };
+
+  const handleAdminToggle = async (member: Member) => {
+    const newRole = member.role === 'admin' ? 'member' : 'admin';
+    const success = await updateUserStatus(member.id, { role: newRole });
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      toast({
+        title: "Rôle modifié",
+        description: `${member.name} est maintenant ${newRole === 'admin' ? 'administrateur' : 'membre'}.`,
+      });
+    }
+  };
+
+  const handleDelete = async (member: Member) => {
     try {
-      await updateUserStatus(selectedMember.id, { role: newRole });
-      await fetchMembers();
-      setShowAdminDialog(false);
-      setSelectedMember(null);
+      const { error } = await supabase.auth.admin.deleteUser(member.id);
+      if (error) throw error;
       
+      queryClient.invalidateQueries({ queryKey: ['members'] });
       toast({
-        title: newRole === 'admin' ? "Administrateur ajouté" : "Administrateur rétrogradé",
-        description: newRole === 'admin'
-          ? `${selectedMember.name} a été promu administrateur.`
-          : `${selectedMember.name} n'est plus administrateur.`,
+        title: "Membre supprimé",
+        description: `${member.name} a été supprimé de la plateforme.`,
       });
-    } catch (error) {
-      console.error('Error updating member role:', error);
+    } catch (error: any) {
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de la mise à jour du rôle.",
+        description: "Impossible de supprimer ce membre.",
         variant: "destructive",
       });
     }
   };
 
-  // Handle status change
-  const handleStatusChange = (member: Member) => {
-    setSelectedMember(member);
-    setShowBanDialog(true);
-  };
-
-  // Handle limit toggle
-  const handleLimitToggle = (member: Member) => {
-    setSelectedMember(member);
-    setShowLimitDialog(true);
-  };
-  
-  // Handle admin toggle
-  const handleAdminToggleClick = (member: Member) => {
-    setSelectedMember(member);
-    setShowAdminDialog(true);
-  };
-
-  // Handle invitation refresh
   const handleInvitationSent = () => {
-    fetchMembers();
-    toast({
-      title: "Invitation mise à jour",
-      description: "La liste des membres a été mise à jour.",
-    });
+    queryClient.invalidateQueries({ queryKey: ['members'] });
   };
 
-  // Mock add member
-  const handleAddMember = () => {
-    toast({
-      title: "Fonctionnalité à venir",
-      description: "L'ajout manuel de membres sera disponible prochainement.",
-    });
-  };
-
-  // Export members as CSV
-  const handleExportMembers = () => {
-    try {
-      // Create CSV content
-      const headers = ['Nom', 'Email', 'Rôle', 'Statut', 'Date d\'inscription'];
-      const csvContent = [
-        headers.join(','),
-        ...filteredMembers.map(member => [
-          member.name,
-          member.email,
-          member.role === 'admin' ? 'Administrateur' : 'Membre',
-          member.banned ? 'Banni' : 'Actif',
-          member.joinDate
-        ].join(','))
-      ].join('\n');
-      
-      // Create download link
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `membres_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast({
-        title: "Export réussi",
-        description: "La liste des membres a été exportée avec succès.",
-      });
-    } catch (error) {
-      console.error('Error exporting members:', error);
-      toast({
-        title: "Erreur d'export",
-        description: "Une erreur est survenue lors de l'export des membres.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle delete (soft delete by banning)
-  const handleDelete = (member: Member) => {
-    setSelectedMember(member);
-    setShowBanDialog(true);
-  };
-
-  // Handle filter change
-  const handleFilterChange = (filters: any) => {
-    setActiveFilters(filters);
-  };
+  if (!isAuthenticated || !isAdmin) {
+    return null;
+  }
 
   return (
-    <div className="page-container max-w-screen-2xl mx-auto">
-      <div className="sm:flex sm:items-center sm:justify-between mb-6">
-        <h1 className="text-3xl font-bold text-center sm:text-left">Gestion des membres</h1>
-        <div className="mt-4 sm:mt-0 flex space-x-2">
-          <Button 
-            variant="outline"
-            onClick={handleExportMembers}
-            className="gap-1"
-          >
-            <Download className="h-4 w-4" />
-            Exporter
-          </Button>
-          <Button 
-            onClick={handleAddMember}
-            className="gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            Ajouter un membre
-          </Button>
+    <div className="max-w-7xl mx-auto py-10 px-4 sm:px-6">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center">
+          <Users className="h-10 w-10 text-zinc-900 dark:text-white mr-3" />
+          <div>
+            <h1 className="text-3xl font-medium">Gestion des membres</h1>
+            <p className="text-muted-foreground">
+              Gérez les utilisateurs de votre plateforme
+            </p>
+          </div>
         </div>
+        <AddMemberDialog onMemberAdded={handleMemberAdded} />
       </div>
-      
-      <Tabs defaultValue="list" className="mb-8">
-        <TabsList className="mb-4">
-          <TabsTrigger value="list">Liste des membres</TabsTrigger>
+
+      <Tabs defaultValue="table" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="table">Liste des membres</TabsTrigger>
           <TabsTrigger value="stats">Statistiques</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="list" className="space-y-6">
-          {/* Search and filters controls */}
-          <div className="max-w-md mb-6">
-            <MemberSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-          </div>
-          
-          {/* Members table */}
-          <MemberTable 
+
+        <TabsContent value="table" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Recherche et filtres
+              </CardTitle>
+              <CardDescription>
+                Recherchez et filtrez les membres selon vos critères
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MemberSearch 
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onFilterChange={setFilters}
+              />
+            </CardContent>
+          </Card>
+
+          <MemberTable
             members={members}
-            filteredMembers={filteredMembers}
             isLoading={isLoading}
             onStatusChange={handleStatusChange}
             onLimitToggle={handleLimitToggle}
-            onAdminToggle={handleAdminToggleClick}
+            onAdminToggle={handleAdminToggle}
             onDelete={handleDelete}
             onInvitationSent={handleInvitationSent}
-            onFilterChange={handleFilterChange}
+            filteredMembers={filteredMembers}
+            onFilterChange={setFilters}
           />
         </TabsContent>
-        
+
         <TabsContent value="stats">
           <MemberStats members={members} />
         </TabsContent>
       </Tabs>
-
-      {/* Ban Dialog */}
-      <MemberActionDialog 
-        isOpen={showBanDialog}
-        onClose={() => setShowBanDialog(false)}
-        onConfirm={handleBanMember}
-        member={selectedMember}
-        action="ban"
-      />
-
-      {/* Limit Dialog */}
-      <MemberActionDialog 
-        isOpen={showLimitDialog}
-        onClose={() => setShowLimitDialog(false)}
-        onConfirm={handleLimitMember}
-        member={selectedMember}
-        action="limit"
-      />
-      
-      {/* Admin Toggle Dialog */}
-      <MemberActionDialog 
-        isOpen={showAdminDialog}
-        onClose={() => setShowAdminDialog(false)}
-        onConfirm={handleAdminToggle}
-        member={selectedMember}
-        action="admin"
-      />
     </div>
   );
 };
