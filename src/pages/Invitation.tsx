@@ -4,8 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { Loader2, Check, AlertTriangle } from 'lucide-react';
+import { Loader2, Check, AlertTriangle, UserPlus } from 'lucide-react';
 
 const Invitation = () => {
   const { code } = useParams<{ code: string }>();
@@ -14,6 +16,10 @@ const Invitation = () => {
   const [isValid, setIsValid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [inviterName, setInviterName] = useState<string | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,6 +61,71 @@ const Invitation = () => {
 
     validateInvitationCode();
   }, [code]);
+
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!code || !formData.name.trim() || !formData.email.trim()) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez remplir tous les champs.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      console.log("Creating account with invitation code:", code);
+      
+      // Generate a temporary password (user won't need to know it)
+      const tempPassword = crypto.randomUUID() + Math.random().toString(36);
+      
+      // Create the user account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: tempPassword,
+        options: {
+          data: { 
+            name: formData.name,
+            invitation_code: code
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Mark the invitation as used
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ invitation_used: true })
+          .eq('invitation_code', code);
+
+        if (updateError) {
+          console.error('Error updating invitation:', updateError);
+        }
+
+        toast({
+          title: "Compte créé avec succès",
+          description: "Votre compte a été créé et l'invitation acceptée.",
+        });
+
+        // Redirect to videos page
+        navigate('/videos');
+      }
+    } catch (error: any) {
+      console.error('Error creating account:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de la création du compte",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleAcceptInvitation = async () => {
     if (!code || !user) return;
@@ -155,14 +226,55 @@ const Invitation = () => {
         ) : (
           <>
             <p className="text-muted-foreground mb-6">
-              Veuillez vous connecter ou créer un compte pour accepter cette invitation.
+              Créez votre compte pour rejoindre la plateforme.
             </p>
-            <div className="flex flex-col w-full gap-4">
-              <Button onClick={() => navigate('/login')}>
-                Se connecter
+            <form onSubmit={handleCreateAccount} className="space-y-4">
+              <div className="text-left">
+                <Label htmlFor="name">Nom complet</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Votre nom"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div className="text-left">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="votre@email.com"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <Button 
+                type="submit"
+                disabled={isProcessing}
+                className="w-full"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Création en cours...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Créer mon compte
+                  </>
+                )}
               </Button>
-              <Button variant="outline" onClick={() => navigate('/signup')}>
-                Créer un compte
+            </form>
+            <div className="text-sm mt-4">
+              <span className="text-muted-foreground">Vous avez déjà un compte?</span>{' '}
+              <Button variant="link" className="p-0 h-auto" onClick={() => navigate('/signin')}>
+                Se connecter
               </Button>
             </div>
           </>

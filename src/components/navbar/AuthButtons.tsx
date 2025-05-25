@@ -11,8 +11,8 @@ const AuthButtons = () => {
       <Button variant="outline" onClick={() => navigate('/signin')}>
         Connexion
       </Button>
-      <Button onClick={() => navigate('/signup')}>
-        S'inscrire
+      <Button variant="secondary" onClick={() => navigate('/signup')}>
+        Inscription par invitation
       </Button>
     </div>
   );
