@@ -60,25 +60,35 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
       {!videoFileName ? (
         <div className="mt-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 mb-2">
-              <TabsTrigger value="upload">Upload de fichier</TabsTrigger>
-              <TabsTrigger value="external">Lien externe (ScreenRec)</TabsTrigger>
+            <TabsList className="grid grid-cols-2 mb-4">
+              <TabsTrigger value="upload" className="flex items-center gap-2">
+                <span>📁</span> Upload depuis PC
+              </TabsTrigger>
+              <TabsTrigger value="external" className="flex items-center gap-2">
+                <span>🔗</span> Lien externe
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="upload">
+            <TabsContent value="upload" className="space-y-2">
               <FileUploadSection 
                 handleVideoChange={handleVideoChange}
                 disabled={disabled}
               />
+              <p className="text-xs text-muted-foreground text-center">
+                💾 Stockage sécurisé avec Firebase Storage
+              </p>
             </TabsContent>
             
-            <TabsContent value="external">
+            <TabsContent value="external" className="space-y-2">
               <ExternalUrlSection
                 externalUrl={externalUrl}
                 setExternalUrl={setExternalUrl}
                 handleExternalUrlSubmit={handleExternalUrlSubmit}
                 disabled={disabled}
               />
+              <p className="text-xs text-muted-foreground text-center">
+                🌐 Support des liens ScreenRec et autres plateformes
+              </p>
             </TabsContent>
           </Tabs>
         </div>

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { VideoProps } from '@/components/video/VideoCard';
-import { useFileUpload } from '@/hooks/useFileUpload';
+import { useFirebaseUpload } from '@/hooks/useFirebaseUpload';
 import { toast } from '@/components/ui/use-toast';
 
 export const useVideoFormData = (video?: VideoProps) => {
@@ -14,7 +14,7 @@ export const useVideoFormData = (video?: VideoProps) => {
   const [externalVideoUrl, setExternalVideoUrl] = useState<string>('');
   const [thumbnailPreview, setThumbnailPreview] = useState<string>(video?.thumbnail || '');
   const [activeTab, setActiveTab] = useState<string>("details");
-  const { uploadFile, status: uploadStatus } = useFileUpload();
+  const { uploadVideo, uploadThumbnail, status: uploadStatus } = useFirebaseUpload();
 
   useEffect(() => {
     if (video?.id) {
@@ -29,7 +29,7 @@ export const useVideoFormData = (video?: VideoProps) => {
 
           if (data && !error) {
             setDescription(data.description || '');
-            // Check if it's an external URL (doesn't start with a Supabase storage URL)
+            // Vérifier si c'est une URL externe (Firebase ou autres)
             if (data.video_url && !data.video_url.includes('storage.googleapis.com')) {
               setExternalVideoUrl(data.video_url);
             }
@@ -96,12 +96,14 @@ export const useVideoFormData = (video?: VideoProps) => {
       let thumbnailUrl = thumbnailPreview;
       let videoUrl = video?.videoUrl;
       
+      // Upload du thumbnail avec Firebase si un fichier est fourni
       if (thumbnailFile) {
-        thumbnailUrl = await uploadFile(thumbnailFile, 'videos', 'thumbnails/');
+        thumbnailUrl = await uploadThumbnail(thumbnailFile);
       }
       
+      // Upload de la vidéo avec Firebase si un fichier est fourni
       if (videoFile) {
-        videoUrl = await uploadFile(videoFile, 'videos', 'content/');
+        videoUrl = await uploadVideo(videoFile);
       } else if (externalVideoUrl) {
         videoUrl = externalVideoUrl;
       }

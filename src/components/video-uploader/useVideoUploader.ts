@@ -5,8 +5,8 @@ interface UseVideoUploaderProps {
   onVideoChange: (file: File | null) => void;
   onDurationExtracted: (duration: string) => void;
   onExternalUrlChange?: (url: string) => void;
-  screenRecVideoId?: string; // ID de la vidéo ScreenRec
-  screenRecPosterUrl?: string; // URL de prévisualisation (GIF)
+  screenRecVideoId?: string;
+  screenRecPosterUrl?: string;
 }
 
 export const useVideoUploader = ({ 
@@ -23,16 +23,23 @@ export const useVideoUploader = ({
   const [activeTab, setActiveTab] = useState<string>("upload");
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Gestion des fichiers vidéo locaux
+  // Gestion des fichiers vidéo locaux avec Firebase
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       
-      // Limite de taille de fichier à 1GB
-      const maxSizeInBytes = 1000 * 1024 * 1024; 
+      // Limite de taille de fichier à 10GB (Firebase Storage limite)
+      const maxSizeInBytes = 10 * 1024 * 1024 * 1024; 
       
       if (file.size > maxSizeInBytes) {
-        alert("Le fichier est trop volumineux. La taille maximum est de 1GB.");
+        alert("Le fichier est trop volumineux. La taille maximum est de 10GB.");
+        return;
+      }
+
+      // Vérifier le type de fichier
+      const supportedTypes = ['video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime'];
+      if (!supportedTypes.includes(file.type)) {
+        alert("Format de fichier non supporté. Utilisez MP4, WEBM, MOV ou AVI.");
         return;
       }
       
@@ -49,21 +56,19 @@ export const useVideoUploader = ({
   const handleExternalUrlSubmit = () => {
     if (externalUrl && onExternalUrlChange) {
       onExternalUrlChange(externalUrl);
-      setPreviewVideoUrl(externalUrl); // Prévisualisation
+      setPreviewVideoUrl(externalUrl);
       setVideoFileName('Vidéo externe');
     }
   };
 
-  // Gestion des vidéos ScreenRec
   const handleScreenRecVideoSubmit = () => {
     if (screenRecVideoId && screenRecPosterUrl) {
       const videoUrl = `https://upww.screenrec.com/videos/f_${screenRecVideoId}.mp4/index.m3u8`;
       
-      setPreviewVideoUrl(videoUrl); // URL de prévisualisation
+      setPreviewVideoUrl(videoUrl);
       setVideoFileName('Vidéo ScreenRec');
-      setPreviewImage(screenRecPosterUrl); // Prévisualisation GIF
+      setPreviewImage(screenRecPosterUrl);
 
-      // Appeler le callback si défini
       if (onExternalUrlChange) onExternalUrlChange(videoUrl);
     }
   };
@@ -77,7 +82,6 @@ export const useVideoUploader = ({
     setPreviewImage('');
   };
 
-  // Extraire la durée de la vidéo
   useEffect(() => {
     if (videoRef.current && previewVideoUrl) {
       const handleMetadataLoaded = () => {
@@ -100,7 +104,6 @@ export const useVideoUploader = ({
     }
   }, [previewVideoUrl, onDurationExtracted]);
 
-  // Mise à jour de la prévisualisation du GIF
   useEffect(() => {
     if (screenRecPosterUrl) {
       setPreviewImage(screenRecPosterUrl);
