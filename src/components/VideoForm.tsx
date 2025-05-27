@@ -8,8 +8,16 @@ import FormButtons from './video-form/FormButtons';
 import UploadProgress from './video-form/UploadProgress';
 import VideoUploader from './VideoUploader';
 import ScreenRecUploader from './video-uploader/ScreenRecUploader';
+import { VideoProps } from '@/components/video/VideoCard';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
-const VideoForm: React.FC = () => {
+interface VideoFormProps {
+  onVideoAdded?: (video: Partial<VideoProps>) => void;
+  onClose?: () => void;
+}
+
+const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
   const {
     title,
     setTitle,
@@ -34,8 +42,61 @@ const VideoForm: React.FC = () => {
     }
   };
 
+  const handleFormSubmit = async (videoData: Partial<VideoProps>) => {
+    try {
+      // Ajouter la description et sauvegarder en base
+      const videoToSave = {
+        ...videoData,
+        description: description,
+      };
+
+      const { data, error } = await supabase
+        .from('videos')
+        .insert({
+          title: videoToSave.title,
+          description: videoToSave.description || '',
+          thumbnail_url: videoToSave.thumbnail,
+          video_url: videoToSave.videoUrl,
+          duration: videoToSave.duration,
+          category: videoToSave.category,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Notifier le parent
+      if (onVideoAdded) {
+        onVideoAdded({
+          ...videoToSave,
+          id: data.id,
+          date: new Date().toLocaleDateString('fr-FR'),
+          likes: 0,
+          comments: 0,
+        });
+      }
+
+      toast({
+        title: "Succès",
+        description: "La vidéo a été ajoutée avec succès",
+      });
+
+      // Fermer le dialog
+      if (onClose) {
+        onClose();
+      }
+    } catch (error: any) {
+      console.error('Error saving video:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'ajout de la vidéo",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <form onSubmit={(e) => handleSubmit(e, () => {})} className="space-y-4">
+    <form onSubmit={(e) => handleSubmit(e, handleFormSubmit)} className="space-y-4">
       <BasicVideoDetails
         title={title}
         description={description}
