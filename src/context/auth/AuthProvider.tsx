@@ -1,3 +1,4 @@
+
 import React, { ReactNode, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { AuthState, AuthContextType, UserProfile } from './types';
@@ -24,9 +25,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   children,
   AuthContext
 }) => {
-  const [authState, setAuthState] = useState<AuthState>(initialState);
+  const [authState, setAuthState] = React.useState<AuthState>(initialState);
 
-  useEffect(() => {
+  React.useEffect(() => {
     let mounted = true;
     
     console.log("Setting up auth state listeners");
