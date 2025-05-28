@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoForm from '@/components/VideoForm';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface VideoManagementProps {
   videos: VideoProps[];
@@ -22,15 +24,66 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
 }) => {
   const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
 
-  const handleVideoAdded = (video: Partial<VideoProps>) => {
-    console.log("🎬 VideoManagement received new video:", video);
-    console.log("📊 Current videos count before adding:", videos.length);
+  const handleVideoAdded = async (videoData: Partial<VideoProps>) => {
+    console.log("🎯 VideoManagement - Received video data:", videoData);
+    console.log("📊 VideoManagement - Current videos count before adding:", videos.length);
     
-    // Appeler la fonction parent
-    onVideoAdded(video);
-    
-    console.log("✅ Video added successfully, closing dialog");
-    setIsAddVideoDialogOpen(false);
+    try {
+      // Sauvegarder en base de données
+      console.log("💾 VideoManagement - Saving to database...");
+      
+      const { data, error } = await supabase
+        .from('videos')
+        .insert({
+          title: videoData.title,
+          description: videoData.description || '',
+          thumbnail_url: videoData.thumbnail,
+          video_url: videoData.videoUrl,
+          duration: videoData.duration,
+          category: videoData.category,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("❌ VideoManagement - Database error:", error);
+        throw error;
+      }
+
+      console.log("✅ VideoManagement - Successfully saved to database:", data);
+
+      // Créer l'objet vidéo complet avec l'ID de la base
+      const completedVideo = {
+        ...videoData,
+        id: data.id,
+        date: new Date(data.created_at).toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }),
+      };
+
+      console.log("📤 VideoManagement - Calling parent onVideoAdded with:", completedVideo);
+      
+      // Appeler la fonction parent pour mettre à jour l'état
+      onVideoAdded(completedVideo);
+      
+      console.log("✅ VideoManagement - Video added successfully, closing dialog");
+      
+      toast({
+        title: "Succès",
+        description: "La vidéo a été ajoutée avec succès",
+      });
+      
+      setIsAddVideoDialogOpen(false);
+    } catch (error: any) {
+      console.error('❌ VideoManagement - Error adding video:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'ajout de la vidéo",
+        variant: "destructive",
+      });
+    }
   };
 
   console.log("📋 VideoManagement render - Total videos:", videos.length);
@@ -41,7 +94,7 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
         <h2 className="text-2xl font-bold">Gestion des Vidéos</h2>
         <Button 
           onClick={() => {
-            console.log("➕ Opening add video dialog");
+            console.log("➕ VideoManagement - Opening add video dialog");
             setIsAddVideoDialogOpen(true);
           }}
           className="flex items-center gap-2"
@@ -66,7 +119,7 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
           <VideoForm 
             onVideoAdded={handleVideoAdded} 
             onClose={() => {
-              console.log("🚪 Closing video form dialog");
+              console.log("🚪 VideoManagement - Closing video form dialog");
               setIsAddVideoDialogOpen(false);
             }} 
           />

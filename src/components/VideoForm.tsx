@@ -9,8 +9,6 @@ import UploadProgress from './video-form/UploadProgress';
 import VideoUploader from './VideoUploader';
 import ScreenRecUploader from './video-uploader/ScreenRecUploader';
 import { VideoProps } from '@/components/video/VideoCard';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 interface VideoFormProps {
   onVideoAdded?: (video: Partial<VideoProps>) => void;
@@ -36,85 +34,58 @@ const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
 
   // Gestionnaire pour les vidéos ScreenRec
   const handleScreenRecVideoSubmit = (videoData: { videoUrl: string; thumbnailUrl: string; videoId: string }) => {
-    console.log("ScreenRec video data received:", videoData);
+    console.log("📱 ScreenRec video data received:", videoData);
     // Mise à jour de l'URL externe
     if (handleExternalUrlChange) {
       handleExternalUrlChange(videoData.videoUrl);
     }
+    // Mise à jour du thumbnail
+    if (handleThumbnailChange) {
+      handleThumbnailChange(null, videoData.thumbnailUrl);
+    }
   };
 
   const handleFormSubmit = async (videoData: Partial<VideoProps>) => {
-    console.log("🎬 Starting video submission process:", {
+    console.log("🎬 VideoForm - Starting submission with data:", {
       title: videoData.title,
       videoUrl: videoData.videoUrl,
       thumbnail: videoData.thumbnail,
       duration: videoData.duration,
-      category: videoData.category
+      category: videoData.category,
+      description: description
     });
 
     try {
-      // Ajouter la description et sauvegarder en base
-      const videoToSave = {
+      // Préparer les données complètes pour le parent
+      const completeVideoData = {
         ...videoData,
         description: description,
-      };
-
-      console.log("📝 Preparing video data for database:", videoToSave);
-
-      const { data, error } = await supabase
-        .from('videos')
-        .insert({
-          title: videoToSave.title,
-          description: videoToSave.description || '',
-          thumbnail_url: videoToSave.thumbnail,
-          video_url: videoToSave.videoUrl,
-          duration: videoToSave.duration,
-          category: videoToSave.category,
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error("❌ Database error:", error);
-        throw error;
-      }
-
-      console.log("✅ Video successfully saved to database:", data);
-
-      // Créer l'objet vidéo complet pour l'UI
-      const completedVideo = {
-        ...videoToSave,
-        id: data.id,
-        date: new Date().toLocaleDateString('fr-FR'),
+        // Générer un ID temporaire si pas fourni
+        id: videoData.id || `temp-${Date.now()}`,
+        date: new Date().toLocaleDateString('fr-FR', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }),
         likes: 0,
         comments: 0,
       };
 
-      console.log("📤 Notifying parent component with video:", completedVideo);
+      console.log("📤 VideoForm - Sending complete data to parent:", completeVideoData);
 
-      // Notifier le parent
+      // Notifier le parent avec les données complètes
       if (onVideoAdded) {
-        onVideoAdded(completedVideo);
+        onVideoAdded(completeVideoData);
       }
 
-      toast({
-        title: "Succès",
-        description: "La vidéo a été ajoutée avec succès",
-      });
-
-      console.log("🎉 Video addition process completed successfully");
+      console.log("✅ VideoForm - Successfully notified parent");
 
       // Fermer le dialog
       if (onClose) {
         onClose();
       }
     } catch (error: any) {
-      console.error('❌ Error saving video:', error);
-      toast({
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de l'ajout de la vidéo",
-        variant: "destructive",
-      });
+      console.error('❌ VideoForm - Error in form submission:', error);
     }
   };
 

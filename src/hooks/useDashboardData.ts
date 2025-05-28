@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { VideoProps } from '@/components/video/VideoCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,7 +25,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
   // Fetch videos and stats from Supabase
   useEffect(() => {
     const fetchData = async () => {
-      console.log("📊 Fetching dashboard data...");
+      console.log("📊 useDashboardData - Fetching dashboard data...");
       
       try {
         setIsLoading(true);
@@ -37,7 +38,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
           
         if (videoError) throw videoError;
         
-        console.log("🎬 Raw video data from database:", videoData);
+        console.log("🎬 useDashboardData - Raw video data from database:", videoData);
         
         // Transform to VideoProps format
         const transformedVideos: VideoProps[] = (videoData as DBVideo[]).map(video => ({
@@ -56,7 +57,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
           videoUrl: video.video_url
         }));
         
-        console.log("✅ Transformed videos for UI:", transformedVideos);
+        console.log("✅ useDashboardData - Transformed videos for UI:", transformedVideos);
         setVideos(transformedVideos);
         
         // Fetch user count
@@ -77,7 +78,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
         
         setViewCount(viewCount || 0);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('❌ useDashboardData - Error fetching dashboard data:', error);
         toast({
           title: "Erreur",
           description: "Impossible de charger les données du tableau de bord",
@@ -95,19 +96,20 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
 
   // Video management handlers
   const handleVideoAdded = (newVideo: Partial<VideoProps>) => {
-    console.log("🆕 Adding new video to dashboard state:", newVideo);
-    console.log("📊 Current videos count:", videos.length);
+    console.log("🆕 useDashboardData - Adding new video to state:", newVideo);
+    console.log("📊 useDashboardData - Current videos count:", videos.length);
     
     const videoToAdd = newVideo as VideoProps;
     setVideos(prevVideos => {
       const updatedVideos = [videoToAdd, ...prevVideos];
-      console.log("✅ Updated videos list, new count:", updatedVideos.length);
+      console.log("✅ useDashboardData - Updated videos list, new count:", updatedVideos.length);
+      console.log("📋 useDashboardData - Full updated videos list:", updatedVideos);
       return updatedVideos;
     });
   };
 
   const handleVideoUpdated = (updatedVideo: Partial<VideoProps>) => {
-    console.log("📝 Updating video in dashboard state:", updatedVideo);
+    console.log("📝 useDashboardData - Updating video in state:", updatedVideo);
     
     setVideos(prevVideos => 
       prevVideos.map(video => 
@@ -117,11 +119,11 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
   };
 
   const handleVideoDeleted = (videoId: string) => {
-    console.log("🗑️ Deleting video from dashboard state:", videoId);
+    console.log("🗑️ useDashboardData - Deleting video from state:", videoId);
     
     setVideos(prevVideos => {
       const filteredVideos = prevVideos.filter(video => video.id !== videoId);
-      console.log("✅ Video deleted, new count:", filteredVideos.length);
+      console.log("✅ useDashboardData - Video deleted, new count:", filteredVideos.length);
       return filteredVideos;
     });
   };
