@@ -22,12 +22,28 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
 }) => {
   const [isAddVideoDialogOpen, setIsAddVideoDialogOpen] = useState(false);
 
+  const handleVideoAdded = (video: Partial<VideoProps>) => {
+    console.log("🎬 VideoManagement received new video:", video);
+    console.log("📊 Current videos count before adding:", videos.length);
+    
+    // Appeler la fonction parent
+    onVideoAdded(video);
+    
+    console.log("✅ Video added successfully, closing dialog");
+    setIsAddVideoDialogOpen(false);
+  };
+
+  console.log("📋 VideoManagement render - Total videos:", videos.length);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gestion des Vidéos</h2>
         <Button 
-          onClick={() => setIsAddVideoDialogOpen(true)}
+          onClick={() => {
+            console.log("➕ Opening add video dialog");
+            setIsAddVideoDialogOpen(true);
+          }}
           className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
@@ -47,7 +63,13 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
           <DialogHeader>
             <DialogTitle>Ajouter une nouvelle vidéo</DialogTitle>
           </DialogHeader>
-          <VideoForm onVideoAdded={onVideoAdded} onClose={() => setIsAddVideoDialogOpen(false)} />
+          <VideoForm 
+            onVideoAdded={handleVideoAdded} 
+            onClose={() => {
+              console.log("🚪 Closing video form dialog");
+              setIsAddVideoDialogOpen(false);
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

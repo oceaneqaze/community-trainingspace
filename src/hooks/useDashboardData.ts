@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { VideoProps } from '@/components/video/VideoCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,15 +24,20 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
   // Fetch videos and stats from Supabase
   useEffect(() => {
     const fetchData = async () => {
+      console.log("📊 Fetching dashboard data...");
+      
       try {
         setIsLoading(true);
         
         // Fetch videos
         const { data: videoData, error: videoError } = await supabase
           .from('videos')
-          .select('*');
+          .select('*')
+          .order('created_at', { ascending: false });
           
         if (videoError) throw videoError;
+        
+        console.log("🎬 Raw video data from database:", videoData);
         
         // Transform to VideoProps format
         const transformedVideos: VideoProps[] = (videoData as DBVideo[]).map(video => ({
@@ -52,6 +56,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
           videoUrl: video.video_url
         }));
         
+        console.log("✅ Transformed videos for UI:", transformedVideos);
         setVideos(transformedVideos);
         
         // Fetch user count
@@ -90,10 +95,20 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
 
   // Video management handlers
   const handleVideoAdded = (newVideo: Partial<VideoProps>) => {
-    setVideos(prevVideos => [...prevVideos, newVideo as VideoProps]);
+    console.log("🆕 Adding new video to dashboard state:", newVideo);
+    console.log("📊 Current videos count:", videos.length);
+    
+    const videoToAdd = newVideo as VideoProps;
+    setVideos(prevVideos => {
+      const updatedVideos = [videoToAdd, ...prevVideos];
+      console.log("✅ Updated videos list, new count:", updatedVideos.length);
+      return updatedVideos;
+    });
   };
 
   const handleVideoUpdated = (updatedVideo: Partial<VideoProps>) => {
+    console.log("📝 Updating video in dashboard state:", updatedVideo);
+    
     setVideos(prevVideos => 
       prevVideos.map(video => 
         video.id === updatedVideo.id ? { ...video, ...updatedVideo } : video
@@ -102,7 +117,13 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
   };
 
   const handleVideoDeleted = (videoId: string) => {
-    setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
+    console.log("🗑️ Deleting video from dashboard state:", videoId);
+    
+    setVideos(prevVideos => {
+      const filteredVideos = prevVideos.filter(video => video.id !== videoId);
+      console.log("✅ Video deleted, new count:", filteredVideos.length);
+      return filteredVideos;
+    });
   };
 
   return {

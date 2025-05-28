@@ -36,6 +36,7 @@ const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
 
   // Gestionnaire pour les vidéos ScreenRec
   const handleScreenRecVideoSubmit = (videoData: { videoUrl: string; thumbnailUrl: string; videoId: string }) => {
+    console.log("ScreenRec video data received:", videoData);
     // Mise à jour de l'URL externe
     if (handleExternalUrlChange) {
       handleExternalUrlChange(videoData.videoUrl);
@@ -43,12 +44,22 @@ const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
   };
 
   const handleFormSubmit = async (videoData: Partial<VideoProps>) => {
+    console.log("🎬 Starting video submission process:", {
+      title: videoData.title,
+      videoUrl: videoData.videoUrl,
+      thumbnail: videoData.thumbnail,
+      duration: videoData.duration,
+      category: videoData.category
+    });
+
     try {
       // Ajouter la description et sauvegarder en base
       const videoToSave = {
         ...videoData,
         description: description,
       };
+
+      console.log("📝 Preparing video data for database:", videoToSave);
 
       const { data, error } = await supabase
         .from('videos')
@@ -63,17 +74,27 @@ const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("❌ Database error:", error);
+        throw error;
+      }
+
+      console.log("✅ Video successfully saved to database:", data);
+
+      // Créer l'objet vidéo complet pour l'UI
+      const completedVideo = {
+        ...videoToSave,
+        id: data.id,
+        date: new Date().toLocaleDateString('fr-FR'),
+        likes: 0,
+        comments: 0,
+      };
+
+      console.log("📤 Notifying parent component with video:", completedVideo);
 
       // Notifier le parent
       if (onVideoAdded) {
-        onVideoAdded({
-          ...videoToSave,
-          id: data.id,
-          date: new Date().toLocaleDateString('fr-FR'),
-          likes: 0,
-          comments: 0,
-        });
+        onVideoAdded(completedVideo);
       }
 
       toast({
@@ -81,12 +102,14 @@ const VideoForm: React.FC<VideoFormProps> = ({ onVideoAdded, onClose }) => {
         description: "La vidéo a été ajoutée avec succès",
       });
 
+      console.log("🎉 Video addition process completed successfully");
+
       // Fermer le dialog
       if (onClose) {
         onClose();
       }
     } catch (error: any) {
-      console.error('Error saving video:', error);
+      console.error('❌ Error saving video:', error);
       toast({
         title: "Erreur",
         description: error.message || "Une erreur est survenue lors de l'ajout de la vidéo",
