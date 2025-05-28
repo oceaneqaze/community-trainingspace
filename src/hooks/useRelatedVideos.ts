@@ -55,6 +55,10 @@ export const useRelatedVideos = (videoId: string | undefined, category: string |
             year: 'numeric'
           }),
           videoUrl: video.video_url,
+          likes: 0,
+          comments: 0,
+          progress: 0,
+          completed: false,
         }));
         
         setRelatedVideos(formattedVideos);

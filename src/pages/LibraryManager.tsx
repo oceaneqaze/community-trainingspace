@@ -64,7 +64,10 @@ const LibraryManager: React.FC = () => {
           year: 'numeric'
         }),
         likes: 0,
-        comments: 0
+        comments: 0,
+        videoUrl: video.video_url,
+        progress: 0,
+        completed: false,
       }));
 
       setVideos(transformedVideos);

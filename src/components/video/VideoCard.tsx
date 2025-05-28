@@ -15,27 +15,38 @@ export interface VideoProps {
   likes: number;
   comments: number;
   videoUrl: string;
-  description?: string; // Add description as optional property
+  description?: string;
+  progress?: number;
+  completed?: boolean;
 }
 
-interface VideoCardProps extends VideoProps {
+interface VideoCardProps {
+  video: VideoProps;
   onClick?: () => void;
   className?: string;
   showStats?: boolean;
+  showProgress?: boolean;
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({
-  title,
-  thumbnail,
-  duration,
-  category,
-  date,
-  likes,
-  comments,
+  video,
   onClick,
   className,
-  showStats = true
+  showStats = true,
+  showProgress = false
 }) => {
+  const {
+    title,
+    thumbnail,
+    duration,
+    category,
+    date,
+    likes,
+    comments,
+    progress,
+    completed
+  } = video;
+
   return (
     <Card 
       className={cn(
@@ -67,6 +78,19 @@ const VideoCard: React.FC<VideoCardProps> = ({
             <Play className="h-8 w-8 text-white" />
           </div>
         </div>
+
+        {/* Progress bar */}
+        {showProgress && typeof progress === 'number' && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20">
+            <div 
+              className={cn(
+                "h-full transition-all duration-300",
+                completed ? "bg-green-500" : "bg-primary"
+              )}
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
       </div>
       
       <CardContent className="p-4">
@@ -87,6 +111,11 @@ const VideoCard: React.FC<VideoCardProps> = ({
                 {comments}
               </span>
             </div>
+            {showProgress && typeof progress === 'number' && (
+              <span className="text-xs">
+                {completed ? "Terminée" : `${progress}%`}
+              </span>
+            )}
           </div>
         )}
       </CardContent>
