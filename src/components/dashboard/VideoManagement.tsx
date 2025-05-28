@@ -36,7 +36,7 @@ const VideoManagement: React.FC<VideoManagementProps> = ({
         .from('videos')
         .insert({
           title: videoData.title,
-          description: videoData.description || '',
+          description: videoData.description || '', // Use description from videoData
           thumbnail_url: videoData.thumbnail,
           video_url: videoData.videoUrl,
           duration: videoData.duration,

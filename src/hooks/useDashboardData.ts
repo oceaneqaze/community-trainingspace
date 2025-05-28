@@ -44,6 +44,7 @@ export const useDashboardData = (isAuthenticated: boolean, isAdmin: boolean) => 
         const transformedVideos: VideoProps[] = (videoData as DBVideo[]).map(video => ({
           id: video.id,
           title: video.title,
+          description: video.description || '', // Include description
           thumbnail: video.thumbnail_url || '/placeholder.svg',
           duration: video.duration || '00:00',
           category: video.category || 'Sans catégorie',
