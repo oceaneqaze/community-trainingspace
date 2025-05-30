@@ -19,7 +19,7 @@ interface Video {
   duration: string | null;
   category: string | null;
   created_at: string;
-  uploaded_by: string;
+  updated_at: string | null;
   uploader_name?: string;
 }
 
