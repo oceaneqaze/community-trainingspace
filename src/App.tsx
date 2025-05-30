@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -69,7 +70,6 @@ function App() {
                 <Route path="payment/success" element={<PaymentSuccess />} />
                 <Route path="payment/failure" element={<PaymentFailure />} />
                 <Route path="404" element={<NotFound />} />
-                {/* Redirection explicite de /login vers /signin */}
                 <Route path="login" element={<Navigate to="/signin" replace />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
