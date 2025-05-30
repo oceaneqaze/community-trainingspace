@@ -114,8 +114,7 @@ const CloudinaryVideoUploader: React.FC<CloudinaryVideoUploaderProps> = ({ onVid
             video_url: videoUrl,
             thumbnail_url: thumbnailUrl,
             duration: duration,
-            category: category.trim() || null,
-            uploaded_by: user.id
+            category: category.trim() || null
           }
         ])
         .select()
