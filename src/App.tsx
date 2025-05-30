@@ -1,20 +1,20 @@
-
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/context/AuthContext';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '@/context/AuthContext';
 
 // Layouts
 import Layout from '@/components/Layout';
 
 // Pages
-import Index from '@/pages/Index';
-import Signin from '@/pages/Signin';
-import Signup from '@/pages/Signup';
+import Index from './pages/Index';
+import Videos from './pages/Videos';
+import VideoDetail from './pages/VideoDetail';
+import VideoPublisher from './pages/VideoPublisher';
 import Dashboard from '@/pages/Dashboard';
-import Videos from '@/pages/Videos';
-import VideoDetail from '@/pages/VideoDetail';
 import LibraryManager from '@/pages/LibraryManager';
 import ScreenRecPreview from '@/pages/ScreenRecPreview';
 import Members from '@/pages/Members';
@@ -39,42 +39,44 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Index />} />
-              <Route path="signin" element={<Signin />} />
-              <Route path="signup" element={<Signup />} />
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="videos" element={<Videos />} />
-              <Route path="videos/:id" element={<VideoDetail />} />
-              <Route path="library" element={<LibraryManager />} />
-              <Route path="preview" element={<ScreenRecPreview />} />
-              <Route path="members" element={<Members />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="invitation/:code" element={<Invitation />} />
-              <Route path="invitation" element={<Invitation />} />
-              <Route path="invitations" element={<InvitationManager />} />
-              <Route path="chat" element={<Chat />} />
-              <Route path="announcements" element={<Announcements />} />
-              <Route path="history" element={<WatchHistory />} />
-              <Route path="ebooks" element={<Ebooks />} />
-              <Route path="blog/manage" element={<BlogManager />} />
-              <Route path="blog" element={<Blog />} />
-              <Route path="blog/:slug" element={<BlogPost />} />
-              <Route path="payment" element={<Payment />} />
-              <Route path="payment/success" element={<PaymentSuccess />} />
-              <Route path="payment/failure" element={<PaymentFailure />} />
-              <Route path="404" element={<NotFound />} />
-              {/* Redirection explicite de /login vers /signin */}
-              <Route path="login" element={<Navigate to="/signin" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
+      <AuthProvider>
+        <TooltipProvider>
           <Toaster />
-        </AuthProvider>
-      </BrowserRouter>
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Index />} />
+                <Route path="videos" element={<Videos />} />
+                <Route path="videos/:id" element={<VideoDetail />} />
+                <Route path="video-publisher" element={<VideoPublisher />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="library" element={<LibraryManager />} />
+                <Route path="preview" element={<ScreenRecPreview />} />
+                <Route path="members" element={<Members />} />
+                <Route path="profile" element={<Profile />} />
+                <Route path="invitation/:code" element={<Invitation />} />
+                <Route path="invitation" element={<Invitation />} />
+                <Route path="invitations" element={<InvitationManager />} />
+                <Route path="chat" element={<Chat />} />
+                <Route path="announcements" element={<Announcements />} />
+                <Route path="history" element={<WatchHistory />} />
+                <Route path="ebooks" element={<Ebooks />} />
+                <Route path="blog/manage" element={<BlogManager />} />
+                <Route path="blog" element={<Blog />} />
+                <Route path="blog/:slug" element={<BlogPost />} />
+                <Route path="payment" element={<Payment />} />
+                <Route path="payment/success" element={<PaymentSuccess />} />
+                <Route path="payment/failure" element={<PaymentFailure />} />
+                <Route path="404" element={<NotFound />} />
+                {/* Redirection explicite de /login vers /signin */}
+                <Route path="login" element={<Navigate to="/signin" replace />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
