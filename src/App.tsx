@@ -33,6 +33,8 @@ import BlogPost from '@/pages/BlogPost';
 import Payment from '@/pages/Payment';
 import PaymentSuccess from '@/pages/PaymentSuccess';
 import PaymentFailure from '@/pages/PaymentFailure';
+import Signin from '@/pages/Signin';
+import Signup from '@/pages/Signup';
 
 // Create a client
 const queryClient = new QueryClient();
@@ -69,6 +71,8 @@ function App() {
                 <Route path="payment" element={<Payment />} />
                 <Route path="payment/success" element={<PaymentSuccess />} />
                 <Route path="payment/failure" element={<PaymentFailure />} />
+                <Route path="signin" element={<Signin />} />
+                <Route path="signup" element={<Signup />} />
                 <Route path="404" element={<NotFound />} />
                 <Route path="login" element={<Navigate to="/signin" replace />} />
                 <Route path="*" element={<NotFound />} />
