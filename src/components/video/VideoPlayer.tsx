@@ -1,36 +1,49 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, forwardRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Eye } from 'lucide-react';
+import { Calendar, User } from 'lucide-react';
 
 interface VideoPlayerProps {
   videoUrl: string;
-  title: string;
+  title?: string;
   description?: string;
   category?: string;
-  createdAt: string;
+  createdAt?: string;
   uploaderName?: string;
   className?: string;
+  poster?: string;
+  onTimeUpdate?: (e: React.SyntheticEvent<HTMLVideoElement>) => void;
+  onEnded?: () => void;
+  initialTime?: number;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({
+const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({
   videoUrl,
   title,
   description,
   category,
   createdAt,
   uploaderName,
-  className
-}) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  className,
+  poster,
+  onTimeUpdate,
+  onEnded,
+  initialTime
+}, ref) => {
+  const internalVideoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = ref || internalVideoRef;
 
   useEffect(() => {
-    // Auto-play peut être géré ici si nécessaire
-    if (videoRef.current) {
+    if (videoRef && 'current' in videoRef && videoRef.current) {
       videoRef.current.load();
+      
+      // Set initial time if provided
+      if (initialTime && initialTime > 0) {
+        videoRef.current.currentTime = initialTime;
+      }
     }
-  }, [videoUrl]);
+  }, [videoUrl, initialTime]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -39,6 +52,28 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       year: 'numeric'
     });
   };
+
+  // If no title is provided, render just the video player
+  if (!title) {
+    return (
+      <video
+        ref={videoRef}
+        width="100%"
+        height="auto"
+        controls
+        preload="metadata"
+        className={`w-full aspect-video bg-black ${className || ''}`}
+        poster={poster || videoUrl.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
+        onTimeUpdate={onTimeUpdate}
+        onEnded={onEnded}
+      >
+        <source src={videoUrl} type="video/mp4" />
+        <source src={videoUrl} type="video/webm" />
+        <source src={videoUrl} type="video/mov" />
+        Votre navigateur ne supporte pas la lecture vidéo.
+      </video>
+    );
+  }
 
   return (
     <Card className={`overflow-hidden ${className}`}>
@@ -50,7 +85,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           controls
           preload="metadata"
           className="w-full aspect-video bg-black"
-          poster={videoUrl.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
+          poster={poster || videoUrl.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
+          onTimeUpdate={onTimeUpdate}
+          onEnded={onEnded}
         >
           <source src={videoUrl} type="video/mp4" />
           <source src={videoUrl} type="video/webm" />
@@ -69,10 +106,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <h2 className="text-xl font-bold mb-2">{title}</h2>
         
         <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-4 w-4" />
-            {formatDate(createdAt)}
-          </span>
+          {createdAt && (
+            <span className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              {formatDate(createdAt)}
+            </span>
+          )}
           {uploaderName && (
             <span className="flex items-center gap-1">
               <User className="h-4 w-4" />
@@ -89,6 +128,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       </div>
     </Card>
   );
-};
+});
+
+VideoPlayer.displayName = 'VideoPlayer';
 
 export default VideoPlayer;

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Play, Calendar, User } from 'lucide-react';
@@ -34,26 +34,39 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
     try {
       setIsLoading(true);
       
-      // Récupérer les vidéos avec les informations des utilisateurs
+      // Récupérer les vidéos directement sans jointure
       const { data, error } = await supabase
         .from('videos')
-        .select(`
-          *,
-          profiles:uploaded_by (
-            name
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      // Transformer les données pour inclure le nom de l'uploader
-      const videosWithUploader = (data || []).map(video => ({
-        ...video,
-        uploader_name: video.profiles?.name || 'Utilisateur inconnu'
-      }));
+      // Pour chaque vidéo, récupérer le nom de l'uploader séparément
+      const videosWithUploader = await Promise.all(
+        (data || []).map(async (video) => {
+          let uploaderName = 'Utilisateur inconnu';
+          
+          if (video.uploaded_by) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', video.uploaded_by)
+              .single();
+            
+            if (profile?.name) {
+              uploaderName = profile.name;
+            }
+          }
+          
+          return {
+            ...video,
+            uploader_name: uploaderName
+          };
+        })
+      );
 
       setVideos(videosWithUploader);
     } catch (error: any) {
