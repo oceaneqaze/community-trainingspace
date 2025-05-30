@@ -16,7 +16,7 @@ interface Video {
   duration: string | null;
   category: string | null;
   created_at: string;
-  uploaded_by: string;
+  updated_at: string | null;
   uploader_name?: string;
 }
 
@@ -34,7 +34,7 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
     try {
       setIsLoading(true);
       
-      // Récupérer les vidéos directement sans jointure
+      // Fetch videos from the database
       const { data, error } = await supabase
         .from('videos')
         .select('*')
@@ -44,29 +44,11 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
         throw error;
       }
 
-      // Pour chaque vidéo, récupérer le nom de l'uploader séparément
-      const videosWithUploader = await Promise.all(
-        (data || []).map(async (video) => {
-          let uploaderName = 'Utilisateur inconnu';
-          
-          if (video.uploaded_by) {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('name')
-              .eq('id', video.uploaded_by)
-              .single();
-            
-            if (profile?.name) {
-              uploaderName = profile.name;
-            }
-          }
-          
-          return {
-            ...video,
-            uploader_name: uploaderName
-          };
-        })
-      );
+      // Add a default uploader name since we don't have uploaded_by in the schema
+      const videosWithUploader = (data || []).map(video => ({
+        ...video,
+        uploader_name: 'Utilisateur'
+      }));
 
       setVideos(videosWithUploader);
     } catch (error: any) {
