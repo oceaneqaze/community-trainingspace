@@ -1,5 +1,6 @@
 
 import React from 'react';
+import ModernCard from '@/components/ui/modern-card';
 
 const FAQ = () => {
   const faqs = [
@@ -26,17 +27,17 @@ const FAQ = () => {
   ];
 
   return (
-    <section className="py-16 bg-muted/50">
+    <section className="py-16">
       <div className="px-2 sm:container sm:px-4 md:px-6">
-        <h2 className="text-3xl font-bold tracking-tight text-center mb-8">
-          Questions fréquentes
+        <h2 className="text-3xl font-bold tracking-tight text-center mb-8 text-white">
+          Questions <span className="text-gradient-purple">fréquentes</span>
         </h2>
         <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
           {faqs.map((faq, index) => (
-            <div key={index} className="bg-card p-6 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">→ {faq.question}</h3>
-              <p className="text-muted-foreground">{faq.answer}</p>
-            </div>
+            <ModernCard key={index} variant="glass" className="p-6 hover-lift" glow="purple">
+              <h3 className="text-lg font-semibold mb-2 text-white">→ {faq.question}</h3>
+              <p className="text-gray-300">{faq.answer}</p>
+            </ModernCard>
           ))}
         </div>
       </div>

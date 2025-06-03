@@ -1,5 +1,6 @@
 
 import React from 'react';
+import ModernBackground from '@/components/ui/modern-background';
 import HeroSection from '@/components/landing/HeroSection';
 import CommunityPreview from '@/components/landing/CommunityPreview';
 import ProblemSection from '@/components/landing/ProblemSection';
@@ -11,7 +12,7 @@ import FinalCTA from '@/components/landing/FinalCTA';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
+    <ModernBackground variant="default">
       <HeroSection />
       <CommunityPreview />
       <ProblemSection />
@@ -20,7 +21,7 @@ const Index = () => {
       <HowItWorks />
       <FAQ />
       <FinalCTA />
-    </div>
+    </ModernBackground>
   );
 };
 
