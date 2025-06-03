@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import VideoPlayer from "@/components/video/VideoPlayer";
+import HLSVideoPlayer from "@/components/video/HLSVideoPlayer";
 import { toast } from "@/components/ui/use-toast";
 
 interface ScreenRecUploaderProps {
@@ -71,10 +71,12 @@ const ScreenRecUploader: React.FC<ScreenRecUploaderProps> = ({ onVideoSubmit }) 
       return;
     }
 
-    // Construction de l'URL de la vidéo au format m3u8
+    // Construction de l'URL de la vidéo au format m3u8 (HLS)
     const videoUrl = `https://upww.screenrec.com/videos/f_${videoId}.mp4/index.m3u8`;
     setPreviewVideoUrl(videoUrl);
     setPreviewVisible(true);
+    
+    console.log('ScreenRec video URL generated:', videoUrl);
   };
 
   // Soumettre la vidéo
@@ -162,7 +164,7 @@ const ScreenRecUploader: React.FC<ScreenRecUploaderProps> = ({ onVideoSubmit }) 
           <div className="mt-4">
             <Label>Aperçu de la vidéo</Label>
             <div className="mt-2 aspect-video rounded-md overflow-hidden">
-              <VideoPlayer videoUrl={previewVideoUrl} poster={posterUrl} />
+              <HLSVideoPlayer src={previewVideoUrl} poster={posterUrl} />
             </div>
           </div>
         )}

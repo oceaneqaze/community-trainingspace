@@ -1,5 +1,6 @@
 
 export { default as VideoPlayer } from './VideoPlayer';
+export { default as HLSVideoPlayer } from './HLSVideoPlayer';
 export { default as VideoInfo } from './VideoInfo';
 export { default as CommentSection } from './CommentSection';
 export { default as CommentItem } from './CommentItem';

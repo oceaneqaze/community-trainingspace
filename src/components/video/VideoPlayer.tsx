@@ -3,6 +3,7 @@ import React, { useRef, useEffect, forwardRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, User } from 'lucide-react';
+import HLSVideoPlayer from './HLSVideoPlayer';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -31,20 +32,6 @@ const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({
   onEnded,
   initialTime
 }, ref) => {
-  const internalVideoRef = useRef<HTMLVideoElement>(null);
-  const videoRef = ref || internalVideoRef;
-
-  useEffect(() => {
-    if (videoRef && 'current' in videoRef && videoRef.current) {
-      videoRef.current.load();
-      
-      // Set initial time if provided
-      if (initialTime && initialTime > 0) {
-        videoRef.current.currentTime = initialTime;
-      }
-    }
-  }, [videoUrl, initialTime]);
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -53,47 +40,36 @@ const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(({
     });
   };
 
-  // If no title is provided, render just the video player
+  // Détecter si c'est une vidéo HLS (.m3u8) ou ScreenRec
+  const isHLS = videoUrl.includes('.m3u8') || videoUrl.includes('screenrec.com');
+
+  // Si pas de titre, renvoyer seulement le lecteur vidéo
   if (!title) {
     return (
-      <video
-        ref={videoRef}
-        width="100%"
-        height="auto"
-        controls
-        preload="metadata"
-        className={`w-full aspect-video bg-black ${className || ''}`}
+      <HLSVideoPlayer
+        ref={ref}
+        src={videoUrl}
         poster={poster || videoUrl.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
+        className={`w-full aspect-video bg-black ${className || ''}`}
         onTimeUpdate={onTimeUpdate}
         onEnded={onEnded}
-      >
-        <source src={videoUrl} type="video/mp4" />
-        <source src={videoUrl} type="video/webm" />
-        <source src={videoUrl} type="video/mov" />
-        Votre navigateur ne supporte pas la lecture vidéo.
-      </video>
+        initialTime={initialTime}
+      />
     );
   }
 
   return (
     <Card className={`overflow-hidden ${className}`}>
       <div className="relative">
-        <video
-          ref={videoRef}
-          width="100%"
-          height="auto"
-          controls
-          preload="metadata"
-          className="w-full aspect-video bg-black"
+        <HLSVideoPlayer
+          ref={ref}
+          src={videoUrl}
           poster={poster || videoUrl.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
+          className="w-full aspect-video bg-black"
           onTimeUpdate={onTimeUpdate}
           onEnded={onEnded}
-        >
-          <source src={videoUrl} type="video/mp4" />
-          <source src={videoUrl} type="video/webm" />
-          <source src={videoUrl} type="video/mov" />
-          Votre navigateur ne supporte pas la lecture vidéo.
-        </video>
+          initialTime={initialTime}
+        />
         
         {category && (
           <Badge className="absolute top-2 left-2 bg-black/70 text-white">
