@@ -1,19 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FileUploadSection from "./video-uploader/FileUploadSection";
-import ExternalUrlSection from "./video-uploader/ExternalUrlSection";
+import MultiPlatformVideoUploader from "./video-uploader/MultiPlatformVideoUploader";
 import VideoPreview from "./video-uploader/VideoPreview";
-import { useVideoUploader } from "./video-uploader/useVideoUploader";
 
 interface VideoUploaderProps {
   disabled?: boolean;
   onVideoChange: (file: File | null) => void;
   onDurationExtracted: (duration: string) => void;
   onExternalUrlChange?: (url: string) => void;
-  screenRecVideoId?: string;
-  screenRecPosterUrl?: string;
+  onMetadataChange?: (metadata: { title?: string; thumbnail?: string; platform?: string }) => void;
 }
 
 const VideoUploader: React.FC<VideoUploaderProps> = ({ 
@@ -21,90 +17,97 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
   onVideoChange, 
   onDurationExtracted,
   onExternalUrlChange,
-  screenRecVideoId,
-  screenRecPosterUrl
+  onMetadataChange
 }) => {
-  const {
-    videoFileName,
-    previewVideoUrl,
-    externalUrl,
-    setExternalUrl,
-    activeTab,
-    setActiveTab,
-    videoRef,
-    handleVideoChange,
-    handleExternalUrlSubmit,
-    handleScreenRecVideoSubmit,
-    clearVideo
-  } = useVideoUploader({
-    onVideoChange,
-    onDurationExtracted,
-    onExternalUrlChange,
-    screenRecVideoId,
-    screenRecPosterUrl
-  });
+  const [selectedVideo, setSelectedVideo] = useState<{
+    name: string;
+    url?: string;
+    platform?: string;
+    thumbnail?: string;
+    isFile: boolean;
+  } | null>(null);
 
-  const isExternalUrl = !!externalUrl;
-
-  // Vérifier si des paramètres ScreenRec ont été fournis et les traiter
-  React.useEffect(() => {
-    if (screenRecVideoId && screenRecPosterUrl && !previewVideoUrl) {
-      handleScreenRecVideoSubmit();
+  const handleVideoData = (data: {
+    videoUrl: string;
+    thumbnailUrl?: string;
+    platform?: string;
+    title?: string;
+    duration?: string;
+  }) => {
+    console.log('📹 VideoUploader - Received video data:', data);
+    
+    // Notifier le parent de l'URL de la vidéo
+    if (onExternalUrlChange) {
+      onExternalUrlChange(data.videoUrl);
     }
-  }, [screenRecVideoId, screenRecPosterUrl]);
+    
+    // Notifier des métadonnées
+    if (onMetadataChange) {
+      onMetadataChange({
+        title: data.title,
+        thumbnail: data.thumbnailUrl,
+        platform: data.platform,
+      });
+    }
+    
+    // Si on a une durée, la transmettre
+    if (data.duration && onDurationExtracted) {
+      onDurationExtracted(data.duration);
+    }
+    
+    // Mettre à jour l'état local pour l'affichage
+    setSelectedVideo({
+      name: data.platform ? `Vidéo ${data.platform}` : 'Vidéo externe',
+      url: data.videoUrl,
+      platform: data.platform,
+      thumbnail: data.thumbnailUrl,
+      isFile: false,
+    });
+  };
+
+  const handleFileUpload = (file: File) => {
+    console.log('📁 VideoUploader - File uploaded:', file.name);
+    
+    // Notifier le parent du fichier
+    onVideoChange(file);
+    
+    // Mettre à jour l'état local pour l'affichage
+    setSelectedVideo({
+      name: file.name,
+      isFile: true,
+    });
+  };
+
+  const clearVideo = () => {
+    setSelectedVideo(null);
+    onVideoChange(null);
+    if (onExternalUrlChange) {
+      onExternalUrlChange('');
+    }
+  };
 
   return (
-    <div>
-      <Label htmlFor="video">Fichier vidéo</Label>
+    <div className="space-y-4">
+      <Label htmlFor="video" className="text-base font-medium">
+        Fichier vidéo
+      </Label>
       
-      {!videoFileName ? (
-        <div className="mt-1">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="upload" className="flex items-center gap-2">
-                <span>📁</span> Upload depuis PC
-              </TabsTrigger>
-              <TabsTrigger value="external" className="flex items-center gap-2">
-                <span>🔗</span> Lien externe
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="upload" className="space-y-2">
-              <FileUploadSection 
-                handleVideoChange={handleVideoChange}
-                disabled={disabled}
-              />
-              <p className="text-xs text-muted-foreground text-center">
-                💾 Stockage sécurisé avec Firebase Storage
-              </p>
-            </TabsContent>
-            
-            <TabsContent value="external" className="space-y-2">
-              <ExternalUrlSection
-                externalUrl={externalUrl}
-                setExternalUrl={setExternalUrl}
-                handleExternalUrlSubmit={handleExternalUrlSubmit}
-                disabled={disabled}
-              />
-              <p className="text-xs text-muted-foreground text-center">
-                🌐 Support des liens ScreenRec et autres plateformes
-              </p>
-            </TabsContent>
-          </Tabs>
-        </div>
+      {!selectedVideo ? (
+        <MultiPlatformVideoUploader
+          onVideoData={handleVideoData}
+          onFileUpload={handleFileUpload}
+          disabled={disabled}
+        />
       ) : (
         <VideoPreview
-          fileName={externalUrl || videoFileName}
-          isExternalUrl={isExternalUrl}
-          previewVideoUrl={previewVideoUrl}
+          fileName={selectedVideo.name}
+          isExternalUrl={!selectedVideo.isFile}
+          previewVideoUrl={selectedVideo.url}
+          thumbnailUrl={selectedVideo.thumbnail}
+          platform={selectedVideo.platform}
           onClear={clearVideo}
           disabled={disabled}
         />
-      )}
-      
-      {/* Hidden video element for metadata extraction if not visible */}
-      {previewVideoUrl && !videoRef.current && (
-        <video ref={videoRef} src={previewVideoUrl} className="hidden" />
       )}
     </div>
   );

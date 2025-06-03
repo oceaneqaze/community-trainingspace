@@ -14,6 +14,7 @@ export const useVideoFormData = (video?: VideoProps) => {
   const [externalVideoUrl, setExternalVideoUrl] = useState<string>('');
   const [thumbnailPreview, setThumbnailPreview] = useState<string>(video?.thumbnail || '');
   const [activeTab, setActiveTab] = useState<string>("details");
+  const [videoPlatform, setVideoPlatform] = useState<string>('');
   const { uploadVideo, uploadThumbnail, status: uploadStatus } = useFirebaseUpload();
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export const useVideoFormData = (video?: VideoProps) => {
     // Clear external URL if a file is selected
     if (file) {
       setExternalVideoUrl('');
+      setVideoPlatform('');
     }
   };
   
@@ -61,6 +63,25 @@ export const useVideoFormData = (video?: VideoProps) => {
     // Clear video file if an external URL is provided
     if (url) {
       setVideoFile(null);
+    }
+  };
+
+  const handleMetadataChange = (metadata: { title?: string; thumbnail?: string; platform?: string }) => {
+    console.log('📊 VideoFormData - Received metadata:', metadata);
+    
+    // Auto-compléter le titre si vide et si on a des métadonnées
+    if (metadata.title && !title.trim()) {
+      setTitle(metadata.title);
+    }
+    
+    // Utiliser le thumbnail de la plateforme si pas de thumbnail personnalisé
+    if (metadata.thumbnail && !thumbnailFile && !thumbnailPreview) {
+      setThumbnailPreview(metadata.thumbnail);
+    }
+    
+    // Stocker la plateforme
+    if (metadata.platform) {
+      setVideoPlatform(metadata.platform);
     }
   };
   
@@ -112,7 +133,7 @@ export const useVideoFormData = (video?: VideoProps) => {
         title,
         thumbnail: thumbnailUrl,
         duration,
-        category,
+        category: category || (videoPlatform ? `Vidéos ${videoPlatform}` : undefined),
         videoUrl,
       };
       
@@ -145,10 +166,12 @@ export const useVideoFormData = (video?: VideoProps) => {
     thumbnailPreview,
     activeTab,
     setActiveTab,
+    videoPlatform,
     uploadStatus,
     handleThumbnailChange,
     handleVideoChange,
     handleExternalUrlChange,
+    handleMetadataChange,
     handleDurationExtracted,
     handleSubmit
   };
