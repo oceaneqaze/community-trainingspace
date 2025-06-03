@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import ModernCard from '@/components/ui/modern-card';
+import ModernButton from '@/components/ui/modern-button';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Play, Calendar, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -34,7 +34,6 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
     try {
       setIsLoading(true);
       
-      // Fetch videos from the database
       const { data, error } = await supabase
         .from('videos')
         .select('*')
@@ -44,7 +43,6 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
         throw error;
       }
 
-      // Add a default uploader name since we don't have uploaded_by in the schema
       const videosWithUploader = (data || []).map(video => ({
         ...video,
         uploader_name: 'Utilisateur'
@@ -82,55 +80,67 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <ModernCard variant="glass" className="p-8 text-center" glow="purple">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+        <p className="mt-4 text-gray-400">Chargement des vidéos...</p>
+      </ModernCard>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Bibliothèque vidéo</h2>
-        <span className="text-sm text-gray-500">{filteredVideos.length} vidéo(s)</span>
-      </div>
-
-      {/* Filtres par catégorie */}
-      {categories.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant={selectedCategory === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategory(null)}
-          >
-            Toutes
-          </Button>
-          {categories.map(category => (
-            <Button
-              key={category}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category}
-            </Button>
-          ))}
+      <ModernCard variant="glass" className="p-6" glow="purple">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-gradient-purple">Bibliothèque vidéo</h2>
+          <Badge className="modern-button text-white">
+            {filteredVideos.length} vidéo(s)
+          </Badge>
         </div>
-      )}
+
+        {/* Filtres par catégorie */}
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <ModernButton
+              variant={selectedCategory === null ? "gradient" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+            >
+              Toutes
+            </ModernButton>
+            {categories.map(category => (
+              <ModernButton
+                key={category}
+                variant={selectedCategory === category ? "gradient" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </ModernButton>
+            ))}
+          </div>
+        )}
+      </ModernCard>
 
       {/* Grille des vidéos */}
       {filteredVideos.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-gray-500">Aucune vidéo disponible</p>
-        </Card>
+        <ModernCard variant="glass" className="p-8 text-center" glow="pink">
+          <p className="text-gray-400 text-lg">Aucune vidéo disponible</p>
+        </ModernCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => (
-            <Card key={video.id} className="group cursor-pointer hover:shadow-lg transition-shadow">
+            <ModernCard 
+              key={video.id} 
+              variant="glass"
+              hover={true}
+              glow="blue"
+              className="group cursor-pointer overflow-hidden"
+              onClick={() => onVideoSelect?.(video)}
+            >
               <div className="relative">
-                <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
+                <div className="aspect-video bg-gray-800 rounded-t-lg overflow-hidden">
                   <video
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     poster={video.thumbnail_url || video.video_url.replace(/\.(mp4|mov|avi|webm)$/, '.jpg')}
                     preload="none"
                   >
@@ -139,49 +149,48 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ onVideoSelect, refreshTrigg
                 </div>
                 
                 {/* Overlay avec bouton play */}
-                <div 
-                  className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center"
-                  onClick={() => onVideoSelect?.(video)}
-                >
-                  <div className="bg-white/90 rounded-full p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="h-6 w-6 text-gray-800" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="glass-card rounded-full p-4 border-white/30">
+                    <Play className="h-6 w-6 text-white" fill="white" />
                   </div>
                 </div>
 
                 {/* Badge catégorie */}
                 {video.category && (
-                  <Badge className="absolute top-2 left-2 bg-black/70 text-white">
+                  <Badge className="absolute top-3 left-3 modern-button text-xs">
                     {video.category}
                   </Badge>
                 )}
 
                 {/* Durée */}
                 {video.duration && (
-                  <Badge className="absolute bottom-2 right-2 bg-black/70 text-white">
+                  <Badge className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white border-white/20">
                     {video.duration}
                   </Badge>
                 )}
               </div>
 
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2">{video.title}</h3>
+              <div className="p-4 space-y-3">
+                <h3 className="font-semibold text-lg line-clamp-2 text-white group-hover:text-gradient-purple transition-all">
+                  {video.title}
+                </h3>
                 
                 {video.description && (
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">{video.description}</p>
+                  <p className="text-sm text-gray-400 line-clamp-2">{video.description}</p>
                 )}
 
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 hover:text-purple-400 transition-colors">
                     <User className="h-3 w-3" />
                     {video.uploader_name}
                   </span>
-                  <span className="flex items-center gap-1">
+                  <span className="flex items-center gap-1 hover:text-pink-400 transition-colors">
                     <Calendar className="h-3 w-3" />
                     {formatDate(video.created_at)}
                   </span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </ModernCard>
           ))}
         </div>
       )}

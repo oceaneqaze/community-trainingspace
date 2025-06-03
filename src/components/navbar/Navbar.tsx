@@ -28,7 +28,6 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      // Updated to match the logout return type
       const { error } = await logout();
       if (error) throw error;
       navigate('/signin');
@@ -38,7 +37,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-background border-b border-border shadow-sm sticky top-0 z-50 w-full">
+    <nav className="glass-card border-b border-white/10 shadow-lg sticky top-0 z-50 w-full backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -62,7 +61,7 @@ const Navbar = () => {
               <div className="flex items-center sm:hidden ml-4">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300"
                   onClick={toggleMenu}
                 >
                   <span className="sr-only">Open main menu</span>

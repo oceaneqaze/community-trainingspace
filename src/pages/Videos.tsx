@@ -1,7 +1,8 @@
 
 import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import ModernBackground from '@/components/ui/modern-background';
+import ModernCard from '@/components/ui/modern-card';
 import { useAuth } from '@/context/AuthContext';
 import VideosHeader from '@/components/video/VideosHeader';
 import VideoFilterSection from '@/components/video/VideoFilterSection';
@@ -61,43 +62,45 @@ const Videos: React.FC = () => {
   };
 
   return (
-    <div className="page-container bg-background">
-      <Card className="bg-card border-border shadow-lg mb-4 sm:mb-8">
-        <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
-          <VideosHeader isAdmin={isAdmin && isAdmin()} />
-        </CardHeader>
-        <CardContent className="px-4 sm:px-6 pb-6">
-          <VideoFilterSection
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            activeView={activeView}
-            setActiveView={setActiveView}
-          />
-          
-          <VideoFiltersDisplay
-            statusFilter={statusFilter}
-            selectedCategory={selectedCategory}
-            onClearFilters={handleClearFilters}
-          />
-          
-          <VideoContent
-            activeView={activeView}
-            setActiveView={setActiveView}
-            isLoading={isLoading}
-            videosByCategory={videosByCategory}
-            filteredVideos={filteredVideos}
-            selectedCategory={selectedCategory}
-            sortedCategories={sortedCategories}
-            onVideoClick={handleVideoClick}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    <ModernBackground variant="default">
+      <div className="container mx-auto px-4 py-8">
+        <ModernCard variant="glass" className="shadow-xl mb-8" glow="purple">
+          <div className="p-6">
+            <VideosHeader isAdmin={isAdmin && isAdmin()} />
+          </div>
+          <div className="px-6 pb-6">
+            <VideoFilterSection
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              categories={categories}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              activeView={activeView}
+              setActiveView={setActiveView}
+            />
+            
+            <VideoFiltersDisplay
+              statusFilter={statusFilter}
+              selectedCategory={selectedCategory}
+              onClearFilters={handleClearFilters}
+            />
+            
+            <VideoContent
+              activeView={activeView}
+              setActiveView={setActiveView}
+              isLoading={isLoading}
+              videosByCategory={videosByCategory}
+              filteredVideos={filteredVideos}
+              selectedCategory={selectedCategory}
+              sortedCategories={sortedCategories}
+              onVideoClick={handleVideoClick}
+            />
+          </div>
+        </ModernCard>
+      </div>
+    </ModernBackground>
   );
 };
 
