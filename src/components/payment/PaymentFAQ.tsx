@@ -14,31 +14,31 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: "Comment fonctionne le paiement mobile ?",
-    answer: "Sélectionnez votre opérateur mobile et suivez les instructions pour effectuer le paiement via votre téléphone. Vous recevrez une notification pour confirmer la transaction."
+    question: "Que se passe-t-il après le paiement ?",
+    answer: "Tu reçois immédiatement ton code d'accès privé par email. Tu peux créer ton compte et accéder à tout le contenu en moins de 2 minutes."
   },
   {
-    question: "Combien de temps ai-je accès au contenu ?",
-    answer: "Votre achat vous donne un accès à vie à DOPE Content. Vous bénéficiez également de toutes les mises à jour futures sans frais supplémentaires."
+    question: "C'est vraiment à vie ?",
+    answer: "Oui, totalement. Tu paies une fois et tu gardes l'accès pour toujours, y compris toutes les mises à jour futures et nouveaux contenus."
   },
   {
-    question: "Puis-je demander un remboursement ?",
-    answer: "Non, aucun remboursement n'est possible après l'achat. Nous sommes transparents sur ce point car nous offrons un produit digital de grande valeur avec un accès immédiat."
+    question: "Je ne suis pas technique, est-ce accessible ?",
+    answer: "Absolument ! Nos systèmes sont conçus pour être utilisés sans compétences techniques. Tu as des templates prêts à l'emploi et un accompagnement pas à pas."
   },
   {
-    question: "Quand vais-je recevoir mon code d'accès ?",
-    answer: "Vous recevrez votre code d'invitation immédiatement après la confirmation du paiement. Ce code vous permettra de créer votre compte sur notre plateforme."
+    question: "Y a-t-il un remboursement possible ?",
+    answer: "Non, car tu as accès immédiatement à tout le contenu digital. C'est pourquoi nous sommes transparents sur ce que tu reçois exactement."
   }
 ];
 
 const PaymentFAQ: React.FC = () => {
   return (
     <div className="mt-6">
-      <h3 className="text-lg font-medium mb-3">Questions fréquentes</h3>
+      <h3 className="text-lg font-medium mb-3">❓ Questions rapides</h3>
       <Accordion type="single" collapsible className="w-full">
         {faqItems.map((item, index) => (
           <AccordionItem key={index} value={`item-${index}`}>
-            <AccordionTrigger className="text-sm">{item.question}</AccordionTrigger>
+            <AccordionTrigger className="text-sm text-left">{item.question}</AccordionTrigger>
             <AccordionContent className="text-sm text-muted-foreground">
               {item.answer}
             </AccordionContent>
