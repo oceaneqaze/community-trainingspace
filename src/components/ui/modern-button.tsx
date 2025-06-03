@@ -1,9 +1,10 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Button, ButtonProps } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
+import { type ButtonProps } from '@/components/ui/button';
 
-interface ModernButtonProps extends ButtonProps {
+interface ModernButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'gradient' | 'outline' | 'ghost';
   glow?: boolean;
 }

@@ -8,6 +8,7 @@ interface ModernCardProps {
   variant?: 'glass' | 'solid' | 'gradient';
   hover?: boolean;
   glow?: 'purple' | 'pink' | 'blue' | 'none';
+  onClick?: () => void;
 }
 
 const ModernCard: React.FC<ModernCardProps> = ({
@@ -15,7 +16,8 @@ const ModernCard: React.FC<ModernCardProps> = ({
   className = '',
   variant = 'glass',
   hover = true,
-  glow = 'none'
+  glow = 'none',
+  onClick
 }) => {
   const baseClasses = "relative rounded-xl border transition-all duration-300";
   
@@ -35,13 +37,17 @@ const ModernCard: React.FC<ModernCardProps> = ({
   };
 
   return (
-    <div className={cn(
-      baseClasses,
-      variantClasses[variant],
-      hoverClasses,
-      glowClasses[glow],
-      className
-    )}>
+    <div 
+      className={cn(
+        baseClasses,
+        variantClasses[variant],
+        hoverClasses,
+        glowClasses[glow],
+        onClick ? "cursor-pointer" : "",
+        className
+      )}
+      onClick={onClick}
+    >
       {children}
     </div>
   );
